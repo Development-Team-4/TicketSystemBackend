@@ -1,0 +1,11 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ticket-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:${TICKET_DB_PORT}/ticket_db
+    username: ${TICKET_DB_USER}
+    password: ${TICKET_DB_PASSWORD}
