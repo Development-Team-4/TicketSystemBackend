@@ -6,6 +6,6 @@ spring:
     name: auth-service
 
   datasource:
-    url: jdbc:postgresql://localhost:${AUTH_DB_PORT}/auth_db
+    url: ${AUTH_DB_URL}
     username: ${AUTH_DB_USER}
     password: ${AUTH_DB_PASSWORD}
