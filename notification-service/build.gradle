@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.11'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.springdoc.openapi-gradle-plugin' version '1.8.0'
 }
 
 group = 'development.team.ticketsystem'
@@ -14,6 +15,10 @@ java {
 	}
 }
 
+openApi {
+	apiDocsUrl.set("http://localhost:8083/v3/api-docs")
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -24,7 +29,17 @@ repositories {
 	mavenCentral()
 }
 
+tasks.named('forkedSpringBootRun') {
+	doNotTrackState("Проблема с доступом к checksums.lock")
+}
+
+// Или для всех таск плагина
+tasks.withType(org.springdoc.openapi.gradle.plugin.OpenApiGeneratorTask) {
+	doNotTrackState("Проблема с доступом к checksums.lock")
+}
+
 dependencies {
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
