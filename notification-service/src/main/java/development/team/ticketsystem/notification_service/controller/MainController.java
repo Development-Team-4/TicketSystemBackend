@@ -1,7 +1,9 @@
 package development.team.ticketsystem.notification_service.controller;
 
+import development.team.ticketsystem.notification_service.dto.AddingNotificationDto;
 import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
+import development.team.ticketsystem.notification_service.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,18 +11,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
 @RequestMapping("/api")
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Контроллер нотификаций", description = "Управление уведомлениями")
 public class MainController {
+
+    private final NotificationService notificationService;
+
     /**
      * Получение всех уведомлений всех пользователей
      */
@@ -36,13 +40,13 @@ public class MainController {
      *
      * @param dto DTO для добавления нового уведомления
      */
-    @GetMapping("/add")
+    @PostMapping("/add")
     @Operation(summary = "Добавить уведомление",
             description = "Добавление уведомлений с помощью NotificationDTO")
     @ApiResponse(responseCode = "200", description = "Успешно добавлено")
-    public void addNewNotification(
+    public ResponseEntity<AddingNotificationDto> addNewNotification(
             @Valid @Schema(description = "DTO уведомления", example = "{\"user_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"ticket_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}") NotificationDto dto) {
-
+        return null;
     }
 
     /**
