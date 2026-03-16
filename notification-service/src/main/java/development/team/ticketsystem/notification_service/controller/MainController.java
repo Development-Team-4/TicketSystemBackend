@@ -45,7 +45,8 @@ public class MainController {
             description = "Добавление уведомлений с помощью NotificationDTO")
     @ApiResponse(responseCode = "200", description = "Успешно добавлено")
     public ResponseEntity<AddingNotificationDto> addNewNotification(
-            @Valid @Schema(description = "DTO уведомления", example = "{\"user_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"ticket_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}") NotificationDto dto) {
+            @Valid @Schema(description = "DTO уведомления", example = "{\"user_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"ticket_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}")
+            @RequestBody NotificationDto dto) {
         return null;
     }
 
