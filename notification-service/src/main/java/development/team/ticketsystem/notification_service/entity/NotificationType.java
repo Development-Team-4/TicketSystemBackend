@@ -1,7 +1,26 @@
 package development.team.ticketsystem.notification_service.entity;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum NotificationType {
-    STATUS_CHANGE,
-    COMMENT,
-    ASSIGNMENT
+    STATUS_CHANGE(
+            "",
+            ""
+    ),
+
+    COMMENT(
+            "",
+            ""
+    ),
+
+    ASSIGNMENT(
+            "",
+            ""
+    );
+
+    private final String title;
+    private final String message;
 }

@@ -1,6 +1,5 @@
 package development.team.ticketsystem.notification_service.controller;
 
-import development.team.ticketsystem.notification_service.dto.AddingNotificationDto;
 import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
 import development.team.ticketsystem.notification_service.service.NotificationService;
@@ -15,9 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-@RequestMapping("/api")
+@RequestMapping("/notifications")
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Контроллер нотификаций", description = "Управление уведомлениями")
@@ -27,12 +27,15 @@ public class MainController {
 
     /**
      * Получение всех уведомлений всех пользователей
+     * (доступно только админам)
      */
     @GetMapping("/get")
     @Operation(summary = "Получить уведомления",
             description = "Возвращает уведомления всех пользователей")
-    public List<Notification> getAllNotifications() {
-        return null;
+    public ResponseEntity<List<Notification>> getAllNotifications() {
+        List<Notification> result = this.notificationService.getAllNotifications();
+
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -40,14 +43,17 @@ public class MainController {
      *
      * @param dto DTO для добавления нового уведомления
      */
-    @PostMapping("/add")
+    @PostMapping
     @Operation(summary = "Добавить уведомление",
             description = "Добавление уведомлений с помощью NotificationDTO")
     @ApiResponse(responseCode = "200", description = "Успешно добавлено")
-    public ResponseEntity<AddingNotificationDto> addNewNotification(
-            @Valid @Schema(description = "DTO уведомления", example = "{\"user_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"ticket_id\": \"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}")
+    public ResponseEntity<?> addNewNotification(
+            @Valid @Schema(description = "DTO уведомления", example = "{\"ticket_id\": " +
+                    "\"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}")
             @RequestBody NotificationDto dto) {
-        return null;
+        this.notificationService.addNewNotification(dto);
+
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -55,12 +61,13 @@ public class MainController {
      *
      * @param userId ID конкретного пользователя
      */
-    @GetMapping("/{userId}/get")
+    @GetMapping("/{userId}")
     @Operation(summary = "Получить уведомления пользователя",
             description = "Получение всех уведомления конкретного пользователя")
     @ApiResponse(responseCode = "200", description = "Успешно найдено")
-    public List<Notification> getNotificationsOfSpecificUser(@Valid @Parameter(description = "ID пользователя")
+    public ResponseEntity<List<Notification>> getNotificationsOfSpecificUser(@Valid @Parameter(description = "ID пользователя")
                                                                  @PathVariable UUID userId) {
-        return null;
+        List<Notification> result = this.notificationService.getAllNotifications(userId);
+        return ResponseEntity.of(Optional.of(result));
     }
 }
