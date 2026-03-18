@@ -35,7 +35,7 @@ public class MainController {
     public ResponseEntity<List<Notification>> getAllNotifications() {
         List<Notification> result = this.notificationService.getAllNotifications();
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok().body(result);
     }
 
     /**
@@ -51,9 +51,13 @@ public class MainController {
             @Valid @Schema(description = "DTO уведомления", example = "{\"ticket_id\": " +
                     "\"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}")
             @RequestBody NotificationDto dto) {
-        this.notificationService.addNewNotification(dto);
+        boolean result = this.notificationService.addNewNotification(dto);
 
-        return ResponseEntity.ok().build();
+        if(result) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
@@ -68,6 +72,6 @@ public class MainController {
     public ResponseEntity<List<Notification>> getNotificationsOfSpecificUser(@Valid @Parameter(description = "ID пользователя")
                                                                  @PathVariable UUID userId) {
         List<Notification> result = this.notificationService.getAllNotifications(userId);
-        return ResponseEntity.of(Optional.of(result));
+        return ResponseEntity.ok().body(result);
     }
 }

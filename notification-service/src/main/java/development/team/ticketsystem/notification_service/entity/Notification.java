@@ -1,5 +1,6 @@
 package development.team.ticketsystem.notification_service.entity;
 
+import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,5 +54,18 @@ public class Notification {
         this.sent = true;
         this.title = type.getTitle();
         this.message = type.getMessage();
+    }
+
+    @Deprecated
+    public Notification(NotificationDto dto) {
+        this.userId = dto.getUserId();
+        this.ticketId = dto.getTicketId();
+        this.type = dto.getType();
+
+        this.title = dto.getType().getTitle();
+        this.message = dto.getType().getMessage();
+        this.sent = true;
+        this.createdAt = Timestamp.from(Instant.now());
+        this.updatedAt = Timestamp.from(Instant.now());
     }
 }

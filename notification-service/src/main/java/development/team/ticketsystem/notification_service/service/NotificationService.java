@@ -4,11 +4,8 @@ import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +29,7 @@ public class NotificationService {
      *
      * @param dto DTO для создания уведомления
      */
-    public ResponseEntity<?> addNewNotification(NotificationDto dto) {
+    public boolean addNewNotification(NotificationDto dto) {
         try {
             Notification notification = new Notification(
                     dto.getUserId(),
@@ -42,9 +39,9 @@ public class NotificationService {
 
             this.notificationRepository.save(notification);
 
-            return ResponseEntity.ok().build();
+            return true;
         } catch(Exception ex) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
     }
 
@@ -60,7 +57,8 @@ public class NotificationService {
     }
 
     /**
-     *
+     * Метод для отправки сообщения по email
+     * (ПОКА НЕ РЕАЛИЗОВАН)
      */
     @Deprecated
     private void sendEmailMessage() {
@@ -68,7 +66,8 @@ public class NotificationService {
     }
 
     /**
-     *
+     * Метод для отправки сообщения в telegram
+     * (ПОКА НЕ РЕАЛИЗОВАН)
      */
     @Deprecated
     private void sendTelegramMessage() {

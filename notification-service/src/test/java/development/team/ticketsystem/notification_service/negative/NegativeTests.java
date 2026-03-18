@@ -1,6 +1,7 @@
 package development.team.ticketsystem.notification_service.negative;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import development.team.ticketsystem.notification_service.constants.DtoFields;
 import development.team.ticketsystem.notification_service.controller.MainController;
 import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.helper.JsonHelper;
@@ -75,5 +76,49 @@ public class NegativeTests {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("TC-5 : Некорректная формат DTO (отсутствует ticket_id)")
+    void incorrectFieldTicketId() throws Exception {
+        fullTestOfCorruptField(DtoFields.NotificationDto.TICKET_ID_FIELD);
+    }
+
+    @Test
+    @DisplayName("TC-6 : Некорректная формат DTO (отсутствует user_id)")
+    void incorrectFieldUserId() throws Exception {
+        fullTestOfCorruptField(DtoFields.NotificationDto.USER_ID_FIELD);
+    }
+
+    @Test
+    @DisplayName("TC-7 : Некорректная формат DTO (отсутствует type)")
+    void incorrectFieldType() throws Exception {
+        fullTestOfCorruptField(DtoFields.NotificationDto.TYPE_FIELD);
+    }
+
+    /**
+     * Полный тест с удалением поля из DTO
+     *
+     * @param field поле для удаления из DTO
+     * @return true, если тест пройден, и false иначе
+     * @throws Exception исключение в случае, если файл для DTO будет не найден
+     */
+    private boolean fullTestOfCorruptField(String field) throws Exception {
+        // Читаем JSON с некорректным type уведомления
+        String invalidJson = JsonHelper.loadResourceAsString("json/incorrect_type_message.json");
+
+        invalidJson = JsonHelper.corruptField(invalidJson, field);
+
+        log.info("Тест: Отправка с удаленным полем из DTO");
+        log.info("Поле для удаления: {}", field);
+        log.info("JSON для отправки: {}", invalidJson);
+
+        // Отправка сообщения + получаем ошибку
+        this.mockMvc.perform(post("/notifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest());
+        return true;
     }
 }
