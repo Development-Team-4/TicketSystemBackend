@@ -1,6 +1,6 @@
 package development.team.ticketsystem.ticket_service.Controllers;
 
-import development.team.ticketsystem.ticket_service.DTO.TicketStatus;
+import development.team.ticketsystem.ticket_service.TicketStatus;
 import development.team.ticketsystem.ticket_service.DTO.tickets.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,31 +17,21 @@ public class TicketController {
         return new TicketResponse();
     }
 
-    // Доступно пользователю, userId придет от gateway
-    @GetMapping("/my")
-    public List<TicketResponse> getMyTickets(
-            @RequestHeader("X-User-Id") UUID userId
-    ) {
-        return List.of();
-    }
-
-
-    // Доступно сотруднику, userId придет от gateway
-    @GetMapping("/assigned")
-    public List<TicketResponse> getAssignedTickets(
-            @RequestHeader("X-User-Id") UUID userId
-    ) {
-        return List.of();
-    }
-
-    // Это будет доступно только админу
+    // Этот метод доступен всем, но с разными фильтрами
     @GetMapping
-    public List<TicketResponse> getAllTickets(
+    public List<TicketResponse> getTickets(
             @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) UUID assignedTo,
+            @RequestParam(required = false) UUID createdBy,
             @RequestParam(required = false) TicketStatus status,
             @RequestParam(required = false) Instant createdAfter,
             @RequestParam(required = false) Instant createdBefore
     ) {
+        // внутри будет проверка на роль того, от кого пришел запрос из JWT
+        // все фильтры одновременно доступны только админу
+        // createdBy - пользователю, assignedTo - сотруднику НО только свои
+        // фильтры по времени, категории и статусу доступны всем, но с учетом роли
+
         return List.of();
     }
 
@@ -50,7 +40,7 @@ public class TicketController {
         return new TicketResponse();
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public TicketResponse updateTicket(
             @PathVariable UUID id,
             @RequestBody UpdateTicketRequest request
@@ -63,7 +53,7 @@ public class TicketController {
 
     }
 
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     public TicketResponse updateStatus(
             @PathVariable UUID id,
             @RequestBody UpdateStatusRequest request
@@ -71,7 +61,7 @@ public class TicketController {
         return new TicketResponse();
     }
 
-    @PatchMapping("/{id}/assignee")
+    @PutMapping("/{id}/assignee")
     public TicketResponse assignTicket(
             @PathVariable UUID id,
             @RequestBody AssignTicketRequest request
