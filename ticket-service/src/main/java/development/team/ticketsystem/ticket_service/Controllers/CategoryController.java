@@ -9,26 +9,35 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/topic/{topicId}/category")
 public class CategoryController {
 
     @GetMapping
-    public List<CategoryResponse> getCategories() {
+    public List<CategoryResponse> getCategories(
+            @PathVariable UUID topicId
+    ) {
         return List.of();
     }
 
     @GetMapping("/{id}")
-    public CategoryResponse getCategory(@PathVariable UUID id) {
+    public CategoryResponse getCategory(
+            @PathVariable UUID topicId,
+            @PathVariable UUID id
+    ) {
         return new CategoryResponse();
     }
 
     @PostMapping
-    public CategoryResponse createCategory(@RequestBody CreateCategoryRequest request) {
+    public CategoryResponse createCategory(
+            @PathVariable UUID topicId,
+            @RequestBody CreateCategoryRequest request
+    ) {
         return new CategoryResponse();
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public CategoryResponse updateCategory(
+            @PathVariable UUID topicId,
             @PathVariable UUID id,
             @RequestBody CreateCategoryRequest request
     ) {
