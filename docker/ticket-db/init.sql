@@ -6,7 +6,7 @@ CREATE TABLE topics
 (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
-    description text
+    description VARCHAR(2000)
 );
 
 
@@ -15,7 +15,7 @@ CREATE TABLE categories
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     topic_id uuid NOT NULL,
     name VARCHAR(255) NOT NULL,
-    description text,
+    description VARCHAR(2000),
 
     CONSTRAINT fk_category_topic
         FOREIGN KEY (topic_id)
@@ -40,8 +40,8 @@ CREATE TABLE category_staff
 CREATE TABLE tickets
 (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    subject text NOT NULL,
-    description text,
+    subject VARCHAR(2000) NOT NULL,
+    description VARCHAR(2000),
     status VARCHAR(50) NOT NULL
         CHECK (status IN ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED')),
 
@@ -64,7 +64,7 @@ CREATE TABLE comments
     ticket_id uuid NOT NULL,
     author_id uuid NOT NULL,
 
-    content text NOT NULL,
+    content VARCHAR(2000) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
 
     CONSTRAINT fk_comment_ticket
