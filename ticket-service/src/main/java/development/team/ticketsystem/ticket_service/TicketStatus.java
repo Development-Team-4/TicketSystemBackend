@@ -1,4 +1,4 @@
-package development.team.ticketsystem.ticket_service.DTO;
+package development.team.ticketsystem.ticket_service;
 
 public enum TicketStatus {
     OPEN,
