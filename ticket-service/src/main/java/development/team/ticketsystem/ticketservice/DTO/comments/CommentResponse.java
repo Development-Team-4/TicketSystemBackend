@@ -1,4 +1,4 @@
-package development.team.ticketsystem.ticket_service.DTO.comments;
+package development.team.ticketsystem.ticketservice.DTO.comments;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

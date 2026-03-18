@@ -1,4 +1,4 @@
-package development.team.ticketsystem.ticket_service.DTO.categories;
+package development.team.ticketsystem.ticketservice.DTO.categories;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

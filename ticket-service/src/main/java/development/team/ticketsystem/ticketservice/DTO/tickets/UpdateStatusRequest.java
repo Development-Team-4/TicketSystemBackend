@@ -1,6 +1,6 @@
-package development.team.ticketsystem.ticket_service.DTO.tickets;
+package development.team.ticketsystem.ticketservice.DTO.tickets;
 
-import development.team.ticketsystem.ticket_service.TicketStatus;
+import development.team.ticketsystem.ticketservice.TicketStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
