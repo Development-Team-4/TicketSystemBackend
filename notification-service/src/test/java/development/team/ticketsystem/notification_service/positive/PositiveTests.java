@@ -8,7 +8,6 @@ import development.team.ticketsystem.notification_service.entity.Notification;
 import development.team.ticketsystem.notification_service.entity.NotificationType;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import development.team.ticketsystem.notification_service.service.NotificationService;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +26,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,11 +50,6 @@ public class PositiveTests {
 
     @InjectMocks
     private MainController mainController;
-
-    @PostConstruct
-    private void postConstruct() {
-        doNothing().when(notificationService).addNewNotification(any(NotificationDto.class));
-    }
 
     @BeforeEach
     public void beforeEach() {
@@ -107,9 +100,10 @@ public class PositiveTests {
         );
 
         when(notificationService.getAllNotifications()).thenReturn(List.of(expectedNotification));
+        when(notificationService.addNewNotification(any(NotificationDto.class))).thenReturn(true);
 
         log.info("Тест: Корректная отправка нотификации типа {}", type);
-        log.info("1. Отправка сообщения {}на эндпоинт /notifications", dto.toString());
+        log.info("1. Отправка сообщения {} на эндпоинт /notifications", dto);
         log.info("2. Получение сообщения в БД. Сравнение результатов");
 
         // Отправка сообщения по REST-у

@@ -55,17 +55,4 @@ public class Notification {
         this.title = type.getTitle();
         this.message = type.getMessage();
     }
-
-    @Deprecated
-    public Notification(NotificationDto dto) {
-        this.userId = dto.getUserId();
-        this.ticketId = dto.getTicketId();
-        this.type = dto.getType();
-
-        this.title = dto.getType().getTitle();
-        this.message = dto.getType().getMessage();
-        this.sent = true;
-        this.createdAt = Timestamp.from(Instant.now());
-        this.updatedAt = Timestamp.from(Instant.now());
-    }
 }

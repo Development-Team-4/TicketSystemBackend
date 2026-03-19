@@ -1,13 +1,10 @@
 package development.team.ticketsystem.notification_service.negative;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.notification_service.constants.DtoFields;
 import development.team.ticketsystem.notification_service.controller.MainController;
-import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.helper.JsonHelper;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import development.team.ticketsystem.notification_service.service.NotificationService;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,10 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.http.MediaType;
 
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -31,12 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @DisplayName("Негативные тесты для notification-service")
 @Slf4j
 public class NegativeTests {
-    private UUID userId;
-    private UUID ticketId;
-
     private MockMvc mockMvc;
-
-    private ObjectMapper objectMapper;
 
     @Mock
     private NotificationRepository notificationRepository;
@@ -47,18 +35,9 @@ public class NegativeTests {
     @InjectMocks
     private MainController mainController;
 
-    @PostConstruct
-    private void postConstruct() {
-        doNothing().when(notificationService).addNewNotification(any(NotificationDto.class));
-    }
-
     @BeforeEach
     public void beforeEach() {
-        this.userId = UUID.randomUUID();
-        this.ticketId = UUID.randomUUID();
-
         this.mockMvc = MockMvcBuilders.standaloneSetup(mainController).build();
-        objectMapper = new ObjectMapper();
     }
 
     @Test

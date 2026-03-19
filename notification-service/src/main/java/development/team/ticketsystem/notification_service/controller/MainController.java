@@ -10,17 +10,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RequestMapping("/notifications")
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Контроллер нотификаций", description = "Управление уведомлениями")
+@Slf4j
 public class MainController {
 
     private final NotificationService notificationService;
@@ -33,6 +34,8 @@ public class MainController {
     @Operation(summary = "Получить уведомления",
             description = "Возвращает уведомления всех пользователей")
     public ResponseEntity<List<Notification>> getAllNotifications() {
+        log.info("Поступил запрос на получение всех уведомлений пользователей");
+
         List<Notification> result = this.notificationService.getAllNotifications();
 
         return ResponseEntity.ok().body(result);
@@ -51,11 +54,17 @@ public class MainController {
             @Valid @Schema(description = "DTO уведомления", example = "{\"ticket_id\": " +
                     "\"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}")
             @RequestBody NotificationDto dto) {
+        log.info("Поступил запрос на добавление нового уведомления с данными: {}", dto);
+
         boolean result = this.notificationService.addNewNotification(dto);
 
         if(result) {
+            log.info("Уведомление успешно добавлено");
+
             return ResponseEntity.ok().build();
         } else {
+            log.error("Возникла ошибка с поступившей информацией");
+
             return ResponseEntity.badRequest().build();
         }
     }
@@ -71,7 +80,10 @@ public class MainController {
     @ApiResponse(responseCode = "200", description = "Успешно найдено")
     public ResponseEntity<List<Notification>> getNotificationsOfSpecificUser(@Valid @Parameter(description = "ID пользователя")
                                                                  @PathVariable UUID userId) {
+        log.info("Поступил запрос на выдачу всех уведомлений пользователя с user_id {}", userId);
+
         List<Notification> result = this.notificationService.getAllNotifications(userId);
+
         return ResponseEntity.ok().body(result);
     }
 }

@@ -4,6 +4,7 @@ import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
@@ -20,7 +22,13 @@ public class NotificationService {
      * @return список нотификаций
      */
     public List<Notification> getAllNotifications() {
-        return this.notificationRepository.findAll();
+        log.info("Идёт поиск всех уведомлений в БД");
+
+        List<Notification> result = this.notificationRepository.findAll();
+
+        log.info("Результат поиска: {}", result);
+
+        return result;
     }
 
     // В дальнейшем поменяю DTO, в котором ещё будет передаваться settings
@@ -30,6 +38,8 @@ public class NotificationService {
      * @param dto DTO для создания уведомления
      */
     public boolean addNewNotification(NotificationDto dto) {
+        log.info("Начат процесс добавления нового уведомления в БД: {}", dto);
+
         try {
             Notification notification = new Notification(
                     dto.getUserId(),
@@ -41,6 +51,8 @@ public class NotificationService {
 
             return true;
         } catch(Exception ex) {
+            log.error("Информация не добавлена, возникла ошибка");
+
             return false;
         }
     }
@@ -53,7 +65,13 @@ public class NotificationService {
      * @return список уведомлений
      */
     public List<Notification> getAllNotifications(UUID userId) {
-        return this.notificationRepository.findByUserId(userId);
+        log.info("Идёт поиск всех уведомлений конкретного пользователя в БД");
+
+        List<Notification> result = this.notificationRepository.findByUserId(userId);
+
+        log.info("Результат поиска: {}", result);
+
+        return result;
     }
 
     /**
