@@ -1,4 +1,4 @@
-package development.team.ticketsystem.auth_service;
+package development.team.ticketsystem.authservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
