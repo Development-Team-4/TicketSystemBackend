@@ -11,8 +11,4 @@ public record NotificationSettingsResponse(
         @Schema(example = "false")
         String telegramEnabled
 
-) {
-    public NotificationSettingsResponse(){
-        this(null,null);
-    }
-}
+) { }
