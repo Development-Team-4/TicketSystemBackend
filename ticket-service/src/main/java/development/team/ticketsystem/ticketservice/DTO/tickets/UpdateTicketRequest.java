@@ -9,7 +9,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString
 @Schema(description = "Запрос на обновление тикета")
 public class UpdateTicketRequest {
 
