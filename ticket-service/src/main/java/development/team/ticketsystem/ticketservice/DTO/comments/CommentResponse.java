@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString
 @Schema(description = "Ответ с данными комментария")
 public class CommentResponse {
 

@@ -13,7 +13,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString
 @Schema(description = "Ответ с данными тикета")
 public class TicketResponse {
 

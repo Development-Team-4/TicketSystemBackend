@@ -9,7 +9,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString
 @Schema(description = "Запрос на создание комментария")
 public class CreateCommentRequest {
 

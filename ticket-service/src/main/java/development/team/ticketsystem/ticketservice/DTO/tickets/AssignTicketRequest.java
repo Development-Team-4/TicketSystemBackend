@@ -11,7 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString
 @Schema(description = "Запрос на назначение тикета сотруднику")
 public class AssignTicketRequest {
     @Schema(
