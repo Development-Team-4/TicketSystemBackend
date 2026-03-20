@@ -2,6 +2,7 @@ package development.team.ticketsystem.notification_service.service;
 
 import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
+import development.team.ticketsystem.notification_service.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,24 +38,28 @@ public class NotificationService {
      *
      * @param dto DTO для создания уведомления
      */
-    public boolean addNewNotification(NotificationDto dto) {
+    public Notification addNewNotification(NotificationDto dto) throws NotificationFormatException {
         log.info("Начат процесс добавления нового уведомления в БД: {}", dto);
 
-        try {
-            Notification notification = new Notification(
-                    dto.getUserId(),
-                    dto.getTicketId(),
-                    dto.getType()
-            );
-
-            this.notificationRepository.save(notification);
-
-            return true;
-        } catch(Exception ex) {
-            log.error("Информация не добавлена, возникла ошибка");
-
-            return false;
+        if (dto.getType() == null) {
+            throw new NotificationFormatException("type не может быть null");
         }
+
+        if (dto.getUserId() == null) {
+            throw new NotificationFormatException("userId не может быть null");
+        }
+
+        if (dto.getTicketId() == null) {
+            throw new NotificationFormatException("ticketId не может быть null");
+        }
+
+        Notification notification = new Notification(
+                dto.getUserId(),
+                dto.getTicketId(),
+                dto.getType()
+        );
+
+        return this.notificationRepository.save(notification);
     }
 
     /**

@@ -2,6 +2,7 @@ package development.team.ticketsystem.notification_service.negative;
 
 import development.team.ticketsystem.notification_service.constants.DtoFields;
 import development.team.ticketsystem.notification_service.controller.MainController;
+import development.team.ticketsystem.notification_service.exceptions.handlers.GlobalExceptionHandler;
 import development.team.ticketsystem.notification_service.helper.JsonHelper;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import development.team.ticketsystem.notification_service.service.NotificationService;
@@ -37,7 +38,8 @@ public class NegativeTests {
 
     @BeforeEach
     public void beforeEach() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(mainController).build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(mainController)
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
     }
 
     @Test
@@ -84,7 +86,7 @@ public class NegativeTests {
      */
     private boolean fullTestOfCorruptField(String field) throws Exception {
         // Читаем JSON с некорректным type уведомления
-        String invalidJson = JsonHelper.loadResourceAsString("json/incorrect_type_message.json");
+        String invalidJson = JsonHelper.loadResourceAsString("json/correct_type_message.json");
 
         invalidJson = JsonHelper.corruptField(invalidJson, field);
 

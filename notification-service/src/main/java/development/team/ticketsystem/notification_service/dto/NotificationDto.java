@@ -1,15 +1,21 @@
 package development.team.ticketsystem.notification_service.dto;
 
 import development.team.ticketsystem.notification_service.entity.NotificationType;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class NotificationDto {
-    private final UUID userId;
-    private final UUID ticketId;
-    private final NotificationType type;
+    @NotNull(message = "userId не может быть null")
+    private UUID userId;
+
+    @NotNull(message = "ticketId не может быть null")
+    private UUID ticketId;
+
+    @NotNull(message = "userId не может быть null")
+    private NotificationType type;
 }

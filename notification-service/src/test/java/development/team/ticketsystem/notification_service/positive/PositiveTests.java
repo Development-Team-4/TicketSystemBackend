@@ -6,6 +6,7 @@ import development.team.ticketsystem.notification_service.controller.MainControl
 import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
 import development.team.ticketsystem.notification_service.entity.NotificationType;
+import development.team.ticketsystem.notification_service.exceptions.handlers.GlobalExceptionHandler;
 import development.team.ticketsystem.notification_service.repository.NotificationRepository;
 import development.team.ticketsystem.notification_service.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,9 @@ public class PositiveTests {
         this.userId = UUID.randomUUID();
         this.ticketId = UUID.randomUUID();
 
-        this.mockMvc = MockMvcBuilders.standaloneSetup(mainController).build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(mainController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
     }
 
@@ -99,8 +102,11 @@ public class PositiveTests {
                 type
         );
 
-        when(notificationService.getAllNotifications()).thenReturn(List.of(expectedNotification));
-        when(notificationService.addNewNotification(any(NotificationDto.class))).thenReturn(true);
+        when(notificationService.addNewNotification(any(NotificationDto.class)))
+                .thenReturn(expectedNotification);
+
+        when(notificationService.getAllNotifications())
+                .thenReturn(List.of(expectedNotification));
 
         log.info("Тест: Корректная отправка нотификации типа {}", type);
         log.info("1. Отправка сообщения {} на эндпоинт /notifications", dto);

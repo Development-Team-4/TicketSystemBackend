@@ -2,6 +2,7 @@ package development.team.ticketsystem.notification_service.controller;
 
 import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import development.team.ticketsystem.notification_service.entity.Notification;
+import development.team.ticketsystem.notification_service.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notification_service.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,20 +54,12 @@ public class MainController {
     public ResponseEntity<?> addNewNotification(
             @Valid @Schema(description = "DTO уведомления", example = "{\"ticket_id\": " +
                     "\"e1238262-8f77-43a2-8df1-90266c2d25f2\", \n\"type\": \"COMMENT\"}")
-            @RequestBody NotificationDto dto) {
+            @RequestBody NotificationDto dto) throws NotificationFormatException {
         log.info("Поступил запрос на добавление нового уведомления с данными: {}", dto);
 
-        boolean result = this.notificationService.addNewNotification(dto);
+        this.notificationService.addNewNotification(dto);
 
-        if(result) {
-            log.info("Уведомление успешно добавлено");
-
-            return ResponseEntity.ok().build();
-        } else {
-            log.error("Возникла ошибка с поступившей информацией");
-
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok().build();
     }
 
     /**
