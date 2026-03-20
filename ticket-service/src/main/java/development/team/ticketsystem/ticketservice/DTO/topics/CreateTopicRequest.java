@@ -1,0 +1,29 @@
+package development.team.ticketsystem.ticketservice.DTO.topics;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@ToString
+@Schema(description = "Запрос на создание темы")
+public class CreateTopicRequest {
+
+    @Schema(
+            description = "Название темы",
+            example = "Техническая поддержка",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String name;
+
+    @Schema(
+            description = "Описание темы",
+            example = "Тема для вопросов по технической поддержке",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String description;
+}
