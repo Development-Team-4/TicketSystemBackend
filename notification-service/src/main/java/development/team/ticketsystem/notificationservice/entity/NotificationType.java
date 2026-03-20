@@ -1,4 +1,4 @@
-package development.team.ticketsystem.notification_service.entity;
+package development.team.ticketsystem.notificationservice.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

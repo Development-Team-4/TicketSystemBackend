@@ -1,11 +1,11 @@
-package development.team.ticketsystem.notification_service.negative;
+package development.team.ticketsystem.notificationservice.negative;
 
-import development.team.ticketsystem.notification_service.constants.DtoFields;
-import development.team.ticketsystem.notification_service.controller.MainController;
-import development.team.ticketsystem.notification_service.exceptions.handlers.GlobalExceptionHandler;
-import development.team.ticketsystem.notification_service.helper.JsonHelper;
-import development.team.ticketsystem.notification_service.repository.NotificationRepository;
-import development.team.ticketsystem.notification_service.service.NotificationService;
+import development.team.ticketsystem.notificationservice.constants.DtoFields;
+import development.team.ticketsystem.notificationservice.controller.NotificationController;
+import development.team.ticketsystem.notificationservice.exceptions.handlers.GlobalExceptionHandler;
+import development.team.ticketsystem.notificationservice.helper.JsonHelper;
+import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
+import development.team.ticketsystem.notificationservice.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +34,7 @@ public class NegativeTests {
     private NotificationService notificationService;
 
     @InjectMocks
-    private MainController mainController;
+    private NotificationController mainController;
 
     @BeforeEach
     public void beforeEach() {

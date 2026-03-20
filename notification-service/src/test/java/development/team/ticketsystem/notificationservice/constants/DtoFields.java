@@ -1,4 +1,4 @@
-package development.team.ticketsystem.notification_service.constants;
+package development.team.ticketsystem.notificationservice.constants;
 
 public class DtoFields {
     public static class NotificationDto {

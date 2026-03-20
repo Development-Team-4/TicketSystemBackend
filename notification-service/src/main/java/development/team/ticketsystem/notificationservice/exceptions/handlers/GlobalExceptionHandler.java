@@ -1,6 +1,6 @@
-package development.team.ticketsystem.notification_service.exceptions.handlers;
+package development.team.ticketsystem.notificationservice.exceptions.handlers;
 
-import development.team.ticketsystem.notification_service.exceptions.NotificationFormatException;
+import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

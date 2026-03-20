@@ -1,4 +1,4 @@
-package development.team.ticketsystem.notification_service.helper;
+package development.team.ticketsystem.notificationservice.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

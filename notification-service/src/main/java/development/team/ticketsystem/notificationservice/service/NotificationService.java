@@ -1,9 +1,9 @@
-package development.team.ticketsystem.notification_service.service;
+package development.team.ticketsystem.notificationservice.service;
 
-import development.team.ticketsystem.notification_service.dto.NotificationDto;
-import development.team.ticketsystem.notification_service.entity.Notification;
-import development.team.ticketsystem.notification_service.exceptions.NotificationFormatException;
-import development.team.ticketsystem.notification_service.repository.NotificationRepository;
+import development.team.ticketsystem.notificationservice.dto.NotificationDto;
+import development.team.ticketsystem.notificationservice.entity.Notification;
+import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
+import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

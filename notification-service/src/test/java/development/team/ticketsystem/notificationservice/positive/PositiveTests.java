@@ -1,14 +1,14 @@
-package development.team.ticketsystem.notification_service.positive;
+package development.team.ticketsystem.notificationservice.positive;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import development.team.ticketsystem.notification_service.controller.MainController;
-import development.team.ticketsystem.notification_service.dto.NotificationDto;
-import development.team.ticketsystem.notification_service.entity.Notification;
-import development.team.ticketsystem.notification_service.entity.NotificationType;
-import development.team.ticketsystem.notification_service.exceptions.handlers.GlobalExceptionHandler;
-import development.team.ticketsystem.notification_service.repository.NotificationRepository;
-import development.team.ticketsystem.notification_service.service.NotificationService;
+import development.team.ticketsystem.notificationservice.controller.NotificationController;
+import development.team.ticketsystem.notificationservice.dto.NotificationDto;
+import development.team.ticketsystem.notificationservice.entity.Notification;
+import development.team.ticketsystem.notificationservice.entity.NotificationType;
+import development.team.ticketsystem.notificationservice.exceptions.handlers.GlobalExceptionHandler;
+import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
+import development.team.ticketsystem.notificationservice.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +50,7 @@ public class PositiveTests {
     private NotificationService notificationService;
 
     @InjectMocks
-    private MainController mainController;
+    private NotificationController mainController;
 
     @BeforeEach
     public void beforeEach() {

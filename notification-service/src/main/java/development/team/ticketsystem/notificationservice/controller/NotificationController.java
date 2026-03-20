@@ -1,9 +1,9 @@
-package development.team.ticketsystem.notification_service.controller;
+package development.team.ticketsystem.notificationservice.controller;
 
-import development.team.ticketsystem.notification_service.dto.NotificationDto;
-import development.team.ticketsystem.notification_service.entity.Notification;
-import development.team.ticketsystem.notification_service.exceptions.NotificationFormatException;
-import development.team.ticketsystem.notification_service.service.NotificationService;
+import development.team.ticketsystem.notificationservice.dto.NotificationDto;
+import development.team.ticketsystem.notificationservice.entity.Notification;
+import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
+import development.team.ticketsystem.notificationservice.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Контроллер нотификаций", description = "Управление уведомлениями")
 @Slf4j
-public class MainController {
+public class NotificationController {
 
     private final NotificationService notificationService;
 

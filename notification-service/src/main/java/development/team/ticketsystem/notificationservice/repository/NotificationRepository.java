@@ -1,6 +1,6 @@
-package development.team.ticketsystem.notification_service.repository;
+package development.team.ticketsystem.notificationservice.repository;
 
-import development.team.ticketsystem.notification_service.entity.Notification;
+import development.team.ticketsystem.notificationservice.entity.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

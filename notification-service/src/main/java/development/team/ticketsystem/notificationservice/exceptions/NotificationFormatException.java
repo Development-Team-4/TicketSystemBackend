@@ -1,4 +1,4 @@
-package development.team.ticketsystem.notification_service.exceptions;
+package development.team.ticketsystem.notificationservice.exceptions;
 
 public class NotificationFormatException extends Exception {
     public NotificationFormatException(String message) {

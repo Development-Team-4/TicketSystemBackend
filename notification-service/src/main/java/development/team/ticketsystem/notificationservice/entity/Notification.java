@@ -1,6 +1,5 @@
-package development.team.ticketsystem.notification_service.entity;
+package development.team.ticketsystem.notificationservice.entity;
 
-import development.team.ticketsystem.notification_service.dto.NotificationDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
