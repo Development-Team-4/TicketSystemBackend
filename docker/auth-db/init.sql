@@ -12,8 +12,8 @@ CREATE TABLE users (
 
 CREATE TABLE notification_channels (
     user_id UUID PRIMARY KEY,
-    email_enabled BOOLEAN DEFAULT TRUE,
-    telegram_enabled BOOLEAN DEFAULT FALSE,
+    email_notification VARCHAR(100),
+    telegram_notification VARCHAR(100),
 
     CONSTRAINT fk_notification_channels_user
         FOREIGN KEY (user_id)
