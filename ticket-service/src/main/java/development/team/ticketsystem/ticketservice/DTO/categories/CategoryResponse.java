@@ -16,25 +16,29 @@ public class CategoryResponse {
 
     @Schema(
             description = "Уникальный идентификатор категории",
-            example = "550e8400-e29b-41d4-a716-446655440000"
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID id;
 
     @Schema(
             description = "ID темы, к которой относится категория",
-            example = "550e8400-e29b-41d4-a716-446655440000"
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID topicId;
 
     @Schema(
             description = "Название категории",
-            example = "Технические проблемы"
+            example = "Технические проблемы",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String name;
 
     @Schema(
             description = "Описание категории",
-            example = "Категория для технических вопросов и проблем"
+            example = "Категория для технических вопросов и проблем",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String description;
 }

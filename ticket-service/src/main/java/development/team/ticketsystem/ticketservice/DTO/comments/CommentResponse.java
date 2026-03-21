@@ -17,31 +17,36 @@ public class CommentResponse {
 
     @Schema(
             description = "Уникальный идентификатор комментария",
-            example = "550e8400-e29b-41d4-a716-446655440000"
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID id;
 
     @Schema(
             description = "ID тикета, к которому относится комментарий",
-            example = "550e8400-e29b-41d4-a716-446655440000"
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID ticketId;
 
     @Schema(
             description = "ID автора комментария",
-            example = "550e8400-e29b-41d4-a716-446655440000"
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID authorId;
 
     @Schema(
             description = "Содержание комментария",
-            example = "Проблема воспроизводится, исправьте пожалуйста"
+            example = "Проблема воспроизводится, исправьте пожалуйста",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String content;
 
     @Schema(
             description = "Дата и время создания комментария",
-            example = "2024-01-15T10:30:00Z"
+            example = "2024-01-15T10:30:00Z",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Instant createdAt;
 }
