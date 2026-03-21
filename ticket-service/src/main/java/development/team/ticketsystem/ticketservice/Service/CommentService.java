@@ -1,5 +1,7 @@
 package development.team.ticketsystem.ticketservice.Service;
 
+import development.team.ticketsystem.ticketservice.DTO.comments.CommentResponse;
+import development.team.ticketsystem.ticketservice.DTO.comments.CreateCommentRequest;
 import development.team.ticketsystem.ticketservice.Entity.CommentEntity;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
@@ -23,14 +25,17 @@ public class CommentService {
         this.ticketRepository = ticketRepository;
     }
 
-    public List<CommentEntity> getByTicket(UUID ticketId) {
+    public List<CommentResponse> getByTicket(UUID ticketId) {
         if (!ticketRepository.existsById(ticketId)) {
             throw new EntityNotFoundException("Ticket not found");
         }
-        return repository.findByTicketId(ticketId);
+        return repository.findByTicketId(ticketId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public CommentEntity create(UUID ticketId, UUID authorId, String content) {
+    public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request) {
 
         if (!ticketRepository.existsById(ticketId)) {
             throw new EntityNotFoundException("Ticket not found");
@@ -39,9 +44,22 @@ public class CommentService {
         CommentEntity comment = new CommentEntity();
         comment.setTicketId(ticketId);
         comment.setAuthorId(authorId);
-        comment.setContent(content);
+        comment.setContent(request.getContent());
         comment.setCreatedAt(Instant.now());
 
-        return repository.save(comment);
+        CommentEntity saved = repository.save(comment);
+
+        return toResponse(saved);
+    }
+
+    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
+    private CommentResponse toResponse(CommentEntity entity) {
+        CommentResponse response = new CommentResponse();
+        response.setId(entity.getId());
+        response.setTicketId(entity.getTicketId());
+        response.setContent(entity.getContent());
+        response.setAuthorId(entity.getAuthorId());
+        response.setCreatedAt(entity.getCreatedAt());
+        return response;
     }
 }

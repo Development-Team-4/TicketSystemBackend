@@ -1,6 +1,8 @@
 package development.team.ticketsystem.ticketservice.Service;
 
 
+import development.team.ticketsystem.ticketservice.DTO.categories.CategoryResponse;
+import development.team.ticketsystem.ticketservice.DTO.categories.CreateCategoryRequest;
 import development.team.ticketsystem.ticketservice.Entity.CategoryEntity;
 import development.team.ticketsystem.ticketservice.Repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,45 @@ public class CategoryService {
         this.repository = repository;
     }
 
-    public List<CategoryEntity> getByTopic(UUID topicId) {
-        return repository.findByTopicId(topicId);
+    public List<CategoryResponse> getByTopic(UUID topicId) {
+        return repository.findByTopicId(topicId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public CategoryEntity getById(UUID id) {
-        return repository.findById(id)
+    public CategoryResponse getById(UUID id) {
+        return toResponse(repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found")));
+    }
+
+    public CategoryResponse create(UUID topicId, CreateCategoryRequest request) {
+        CategoryEntity entity = new CategoryEntity();
+        entity.setTopicId(topicId);
+        entity.setName(request.getName());
+        entity.setDescription(request.getDescription());
+        CategoryEntity saved = repository.save(entity);
+        return toResponse(saved);
+    }
+
+    public CategoryResponse update(UUID id, CreateCategoryRequest request) {
+        CategoryEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+
+        existing.setName(request.getName());
+        existing.setDescription(request.getDescription());
+        CategoryEntity entity = repository.save(existing);
+
+        return toResponse(entity);
     }
 
-    public CategoryEntity create(CategoryEntity category) {
-        return repository.save(category);
-    }
-
-    public CategoryEntity update(UUID id, CategoryEntity updated) {
-        CategoryEntity existing = getById(id);
-
-        existing.setName(updated.getName());
-        existing.setDescription(updated.getDescription());
-
-        return repository.save(existing);
+    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
+    private CategoryResponse toResponse(CategoryEntity entity) {
+        CategoryResponse response = new CategoryResponse();
+        response.setId(entity.getId());
+        response.setTopicId(entity.getTopicId());
+        response.setName(entity.getName());
+        response.setDescription(entity.getDescription());
+        return response;
     }
 }
