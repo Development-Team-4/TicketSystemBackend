@@ -1,13 +1,12 @@
 package development.team.ticketsystem.ticketservice.Controllers;
 
 import development.team.ticketsystem.ticketservice.DTO.tickets.*;
-import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.Service.TicketService;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.jspecify.annotations.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/tickets")
 @Tag(name = "Tickets", description = "Управление тикетами")
@@ -22,9 +22,6 @@ public class TicketController {
 
     private final TicketService service;
 
-    public TicketController(TicketService service) {
-        this.service = service;
-    }
 
     @Operation(summary = "Создать тикет")
     @PostMapping
@@ -32,15 +29,7 @@ public class TicketController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для создания тикета")
             @RequestBody CreateTicketRequest request
     ) {
-        TicketEntity entity = new TicketEntity();
-        entity.setSubject(request.getSubject());
-        entity.setDescription(request.getDescription());
-        entity.setCategoryId(request.getCategoryId());
-        entity.setStatus(TicketStatus.valueOf(TicketStatus.OPEN.name()));
-
-        TicketEntity saved = service.create(entity);
-
-        return toResponse(saved);
+        return service.create(request);
     }
 
     // Этот метод доступен всем, но с разными фильтрами
@@ -71,16 +60,13 @@ public class TicketController {
         // фильтры по времени, категории и статусу доступны всем, но с учетом роли
 
         return service.getAll(
-                        categoryId,
-                        assignedTo,
-                        createdBy,
-                        status != null ? status.name() : null,
-                        createdAfter,
-                        createdBefore
-                )
-                .stream()
-                .map(this::toResponse)
-                .toList();
+                categoryId,
+                assignedTo,
+                createdBy,
+                status != null ? status.name() : null,
+                createdAfter,
+                createdBefore
+        );
     }
 
     @Operation(summary = "Получить тикет по ID")
@@ -89,7 +75,7 @@ public class TicketController {
             @Parameter(description = "ID тикета", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id
     ) {
-        return toResponse(service.getById(id));
+        return service.getById(id);
     }
 
     @Operation(summary = "Обновить тикет")
@@ -101,11 +87,7 @@ public class TicketController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления тикета")
             @RequestBody UpdateTicketRequest request
     ) {
-        TicketEntity updated = new TicketEntity();
-        updated.setSubject(request.getSubject());
-        updated.setDescription(request.getDescription());
-
-        return toResponse(service.update(id, updated));
+        return service.update(id, request);
     }
 
     @Operation(summary = "Удалить тикет")
@@ -126,7 +108,7 @@ public class TicketController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Новый статус тикета")
             @RequestBody UpdateStatusRequest request
     ) {
-        return toResponse(service.updateStatus(id, request.getStatus().name()));
+        return service.updateStatus(id, request);
     }
 
     @Operation(summary = "Назначить тикет сотруднику")
@@ -138,26 +120,7 @@ public class TicketController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для назначения тикета")
             @RequestBody AssignTicketRequest request
     ) {
-        return toResponse(service.assign(id, request.getAssigneeId()));
+        return service.assign(id, request);
     }
 
-
-    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
-    private TicketResponse toResponse(@NonNull TicketEntity entity) {
-        TicketResponse response = new TicketResponse();
-
-        response.setId(entity.getId());
-        response.setSubject(entity.getSubject());
-        response.setDescription(entity.getDescription());
-        response.setStatus(TicketStatus.valueOf(String.valueOf(entity.getStatus())));
-
-        response.setCategoryId(entity.getCategoryId());
-        response.setCreatedBy(entity.getCreatedBy());
-        response.setAssigneeId(entity.getAssigneeId());
-
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-
-        return response;
-    }
 }

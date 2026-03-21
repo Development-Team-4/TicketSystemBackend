@@ -3,54 +3,69 @@ package development.team.ticketsystem.ticketservice.Controllers;
 
 import development.team.ticketsystem.ticketservice.DTO.categories.CategoryResponse;
 import development.team.ticketsystem.ticketservice.DTO.categories.CreateCategoryRequest;
-import development.team.ticketsystem.ticketservice.Entity.CategoryEntity;
 import development.team.ticketsystem.ticketservice.Service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/topic/{topicId}/category")
-@Tag(name = "Categories", description = "Управление категориями")
+@Tag(name = "Categories",
+        description = "Управление категориями в системе поддержки. Категории группируют тикеты по тематикам внутри определенной темы.")
 public class CategoryController {
 
     private final CategoryService service;
 
-    public CategoryController(CategoryService service) {
-        this.service = service;
-    }
 
-
-    @Operation(summary = "Получить все категории темы")
-    @GetMapping
+    @GetMapping("/topic/{topicId}/category")
     public List<CategoryResponse> getCategories(
-            @Parameter(description = "ID темы", example = "550e8400-e29b-41d4-a716-446655440000")
+            @Parameter(
+                    description = "Уникальный идентификатор темы, для которой запрашиваются категории",
+                    example = "550e8400-e29b-41d4-a716-446655440000",
+                    required = true
+            )
             @PathVariable UUID topicId
     ) {
-        return service.getByTopic(topicId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        return service.getByTopic(topicId);
     }
 
-    @Operation(summary = "Получить категорию по ID")
-    @GetMapping("/{id}")
+
+
+    @GetMapping("/topic/{topicId}/category/{id}")
     public CategoryResponse getCategory(
-            @Parameter(description = "ID темы", example = "550e8400-e29b-41d4-a716-446655440000")
+            @Parameter(
+                    description = "Уникальный идентификатор темы (родительской сущности для категории)",
+                    example = "550e8400-e29b-41d4-a716-446655440000",
+                    required = true
+            )
             @PathVariable UUID topicId,
 
-            @Parameter(description = "ID категории", example = "550e8400-e29b-41d4-a716-446655440000")
+            @Parameter(
+                    description = "Уникальный идентификатор категории, которую необходимо получить",
+                    example = "550e8400-e29b-41d4-a716-446655440001",
+                    required = true
+            )
             @PathVariable UUID id
     ) {
-        return toResponse(service.getById(id));
+        return service.getById(id);
     }
 
-    @Operation(summary = "Создать категорию")
-    @PostMapping
+
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/topic/{topicId}/category")
     public CategoryResponse createCategory(
             @Parameter(description = "ID темы", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID topicId,
@@ -58,16 +73,11 @@ public class CategoryController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для создания категории")
             @RequestBody CreateCategoryRequest request
     ) {
-        CategoryEntity entity = new CategoryEntity();
-        entity.setTopicId(topicId);
-        entity.setName(request.getName());
-        entity.setDescription(request.getDescription());
-
-        return toResponse(service.create(entity));
+        return service.create(topicId, request);
     }
 
     @Operation(summary = "Обновить категорию")
-    @PutMapping("/{id}")
+    @PutMapping("/topic/{topicId}/category/{id}")
     public CategoryResponse updateCategory(
             @Parameter(description = "ID темы", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID topicId,
@@ -78,20 +88,7 @@ public class CategoryController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления категории")
             @RequestBody CreateCategoryRequest request
     ) {
-        CategoryEntity updated = new CategoryEntity();
-        updated.setName(request.getName());
-        updated.setDescription(request.getDescription());
-
-        return toResponse(service.update(id, updated));
+        return service.update(id, request);
     }
 
-    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
-    private CategoryResponse toResponse(CategoryEntity entity) {
-        CategoryResponse response = new CategoryResponse();
-        response.setId(entity.getId());
-        response.setTopicId(entity.getTopicId());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        return response;
-    }
 }
