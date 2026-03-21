@@ -27,9 +27,10 @@ public class TopicService {
     }
 
     public TopicResponse create(CreateTopicRequest request) {
-        TopicEntity entity = new TopicEntity();
-        entity.setName(request.getName());
-        entity.setDescription(request.getDescription());
+        TopicEntity entity = TopicEntity.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
 
         TopicEntity saved = repository.save(entity);
         return toResponse(saved);
@@ -39,8 +40,8 @@ public class TopicService {
         TopicEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Topic not found"));
 
-        existing.setName(request.getName());
-        existing.setDescription(request.getDescription());
+        existing.setName(request.getName())
+                .setDescription(request.getDescription());
 
         TopicEntity saved = repository.save(existing);
 
@@ -49,10 +50,10 @@ public class TopicService {
 
     // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
     private TopicResponse toResponse(TopicEntity entity) {
-        TopicResponse response = new TopicResponse();
-        response.setId(entity.getId());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        return response;
+        return TopicResponse.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .build();
     }
 }

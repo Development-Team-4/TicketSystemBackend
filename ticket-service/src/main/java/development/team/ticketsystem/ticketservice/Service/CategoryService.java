@@ -33,10 +33,11 @@ public class CategoryService {
     }
 
     public CategoryResponse create(UUID topicId, CreateCategoryRequest request) {
-        CategoryEntity entity = new CategoryEntity();
-        entity.setTopicId(topicId);
-        entity.setName(request.getName());
-        entity.setDescription(request.getDescription());
+        CategoryEntity entity = CategoryEntity.builder()
+                .topicId(topicId)
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
         CategoryEntity saved = repository.save(entity);
         return toResponse(saved);
     }
@@ -45,8 +46,8 @@ public class CategoryService {
         CategoryEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
-        existing.setName(request.getName());
-        existing.setDescription(request.getDescription());
+        existing.setName(request.getName())
+                .setDescription(request.getDescription());
         CategoryEntity entity = repository.save(existing);
 
         return toResponse(entity);
@@ -54,11 +55,11 @@ public class CategoryService {
 
     // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
     private CategoryResponse toResponse(CategoryEntity entity) {
-        CategoryResponse response = new CategoryResponse();
-        response.setId(entity.getId());
-        response.setTopicId(entity.getTopicId());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        return response;
+        return CategoryResponse.builder()
+                .id(entity.getId())
+                .topicId(entity.getTopicId())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .build();
     }
 }

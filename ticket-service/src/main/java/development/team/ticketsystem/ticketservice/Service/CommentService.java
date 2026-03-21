@@ -41,11 +41,12 @@ public class CommentService {
             throw new EntityNotFoundException("Ticket not found");
         }
 
-        CommentEntity comment = new CommentEntity();
-        comment.setTicketId(ticketId);
-        comment.setAuthorId(authorId);
-        comment.setContent(request.getContent());
-        comment.setCreatedAt(Instant.now());
+        CommentEntity comment = CommentEntity.builder()
+                .ticketId(ticketId)
+                .authorId(authorId)
+                .content(request.getContent())
+                .createdAt(Instant.now())
+                .build();
 
         CommentEntity saved = repository.save(comment);
 
@@ -54,12 +55,12 @@ public class CommentService {
 
     // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
     private CommentResponse toResponse(CommentEntity entity) {
-        CommentResponse response = new CommentResponse();
-        response.setId(entity.getId());
-        response.setTicketId(entity.getTicketId());
-        response.setContent(entity.getContent());
-        response.setAuthorId(entity.getAuthorId());
-        response.setCreatedAt(entity.getCreatedAt());
-        return response;
+        return CommentResponse.builder()
+                .id(entity.getId())
+                .ticketId(entity.getTicketId())
+                .content(entity.getContent())
+                .authorId(entity.getAuthorId())
+                .createdAt(entity.getCreatedAt())
+                .build();
     }
 }
