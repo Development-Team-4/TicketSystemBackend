@@ -15,7 +15,7 @@ public class RegisterRequest {
             example = "John Doe",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_name")
+    @JsonProperty("userName")
     private String name;
 
     @Schema(
@@ -23,7 +23,7 @@ public class RegisterRequest {
             example = "john@example.com",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_email")
+    @JsonProperty("userEmail")
     private String email;
 
     @Schema(
@@ -31,6 +31,6 @@ public class RegisterRequest {
             example = "securePassword123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_password")
+    @JsonProperty("userPassword")
     private String password;
 }

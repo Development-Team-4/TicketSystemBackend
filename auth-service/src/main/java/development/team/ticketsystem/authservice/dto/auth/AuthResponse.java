@@ -18,7 +18,7 @@ public class AuthResponse {
             example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("access_token")
+    @JsonProperty("accessToken")
     private String accessToken;
 
     @Schema(
@@ -26,7 +26,7 @@ public class AuthResponse {
             example = "Bearer",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("token_type")
+    @JsonProperty("tokenType")
     private String tokenType;
 
     @Schema(

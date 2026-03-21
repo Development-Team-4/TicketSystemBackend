@@ -17,7 +17,7 @@ public class UpdateUserRequest {
             example = "John Updated",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
-    @JsonProperty("user_name")
+    @JsonProperty("userName")
     private String name;
 
     @Schema(
@@ -25,6 +25,6 @@ public class UpdateUserRequest {
             example = "https://example.com/avatar.png",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
-    @JsonProperty("user_avatar")
+    @JsonProperty("userAvatar")
     private String avatar;
 }

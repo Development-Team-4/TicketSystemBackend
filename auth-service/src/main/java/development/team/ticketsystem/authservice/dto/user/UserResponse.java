@@ -21,7 +21,7 @@ public class UserResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_id")
+    @JsonProperty("userId")
     private UUID id;
 
     @Schema(
@@ -29,7 +29,7 @@ public class UserResponse {
             example = "John Doe",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_name")
+    @JsonProperty("userName")
     private String name;
 
     @Schema(
@@ -37,7 +37,7 @@ public class UserResponse {
             example = "john@example.com",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_email")
+    @JsonProperty("userEmail")
     private String email;
 
     @Schema(
@@ -46,7 +46,7 @@ public class UserResponse {
             allowableValues = {"USER", "ADMIN", "MODERATOR"},
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_role")
+    @JsonProperty("userRole")
     private String role;
 
     @Schema(
@@ -54,7 +54,7 @@ public class UserResponse {
             example = "https://example.com/avatar.png",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
-    @JsonProperty("user_avatar")
+    @JsonProperty("userAvatar")
     private String avatar;
 
     @Schema(
@@ -62,7 +62,7 @@ public class UserResponse {
             example = "2024-01-01T12:00:00Z",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_created_at")
+    @JsonProperty("userCreatedAt")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Instant createdAt;
 }

@@ -15,7 +15,7 @@ public class LoginRequest {
             example = "user@example.com",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_email")
+    @JsonProperty("userEmail")
     private String email;
 
     @Schema(
@@ -23,6 +23,6 @@ public class LoginRequest {
             example = "password123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_password")
+    @JsonProperty("userPassword")
     private String password;
 }

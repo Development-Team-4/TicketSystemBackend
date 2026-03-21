@@ -15,7 +15,7 @@ public class NotificationSettingsResponse{
             example = "qee@gmai.com",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_email_notification")
+    @JsonProperty("userEmailNotification")
     private String emailEnabled;
 
     @Schema(
@@ -23,6 +23,6 @@ public class NotificationSettingsResponse{
             example = "@qxtewtenjoiu",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("user_telegram_notification")
+    @JsonProperty("userTelegramNotification")
     private String telegramEnabled;
 }
