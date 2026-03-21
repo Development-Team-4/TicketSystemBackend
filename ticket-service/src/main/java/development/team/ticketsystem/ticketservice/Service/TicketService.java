@@ -6,6 +6,7 @@ import development.team.ticketsystem.ticketservice.Repository.Specification.Tick
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,7 @@ public class TicketService {
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
     }
 
+    @Transactional
     public TicketResponse update(UUID id, UpdateTicketRequest request) {
         TicketEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
@@ -74,6 +76,7 @@ public class TicketService {
         return toResponse(updated);
     }
 
+    @Transactional
     public void delete(UUID id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Ticket not found");
@@ -81,6 +84,7 @@ public class TicketService {
         repository.deleteById(id);
     }
 
+    @Transactional
     public TicketResponse updateStatus(UUID id, UpdateStatusRequest request) {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
@@ -90,9 +94,11 @@ public class TicketService {
         return toResponse(updated);
     }
 
+    @Transactional
     public TicketResponse assign(UUID id, AssignTicketRequest assigneeId) {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
         ticket.setAssigneeId(assigneeId.getAssigneeId())
                 .setUpdatedAt(Instant.now());
         TicketEntity assigned = repository.save(ticket);

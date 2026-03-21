@@ -6,6 +6,7 @@ import development.team.ticketsystem.ticketservice.Entity.CommentEntity;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +22,13 @@ public class CommentService {
     private final TicketRepository ticketRepository;
 
     public List<CommentResponse> getByTicket(UUID ticketId) {
-        if (!ticketRepository.existsById(ticketId)) {
-            throw new EntityNotFoundException("Ticket not found");
-        }
         return repository.findByTicketId(ticketId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional
     public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request) {
 
         if (!ticketRepository.existsById(ticketId)) {

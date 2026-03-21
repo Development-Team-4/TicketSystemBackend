@@ -5,6 +5,7 @@ import development.team.ticketsystem.ticketservice.DTO.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.Entity.TopicEntity;
 import development.team.ticketsystem.ticketservice.Repository.TopicRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,7 @@ public class TopicService {
         return toResponse(saved);
     }
 
+    @Transactional
     public TopicResponse update(UUID id, CreateTopicRequest request) {
         TopicEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Topic not found"));
