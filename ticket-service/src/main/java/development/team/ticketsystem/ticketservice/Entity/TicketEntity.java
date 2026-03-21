@@ -2,14 +2,14 @@ package development.team.ticketsystem.ticketservice.Entity;
 
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Builder
+@Accessors(chain = true)
 @Getter
 @Setter
 @AllArgsConstructor

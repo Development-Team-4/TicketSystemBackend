@@ -1,14 +1,14 @@
 package development.team.ticketsystem.ticketservice.DTO.comments;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Builder
+@Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
