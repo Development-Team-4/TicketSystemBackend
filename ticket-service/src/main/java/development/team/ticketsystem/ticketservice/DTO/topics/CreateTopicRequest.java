@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.DTO.topics;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class CreateTopicRequest {
             example = "Техническая поддержка",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("name")
     private String name;
 
     @Schema(
@@ -24,5 +26,6 @@ public class CreateTopicRequest {
             example = "Тема для вопросов по технической поддержке",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("description")
     private String description;
 }

@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.DTO.comments;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -20,6 +21,7 @@ public class CommentResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("id")
     private UUID id;
 
     @Schema(
@@ -27,6 +29,7 @@ public class CommentResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("ticketId")
     private UUID ticketId;
 
     @Schema(
@@ -34,6 +37,7 @@ public class CommentResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("authorId")
     private UUID authorId;
 
     @Schema(
@@ -41,6 +45,7 @@ public class CommentResponse {
             example = "Проблема воспроизводится, исправьте пожалуйста",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("content")
     private String content;
 
     @Schema(
@@ -48,5 +53,6 @@ public class CommentResponse {
             example = "2024-01-15T10:30:00Z",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("createdAt")
     private Instant createdAt;
 }

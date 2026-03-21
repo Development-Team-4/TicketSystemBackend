@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.DTO.tickets;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -21,6 +22,7 @@ public class TicketResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("id")
     private UUID id;
 
     @Schema(
@@ -28,6 +30,7 @@ public class TicketResponse {
             example = "Не работает авторизация",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("subject")
     private String subject;
 
     @Schema(
@@ -35,6 +38,7 @@ public class TicketResponse {
             example = "При попытке войти в систему выдает ошибку 500",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("description")
     private String description;
 
     @Schema(
@@ -43,6 +47,7 @@ public class TicketResponse {
             allowableValues = {"OPEN", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"},
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("status")
     private TicketStatus status;
 
     @Schema(
@@ -50,6 +55,7 @@ public class TicketResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("categoryId")
     private UUID categoryId;
 
     @Schema(
@@ -57,6 +63,7 @@ public class TicketResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("createdBy")
     private UUID createdBy;
 
     @Schema(
@@ -64,6 +71,7 @@ public class TicketResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("assigneeId")
     private UUID assigneeId;
 
     @Schema(
@@ -71,6 +79,7 @@ public class TicketResponse {
             example = "2024-01-15T10:30:00Z",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("createdAt")
     private Instant createdAt;
 
     @Schema(
@@ -78,5 +87,6 @@ public class TicketResponse {
             example = "2024-01-15T15:45:00Z",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("updatedAt")
     private Instant updatedAt;
 }

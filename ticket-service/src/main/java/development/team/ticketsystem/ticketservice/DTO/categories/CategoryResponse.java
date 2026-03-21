@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.DTO.categories;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class CategoryResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("id")
     private UUID id;
 
     @Schema(
@@ -29,6 +31,7 @@ public class CategoryResponse {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("topicId")
     private UUID topicId;
 
     @Schema(
@@ -36,6 +39,7 @@ public class CategoryResponse {
             example = "Технические проблемы",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("name")
     private String name;
 
     @Schema(
@@ -43,5 +47,6 @@ public class CategoryResponse {
             example = "Категория для технических вопросов и проблем",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("description")
     private String description;
 }
