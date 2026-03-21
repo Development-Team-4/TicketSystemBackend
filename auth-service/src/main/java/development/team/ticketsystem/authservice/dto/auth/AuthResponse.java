@@ -13,9 +13,4 @@ public record AuthResponse(
         String tokenType,
 
         UserResponse user
-) {
-    //Потом уберу. Тупо заглушка на данный момент.
-    public AuthResponse(){
-        this(null, null, null);
-    }
-}
+) { }

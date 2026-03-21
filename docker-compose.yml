@@ -11,6 +11,8 @@ services:
       TZ: UTC+3
     ports:
       - "${AUTH_DB_PORT}:5432"
+    volumes:
+      - ./docker/auth-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     tmpfs:
       - /var/lib/postgresql/data:rw,noexec,nosuid,size=256m
     shm_size: "256m"
@@ -36,6 +38,8 @@ services:
       - "${TICKET_DB_PORT}:5432"
     tmpfs:
       - /var/lib/postgresql/data:rw,noexec,nosuid,size=256m
+    volumes:
+      - ./docker/ticket-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     shm_size: "256m"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
@@ -59,6 +63,8 @@ services:
       - "${NOTIFICATION_DB_PORT}:5432"
     tmpfs:
       - /var/lib/postgresql/data:rw,noexec,nosuid,size=256m
+    volumes:
+      - ./docker/notification-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     shm_size: "256m"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
