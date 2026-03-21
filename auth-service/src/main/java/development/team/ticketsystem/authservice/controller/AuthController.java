@@ -23,14 +23,12 @@ public class AuthController {
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest request) {
-        log.info("User registration request was received by e-mail  {}", request.email());
         return authService.register(request);
     }
 
     @Operation(summary = "Логин")
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
-        log.info("A user login request was received by e-mail {}",request.email());
         return authService.login(request);
     }
 

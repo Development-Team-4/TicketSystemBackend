@@ -25,10 +25,7 @@ public class AuthService{
     @Transactional
     public AuthResponse register(RegisterRequest request) {
 
-        log.info("Register attempt for email={}", request.getEmail());
-
         if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("Registration failed: email already exists email={}", request.getEmail());
             throw new IllegalStateException("Email already exists");
         }
 
@@ -42,8 +39,6 @@ public class AuthService{
 
         userRepository.save(user);
 
-        log.info("User successfully registered email={}", request.getEmail());
-
         return new AuthResponse(
                 "mock-token",
                 "Bearer",
@@ -54,20 +49,13 @@ public class AuthService{
     @Transactional
     public AuthResponse login(LoginRequest request) {
 
-        log.info("Login attempt for email={}", request.getEmail());
-
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    log.warn("Login failed: user not found email={}", request.getEmail());
-                    return new IllegalArgumentException("Invalid credentials");
-                });
+                .orElseThrow(() ->
+                    new IllegalArgumentException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            log.warn("Login failed: wrong password email={}", request.getEmail());
             throw new IllegalArgumentException("Invalid credentials");
         }
-
-        log.info("User successfully logged in email={}", request.getEmail());
 
         return new AuthResponse(
                 "mock-token",

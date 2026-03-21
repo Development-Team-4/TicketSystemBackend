@@ -29,14 +29,12 @@ public class UserController {
     public UserResponse getUser(
             @Parameter(description = "ID пользователя", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id) {
-        log.info("Request has been sent to retrieve a user with ID {}", id);
         return userService.getById(id);
     }
 
     @Operation(summary = "Получить список пользователей")
     @GetMapping
     public List<UserResponse> getUsers() {
-        log.info("Request has been sent to retrieve all users");
         return userService.getAll();
     }
 
@@ -46,7 +44,6 @@ public class UserController {
             @PathVariable UUID id,
             @RequestBody UpdateUserRequest request
     ) {
-        log.info("Request has been sent to update the user's data with ID {}", id);
         return userService.update(id, request);
     }
 
@@ -57,7 +54,6 @@ public class UserController {
             @PathVariable UUID id,
             @RequestBody UpdateNotificationSettingsRequest request
     ) {
-        log.info("Request has been sent to update the notification settings for user with ID {}", id);
         return userService.updateSettings(id, request);
     }
 
@@ -66,7 +62,6 @@ public class UserController {
     public NotificationSettingsResponse getSettings(
             @PathVariable UUID id
     ) {
-        log.info("Request has been sent to receive notification settings for user with id {}", id);
         return userService.getSettings(id);
     }
 
