@@ -5,19 +5,17 @@ import development.team.ticketsystem.ticketservice.DTO.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.Entity.TopicEntity;
 import development.team.ticketsystem.ticketservice.Repository.TopicRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class TopicService {
 
     private final TopicRepository repository;
-
-    public TopicService(TopicRepository repository) {
-        this.repository = repository;
-    }
 
     public List<TopicResponse> getAll() {
         return repository.findAll()

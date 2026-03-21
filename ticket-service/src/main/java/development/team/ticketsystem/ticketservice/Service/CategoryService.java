@@ -6,19 +6,17 @@ import development.team.ticketsystem.ticketservice.DTO.categories.CreateCategory
 import development.team.ticketsystem.ticketservice.Entity.CategoryEntity;
 import development.team.ticketsystem.ticketservice.Repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class CategoryService {
 
     private final CategoryRepository repository;
-
-    public CategoryService(CategoryRepository repository) {
-        this.repository = repository;
-    }
 
     public List<CategoryResponse> getByTopic(UUID topicId) {
         return repository.findByTopicId(topicId)

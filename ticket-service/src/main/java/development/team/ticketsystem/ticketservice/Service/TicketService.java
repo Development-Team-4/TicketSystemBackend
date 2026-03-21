@@ -6,6 +6,7 @@ import development.team.ticketsystem.ticketservice.Repository.Specification.Tick
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +14,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class TicketService {
 
     private final TicketRepository repository;
-
-    public TicketService(TicketRepository repository) {
-        this.repository = repository;
-    }
 
     public TicketResponse create(CreateTicketRequest request) {
         TicketEntity ticket = TicketEntity.builder()
