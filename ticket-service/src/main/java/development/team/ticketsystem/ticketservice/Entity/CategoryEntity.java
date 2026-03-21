@@ -18,12 +18,16 @@ public class CategoryEntity {
 
     @Id
     @GeneratedValue
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "topic_id")
+    @Column(name = "topic_id", nullable = false)
     private UUID topicId;
 
+    @Column(nullable = false, length = 255)
     private String name;
+
+    @Column(length = 2000)
     private String description;
 
 }

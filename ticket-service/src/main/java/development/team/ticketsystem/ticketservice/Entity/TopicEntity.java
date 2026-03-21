@@ -18,12 +18,12 @@ public class TopicEntity {
 
     @Id
     @GeneratedValue
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
-    @Column
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column
+    @Column(length = 2000)
     private String description;
-
 }

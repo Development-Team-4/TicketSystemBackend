@@ -18,11 +18,11 @@ import java.util.UUID;
 public class CategoryStaffEntity {
 
     @Id
-    @Column(name = "category_id")
+    @Column(name = "category_id", nullable = false, updatable = false)
     private UUID categoryId;
 
     @Id
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
 
 }
