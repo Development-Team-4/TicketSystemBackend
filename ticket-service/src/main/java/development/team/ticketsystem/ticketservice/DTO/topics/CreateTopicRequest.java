@@ -24,7 +24,7 @@ public class CreateTopicRequest {
     @Schema(
             description = "Описание темы",
             example = "Тема для вопросов по технической поддержке",
-            requiredMode = Schema.RequiredMode.REQUIRED
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     @JsonProperty("description")
     private String description;
