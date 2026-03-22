@@ -3,7 +3,7 @@ package development.team.ticketsystem.notificationservice.positive;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.notificationservice.controller.NotificationController;
-import development.team.ticketsystem.notificationservice.dto.NotificationDto;
+import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
 import development.team.ticketsystem.notificationservice.entity.NotificationType;
 import development.team.ticketsystem.notificationservice.exceptions.handlers.GlobalExceptionHandler;
@@ -90,7 +90,7 @@ public class PositiveTests {
      */
     private boolean fullTest(NotificationType type) throws Exception {
         // Формирование сообщения
-        NotificationDto dto = new NotificationDto(
+        NotificationCreationDto dto = new NotificationCreationDto(
                 this.userId,
                 this.ticketId,
                 type
@@ -102,7 +102,7 @@ public class PositiveTests {
                 type
         );
 
-        when(notificationService.addNewNotification(any(NotificationDto.class)))
+        when(notificationService.addNewNotification(any(NotificationCreationDto.class)))
                 .thenReturn(expectedNotification);
 
         when(notificationService.getAllNotifications())

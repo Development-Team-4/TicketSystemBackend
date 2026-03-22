@@ -46,7 +46,7 @@ public class NegativeTests {
     @DisplayName("TC-4 : Некорректная отправка сообщения (неправильный type)")
     void incorrectTypeMessageSending() throws Exception {
         // Читаем JSON с некорректным type уведомления
-        String invalidJson = JsonHelper.loadResourceAsString("json/incorrect_type_message.json");
+        String invalidJson = JsonHelper.readDataFromJson("json/incorrect_type_message.json");
 
         log.info("Тест: Отправка с некорректным типом уведомления");
         log.info("JSON для отправки: {}", invalidJson);
@@ -86,9 +86,9 @@ public class NegativeTests {
      */
     private boolean fullTestOfCorruptField(String field) throws Exception {
         // Читаем JSON с некорректным type уведомления
-        String invalidJson = JsonHelper.loadResourceAsString("json/correct_type_message.json");
+        String invalidJson = JsonHelper.readDataFromJson("json/correct_type_message.json");
 
-        invalidJson = JsonHelper.corruptField(invalidJson, field);
+        invalidJson = JsonHelper.deleteFieldFromJson(invalidJson, field);
 
         log.info("Тест: Отправка с удаленным полем из DTO");
         log.info("Поле для удаления: {}", field);
