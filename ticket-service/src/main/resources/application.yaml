@@ -1,0 +1,11 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ticket-service
+
+  datasource:
+    url: ${TICKET_DB_URL}
+    username: ${TICKET_DB_USER}
+    password: ${TICKET_DB_PASSWORD}
