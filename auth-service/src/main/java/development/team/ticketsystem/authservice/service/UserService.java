@@ -6,6 +6,8 @@ import development.team.ticketsystem.authservice.dto.user.UpdateUserRequest;
 import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import development.team.ticketsystem.authservice.entity.User;
 import development.team.ticketsystem.authservice.entity.UserNotificationSettings;
+import development.team.ticketsystem.authservice.exception.NotificationSettingsNotFoundException;
+import development.team.ticketsystem.authservice.exception.UserNotFoundException;
 import development.team.ticketsystem.authservice.mapper.UserMapper;
 import development.team.ticketsystem.authservice.repository.UserNotificationSettingsRepository;
 import development.team.ticketsystem.authservice.repository.UserRepository;
@@ -54,7 +56,7 @@ public class UserService {
 
     public NotificationSettingsResponse getSettings(UUID id) {
         UserNotificationSettings settings = settingsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Settings not found"));
+                .orElseThrow(NotificationSettingsNotFoundException::new);
 
         return mapper.toResponse(settings);
     }
@@ -77,6 +79,6 @@ public class UserService {
 
     private User getUserOrThrow(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
     }
 }

@@ -4,6 +4,8 @@ import development.team.ticketsystem.authservice.dto.auth.AuthResponse;
 import development.team.ticketsystem.authservice.dto.auth.LoginRequest;
 import development.team.ticketsystem.authservice.dto.auth.RegisterRequest;
 import development.team.ticketsystem.authservice.entity.User;
+import development.team.ticketsystem.authservice.exception.EmailAlreadyExistsException;
+import development.team.ticketsystem.authservice.exception.InvalidCredentialsException;
 import development.team.ticketsystem.authservice.mapper.UserMapper;
 import development.team.ticketsystem.authservice.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -26,7 +28,7 @@ public class AuthService{
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalStateException("Email already exists");
+            throw new EmailAlreadyExistsException();
         }
 
         User user = User.builder()
@@ -50,11 +52,10 @@ public class AuthService{
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                    new IllegalArgumentException("Invalid credentials"));
+                .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
 
         return new AuthResponse(
