@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.DTO.tickets;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -19,5 +20,6 @@ public class UpdateStatusRequest {
             allowableValues = {"OPEN", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"},
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("status")
     private TicketStatus status;
 }

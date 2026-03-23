@@ -1,13 +1,13 @@
 package development.team.ticketsystem.ticketservice.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
 
+@Builder
+@Accessors(chain = true)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,12 +18,12 @@ public class TopicEntity {
 
     @Id
     @GeneratedValue
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
-    @Column
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column
+    @Column(length = 2000)
     private String description;
-
 }

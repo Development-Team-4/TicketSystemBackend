@@ -1,13 +1,14 @@
 package development.team.ticketsystem.ticketservice.DTO.topics;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
 
+@Builder
+@Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -16,19 +17,25 @@ public class TopicResponse {
 
     @Schema(
             description = "Уникальный идентификатор темы",
-            example = "550e8400-e29b-41d4-a716-446655440000"
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("id")
     private UUID id;
 
     @Schema(
             description = "Название темы",
-            example = "Техническая поддержка"
+            example = "Техническая поддержка",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("name")
     private String name;
 
     @Schema(
             description = "Описание темы",
-            example = "Тема для вопросов по технической поддержке"
+            example = "Тема для вопросов по технической поддержке",
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("description")
     private String description;
 }

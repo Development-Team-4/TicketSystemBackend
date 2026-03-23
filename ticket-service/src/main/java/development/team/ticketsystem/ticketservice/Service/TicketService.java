@@ -1,33 +1,42 @@
 package development.team.ticketsystem.ticketservice.Service;
 
+import development.team.ticketsystem.ticketservice.DTO.tickets.*;
 import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.Repository.Specification.TicketSpecification;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class TicketService {
 
     private final TicketRepository repository;
 
-    public TicketService(TicketRepository repository) {
-        this.repository = repository;
+    public TicketResponse create(CreateTicketRequest request) {
+        TicketEntity ticket = TicketEntity.builder()
+                .subject(request.getSubject())
+                .description(request.getDescription())
+                .categoryId(request.getCategoryId())
+                .status(TicketStatus.OPEN)
+                .createdBy(UUID.fromString("3e3789e6-74ab-4101-95f2-f88876b0ed8c")) // временно
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+        TicketEntity saved = repository.save(ticket);
+        return toResponse(saved);
+
     }
 
-    public TicketEntity create(TicketEntity ticket) {
-        ticket.setCreatedBy(UUID.fromString("3e3789e6-74ab-4101-95f2-f88876b0ed8c")); // Временно для тестов
-        ticket.setCreatedAt(Instant.now());
-        ticket.setUpdatedAt(Instant.now());
-        return repository.save(ticket);
-    }
-
-    public List<TicketEntity> getAll(
+    public List<TicketResponse> getAll(
             UUID categoryId,
             UUID assignedTo,
             UUID createdBy,
@@ -36,32 +45,38 @@ public class TicketService {
             Instant createdBefore
     ) {
         return repository.findAll(
-                TicketSpecification.filter(
-                        categoryId,
-                        assignedTo,
-                        createdBy,
-                        status,
-                        createdAfter,
-                        createdBefore
-                )
-        );
+                        TicketSpecification.filter(
+                                categoryId,
+                                assignedTo,
+                                createdBy,
+                                status,
+                                createdAfter,
+                                createdBefore
+                        )
+                ).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public TicketEntity getById(UUID id) {
-        return repository.findById(id)
+    public TicketResponse getById(UUID id) {
+        return toResponse(repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
+    }
+
+    @Transactional
+    public TicketResponse update(UUID id, UpdateTicketRequest request) {
+        TicketEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        existing.setSubject(request.getSubject())
+                .setDescription(request.getDescription())
+                .setUpdatedAt(Instant.now());
+
+        TicketEntity updated = repository.save(existing);
+        return toResponse(updated);
     }
 
-    public TicketEntity update(UUID id, TicketEntity updated) {
-        TicketEntity existing = getById(id);
-
-        existing.setSubject(updated.getSubject());
-        existing.setDescription(updated.getDescription());
-        existing.setUpdatedAt(Instant.now());
-
-        return repository.save(existing);
-    }
-
+    @Transactional
     public void delete(UUID id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Ticket not found");
@@ -69,17 +84,39 @@ public class TicketService {
         repository.deleteById(id);
     }
 
-    public TicketEntity updateStatus(UUID id, String status) {
-        TicketEntity ticket = getById(id);
-        ticket.setStatus(TicketStatus.valueOf(status));
-        ticket.setUpdatedAt(Instant.now());
-        return repository.save(ticket);
+    @Transactional
+    public TicketResponse updateStatus(UUID id, UpdateStatusRequest request) {
+        TicketEntity ticket = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+        ticket.setStatus(request.getStatus())
+                .setUpdatedAt(Instant.now());
+        TicketEntity updated = repository.save(ticket);
+        return toResponse(updated);
     }
 
-    public TicketEntity assign(UUID id, UUID assigneeId) {
-        TicketEntity ticket = getById(id);
-        ticket.setAssigneeId(assigneeId);
-        ticket.setUpdatedAt(Instant.now());
-        return repository.save(ticket);
+    @Transactional
+    public TicketResponse assign(UUID id, AssignTicketRequest assigneeId) {
+        TicketEntity ticket = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        ticket.setAssigneeId(assigneeId.getAssigneeId())
+                .setUpdatedAt(Instant.now());
+        TicketEntity assigned = repository.save(ticket);
+        return toResponse(assigned);
+    }
+
+    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
+    private TicketResponse toResponse(TicketEntity entity) {
+        return TicketResponse.builder()
+                .id(entity.getId())
+                .subject(entity.getSubject())
+                .description(entity.getDescription())
+                .status(entity.getStatus())
+                .categoryId(entity.getCategoryId())
+                .createdBy(entity.getCreatedBy())
+                .assigneeId(entity.getAssigneeId())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 }

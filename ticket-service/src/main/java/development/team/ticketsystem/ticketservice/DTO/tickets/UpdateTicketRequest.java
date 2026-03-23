@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.DTO.tickets;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class UpdateTicketRequest {
             example = "Не работает авторизация",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("subject")
     private String subject;
 
     @Schema(
@@ -24,5 +26,6 @@ public class UpdateTicketRequest {
             example = "При попытке войти в систему выдает ошибку 500",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
+    @JsonProperty("description")
     private String description;
 }
