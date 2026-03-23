@@ -18,10 +18,10 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "ticket_id")
+    @Column(name = "ticket_id", nullable = false)
     private UUID ticketId;
 
     @Column(name = "type")
@@ -37,10 +37,10 @@ public class Notification {
     @Column(name = "sent")
     private Boolean sent;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Timestamp createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Timestamp updatedAt;
 
     public Notification(UUID userId, UUID ticketId, NotificationType type) {

@@ -62,25 +62,47 @@ public class NotificationController {
      *
      * @param dto DTO для добавления нового уведомления
      */
-    @PostMapping
-    @Operation(summary = "Добавить уведомление",
-            description = "Добавление уведомлений с помощью NotificationDTO")
+    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Получить уведомления пользователя",
+            description = "Получение всех уведомления конкретного пользователя")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201",
-                    description = "Уведомление успешно создано"
+                    responseCode = "200",
+                    description = "Успешное получение уведомлений пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = NotificationDto.class),
+                            examples = @ExampleObject(
+                                    name = "Успешный ответ",
+                                    value = """
+                                            [
+                                                {
+                                                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                                                    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+                                                    "ticket_id": "550e8400-e29b-41d4-a716-446655440002",
+                                                    "title": "Новый комментарий",
+                                                    "type": "COMMENT",
+                                                    "message": "К Вашему тикету добавлен новый комментарий",
+                                                    "sent": true,
+                                                    "created_at": "2024-01-15T10:30:00Z",
+                                                    "updated_at": "2024-01-15T10:30:00Z"
+                                                }
+                                            ]
+                                            """
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Некорректные данные запроса"
+                    description = "Некорректный формат ID пользователя"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Ресурс не найден (тикет или пользователь не существует)"
+                    description = "Пользователь не найден"
             ),
             @ApiResponse(
-                    responseCode = "422",
-                    description = "Ошибка формата уведомления"
+                    responseCode = "500",
+                    description = "Внутренняя ошибка сервера"
             )
     })
     public ResponseEntity<?> addNewNotification(
@@ -94,6 +116,7 @@ public class NotificationController {
                                     name = "Уведомление о комментарии",
                                     value = """
                                             {
+                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
                                                 "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
                                                 "type": "COMMENT"
                                             }
@@ -103,6 +126,7 @@ public class NotificationController {
                                     name = "Уведомление об изменении статуса",
                                     value = """
                                             {
+                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
                                                 "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
                                                 "type": "STATUS_CHANGE"
                                             }
@@ -112,6 +136,7 @@ public class NotificationController {
                                     name = "Уведомление о назначении",
                                     value = """
                                             {
+                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
                                                 "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
                                                 "type": "ASSIGNMENT"
                                             }

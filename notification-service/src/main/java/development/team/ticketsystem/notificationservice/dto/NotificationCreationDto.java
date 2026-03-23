@@ -13,17 +13,17 @@ import java.util.UUID;
 @AllArgsConstructor
 public class NotificationCreationDto {
     @NotNull(message = "userId не может быть null")
-    @JsonProperty(value = "user_id")
-    @Schema(description = "ID пользователя", required = true)
+    @JsonProperty(value = "userId")
+    @Schema(description = "ID пользователя", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID userId;
 
     @NotNull(message = "ticketId не может быть null")
-    @JsonProperty(value = "ticket_id")
-    @Schema(description = "ID тикета", required = true)
+    @JsonProperty(value = "ticketId")
+    @Schema(description = "ID тикета", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID ticketId;
 
     @NotNull(message = "userId не может быть null")
     @JsonProperty(value = "type")
-    @Schema(description = "Тип тикета", required = true)
+    @Schema(description = "Тип тикета", requiredMode = Schema.RequiredMode.REQUIRED)
     private NotificationType type;
 }

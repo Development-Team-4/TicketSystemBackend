@@ -19,8 +19,6 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
 
-    private final NotificationValidator notificationValidator;
-
     /**
      * Метод выдачи всех нотификаций
      *
@@ -37,10 +35,9 @@ public class NotificationService {
      * Метод добавления нового уведомления через DTO
      *
      * @param dto DTO для создания уведомления
+     * @return dto с данными уведомления
      */
     public NotificationDto addNewNotification(NotificationCreationDto dto) throws NotificationFormatException {
-        notificationValidator.validate(dto);
-
         Notification notification = createNotificationFromDto(dto);
 
         return notificationMapper.toDto(this.notificationRepository.save(notification));

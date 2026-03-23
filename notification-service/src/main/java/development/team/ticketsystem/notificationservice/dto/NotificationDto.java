@@ -18,12 +18,12 @@ public class NotificationDto {
     @NotNull
     private UUID id;
 
-    @JsonProperty(value = "user_id")
+    @JsonProperty(value = "userId")
     @NotBlank
     @NotNull
     private UUID userId;
 
-    @JsonProperty(value = "ticket_id")
+    @JsonProperty(value = "ticketId")
     @NotBlank
     @NotNull
     private UUID ticketId;
@@ -41,9 +41,9 @@ public class NotificationDto {
     @JsonProperty(value = "sent")
     private Boolean sent;
 
-    @JsonProperty(value = "created_at")
+    @JsonProperty(value = "createdAt")
     private Timestamp createdAt;
 
-    @JsonProperty(value = "updated_at")
+    @JsonProperty(value = "updatedAt")
     private Timestamp updatedAt;
 }
