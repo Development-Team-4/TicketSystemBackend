@@ -1,16 +1,38 @@
 package development.team.ticketsystem.authservice.dto.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "Ответ при аутентификации")
-public record AuthResponse(
+public class AuthResponse {
 
-        @Schema(example = "jwt.token.here")
-        String accessToken,
+    @Schema(
+            description = "JWT токен доступа для авторизации",
+            example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("accessToken")
+    private String accessToken;
 
-        @Schema(example = "Bearer")
-        String tokenType,
+    @Schema(
+            description = "Тип токена для использования в Authorization header",
+            example = "Bearer",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("tokenType")
+    private String tokenType;
 
-        UserResponse user
-) { }
+    @Schema(
+            description = "Данные аутентифицированного пользователя",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("user")
+    private UserResponse user;
+}

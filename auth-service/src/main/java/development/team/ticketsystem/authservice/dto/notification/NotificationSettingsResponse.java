@@ -1,14 +1,28 @@
 package development.team.ticketsystem.authservice.dto.notification;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "Ответ с настройками уведомлений")
-public record NotificationSettingsResponse(
+public class NotificationSettingsResponse{
 
-        @Schema(example = "true")
-        String emailEnabled,
+    @Schema(
+            description = "email для уведомлений",
+            example = "qee@gmai.com",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("userEmailNotification")
+    private String emailEnabled;
 
-        @Schema(example = "false")
-        String telegramEnabled
-
-) { }
+    @Schema(
+            description = "Telegram для уведомлений",
+            example = "@qxtewtenjoiu",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("userTelegramNotification")
+    private String telegramEnabled;
+}
