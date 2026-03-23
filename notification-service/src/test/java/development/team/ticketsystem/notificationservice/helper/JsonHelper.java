@@ -14,7 +14,7 @@ public class JsonHelper {
      * @return данные из файла в виде строки
      * @throws Exception в случае, если нет такого ресурса
      */
-    public static String loadResourceAsString(String resourcePath) throws Exception {
+    public static String readDataFromJson(String resourcePath) throws Exception {
         try (var inputStream = JsonHelper.class.getClassLoader().getResourceAsStream(resourcePath)) {
 
             if (inputStream == null) {
@@ -32,7 +32,7 @@ public class JsonHelper {
      * @param field поле для удаления
      * @return строку JSON-а без поля
      */
-    public static String corruptField(String json, String field) {
+    public static String deleteFieldFromJson(String json, String field) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = (ObjectNode) mapper.readTree(json);
