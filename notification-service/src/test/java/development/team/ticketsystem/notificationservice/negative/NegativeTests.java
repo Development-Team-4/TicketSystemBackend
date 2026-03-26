@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.http.MediaType;
 
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -52,7 +54,7 @@ public class NegativeTests {
         log.info("JSON для отправки: {}", invalidJson);
 
         // Отправка сообщения + получаем ошибку
-        this.mockMvc.perform(post("/notifications")
+        this.mockMvc.perform(post("/notifications/" + UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
@@ -95,7 +97,7 @@ public class NegativeTests {
         log.info("JSON для отправки: {}", invalidJson);
 
         // Отправка сообщения + получаем ошибку
-        this.mockMvc.perform(post("/notifications")
+        this.mockMvc.perform(post("/notifications/" + UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
