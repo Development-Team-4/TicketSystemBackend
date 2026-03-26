@@ -3,7 +3,9 @@ package development.team.ticketsystem.ticketservice.Service;
 import development.team.ticketsystem.ticketservice.DTO.topics.CreateTopicRequest;
 import development.team.ticketsystem.ticketservice.DTO.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.Entity.TopicEntity;
+import development.team.ticketsystem.ticketservice.Exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.Repository.TopicRepository;
+import development.team.ticketsystem.ticketservice.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,11 @@ public class TopicService {
                 .toList();
     }
 
-    public TopicResponse create(CreateTopicRequest request) {
+    public TopicResponse create(UserRole role, CreateTopicRequest request) {
+        if (role != UserRole.ADMIN) {
+            throw new AccessDeniedException("Only ADMIN can create topic");
+        }
+
         TopicEntity entity = TopicEntity.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -36,7 +42,11 @@ public class TopicService {
     }
 
     @Transactional
-    public TopicResponse update(UUID id, CreateTopicRequest request) {
+    public TopicResponse update(UserRole role, UUID id, CreateTopicRequest request) {
+        if (role != UserRole.ADMIN) {
+            throw new AccessDeniedException("Only ADMIN can update topic");
+        }
+
         TopicEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Topic not found"));
 
