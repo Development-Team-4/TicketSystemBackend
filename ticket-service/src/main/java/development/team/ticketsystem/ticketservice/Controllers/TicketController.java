@@ -3,6 +3,7 @@ package development.team.ticketsystem.ticketservice.Controllers;
 import development.team.ticketsystem.ticketservice.DTO.tickets.*;
 import development.team.ticketsystem.ticketservice.Service.TicketService;
 import development.team.ticketsystem.ticketservice.TicketStatus;
+import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -154,6 +155,8 @@ public class TicketController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TicketResponse createTicket(
+            @RequestHeader("X-User-Id") UUID userId,
+
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Данные для создания тикета. Все поля обязательны для заполнения.",
                     required = true,
@@ -173,7 +176,7 @@ public class TicketController {
             )
             @RequestBody CreateTicketRequest request
     ) {
-        return service.create(request);
+        return service.create(userId, request);
     }
 
     @Operation(
@@ -306,6 +309,9 @@ public class TicketController {
     })
     @GetMapping
     public List<TicketResponse> getTickets(
+            @RequestHeader("X-User-Role") UserRole role,
+            @RequestHeader("X-User-Id") UUID userId,
+
             @Parameter(
                     description = "Фильтр по ID категории. Возвращает тикеты, принадлежащие указанной категории.",
                     example = "770e8400-e29b-41d4-a716-446655440001",
@@ -349,12 +355,9 @@ public class TicketController {
             )
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdBefore
     ) {
-        // внутри будет проверка на роль того, от кого пришел запрос из JWT
-        // все фильтры одновременно доступны только админу
-        // createdBy - пользователю, assignedTo - сотруднику НО только свои
-        // фильтры по времени, категории и статусу доступны всем, но с учетом роли
-
-        return service.getAll(
+         return service.getAll(
+                role,
+                userId,
                 categoryId,
                 assignedTo,
                 createdBy,
@@ -568,6 +571,9 @@ public class TicketController {
     })
     @PutMapping("/{id}")
     public TicketResponse updateTicket(
+            @RequestHeader("X-User-Role") UserRole role,
+            @RequestHeader("X-User-Id") UUID userId,
+
             @Parameter(
                     description = "Уникальный идентификатор тикета для обновления",
                     example = "550e8400-e29b-41d4-a716-446655440001",
@@ -593,7 +599,7 @@ public class TicketController {
             )
             @RequestBody UpdateTicketRequest request
     ) {
-        return service.update(id, request);
+        return service.update(role, userId, id, request);
     }
 
     @Operation(
@@ -660,6 +666,9 @@ public class TicketController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTicket(
+            @RequestHeader("X-User-Role") UserRole role,
+            @RequestHeader("X-User-Id") UUID userId,
+
             @Parameter(
                     description = "Уникальный идентификатор тикета для удаления",
                     example = "550e8400-e29b-41d4-a716-446655440001",
@@ -667,7 +676,7 @@ public class TicketController {
             )
             @PathVariable UUID id
     ) {
-        service.delete(id);
+        service.delete(role, userId, id);
     }
 
     @Operation(

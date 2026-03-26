@@ -3,6 +3,7 @@ package development.team.ticketsystem.ticketservice.Controllers;
 import development.team.ticketsystem.ticketservice.DTO.topics.CreateTopicRequest;
 import development.team.ticketsystem.ticketservice.DTO.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.Service.TopicService;
+import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -114,7 +115,6 @@ public class TopicController {
         return service.getAll();
     }
 
-    // Проверка на уникальность темы в системе будет реализована на этапе бизнес-логики в сервисах
     @Operation(
             summary = "Создать тему",
             description = """
@@ -252,6 +252,8 @@ public class TopicController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TopicResponse createTopic(
+            @RequestHeader("X-User-Role") UserRole role,
+
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Данные для создания темы. Поле 'name' обязательно. Поле 'description' - опционально.",
                     required = true,
@@ -272,7 +274,7 @@ public class TopicController {
             )
             @RequestBody CreateTopicRequest request
     ) {
-        return service.create(request);
+        return service.create(role, request);
     }
 
     @Operation(
@@ -404,6 +406,8 @@ public class TopicController {
     })
     @PutMapping("/{id}")
     public TopicResponse updateTopic(
+        @RequestHeader("X-User-Role") UserRole role,
+
         @Parameter(
                 description = "Уникальный идентификатор темы, которую необходимо обновить",
                 example = "660e8400-e29b-41d4-a716-446655440001",
@@ -431,7 +435,7 @@ public class TopicController {
         )
         @RequestBody CreateTopicRequest request
     ) {
-        return service.update(id, request);
+        return service.update(role, id, request);
     }
 
 }
