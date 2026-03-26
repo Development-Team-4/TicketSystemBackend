@@ -5,6 +5,8 @@ import development.team.ticketsystem.ticketservice.DTO.comments.CreateCommentReq
 import development.team.ticketsystem.ticketservice.Entity.CommentEntity;
 import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.Exceptions.InvalidStateException;
+import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationCreationDto;
+import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationType;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
@@ -23,6 +25,7 @@ public class CommentService {
 
     private final CommentRepository repository;
     private final TicketRepository ticketRepository;
+    private final NotificationSender notificationSender;
 
     public List<CommentResponse> getByTicket(UUID ticketId) {
         return repository.findByTicketId(ticketId)
@@ -49,6 +52,15 @@ public class CommentService {
                 .build();
 
         CommentEntity saved = repository.save(comment);
+         // отложено из-за проблем сервиса нотификаций
+        //        notificationSender.sendToNotificationMicroservice(
+//                ticket.getCreatedBy(),
+//                new NotificationCreationDto(
+//                        ticket.getCreatedBy(),
+//                        ticket.getId(),
+//                        NotificationType.STATUS_CHANGE
+//                ));
+//
 
         return toResponse(saved);
     }
