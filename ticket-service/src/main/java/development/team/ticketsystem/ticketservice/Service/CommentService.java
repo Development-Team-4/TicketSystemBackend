@@ -3,8 +3,11 @@ package development.team.ticketsystem.ticketservice.Service;
 import development.team.ticketsystem.ticketservice.DTO.comments.CommentResponse;
 import development.team.ticketsystem.ticketservice.DTO.comments.CreateCommentRequest;
 import development.team.ticketsystem.ticketservice.Entity.CommentEntity;
+import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
+import development.team.ticketsystem.ticketservice.Exceptions.InvalidStateException;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
+import development.team.ticketsystem.ticketservice.TicketStatus;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +33,13 @@ public class CommentService {
 
     @Transactional
     public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request) {
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        if (!ticketRepository.existsById(ticketId)) {
-            throw new EntityNotFoundException("Ticket not found");
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new InvalidStateException("Cannot comment CLOSED ticket");
         }
+
 
         CommentEntity comment = CommentEntity.builder()
                 .ticketId(ticketId)
