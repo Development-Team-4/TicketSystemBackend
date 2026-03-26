@@ -1,9 +1,11 @@
 package development.team.ticketsystem.ticketservice.Controllers;
 
 
+import development.team.ticketsystem.ticketservice.DTO.categories.AssignStaffRequest;
 import development.team.ticketsystem.ticketservice.DTO.categories.CategoryResponse;
 import development.team.ticketsystem.ticketservice.DTO.categories.CreateCategoryRequest;
 import development.team.ticketsystem.ticketservice.Service.CategoryService;
+import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -326,6 +328,8 @@ public class CategoryController {
     @PostMapping("/topics/{topicId}/categories")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse createCategory(
+            @RequestHeader("X-User-Role") UserRole role,
+
             @Parameter(
                     description = "Уникальный идентификатор темы, в которой будет создана категория",
                     example = "550e8400-e29b-41d4-a716-446655440000",
@@ -352,7 +356,7 @@ public class CategoryController {
             )
             @RequestBody CreateCategoryRequest request
     ) {
-        return service.create(topicId, request);
+        return service.create(role, topicId, request);
     }
 
     @Operation(
@@ -471,6 +475,8 @@ public class CategoryController {
     })
     @PatchMapping("/categories/{id}")
     public CategoryResponse updateCategory(
+            @RequestHeader("X-User-Role") UserRole role,
+
             @Parameter(
                     description = "Уникальный идентификатор категории, которую необходимо обновить",
                     example = "550e8400-e29b-41d4-a716-446655440001",
@@ -498,7 +504,182 @@ public class CategoryController {
             )
             @RequestBody CreateCategoryRequest request
     ) {
-        return service.update(id, request);
+        return service.update(role, id, request);
+    }
+
+    @Operation(
+            summary = "Назначить сотрудника на категорию",
+            description = """
+                Назначает сотрудника поддержки на указанную категорию тикетов.
+                
+                Назначение определяет, какие сотрудники могут работать с тикетами данной категории.
+                
+                Правила:
+                - Один сотрудник может быть назначен на несколько категорий
+                - Одна категория может иметь несколько сотрудников
+                
+                После назначения:
+                - Сотрудник получает доступ к тикетам данной категории
+                - Может брать тикеты в работу
+                
+                Права доступа:
+                - Администратор: может назначать сотрудников на любые категории
+                - Сотрудник поддержки: не может управлять категориями
+                - Пользователь: не имеет доступа
+                
+                Эндпоинт доступен только администраторам.
+                """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Сотрудник успешно назначен на категорию"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Некорректные данные запроса",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Категория не найдена",
+                                            value = """
+                                                {
+                                                  "timestamp": "2024-01-15T10:30:00Z",
+                                                  "status": 400,
+                                                  "error": "Bad Request",
+                                                  "message": "Category not found with id: 770e8400-e29b-41d4-a716-446655440999",
+                                                  "path": "/categories/770e8400-e29b-41d4-a716-446655440001/assign-staff"
+                                                }
+                                                """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Доступ запрещен. Только администратор может назначать сотрудников.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = """
+                                        {
+                                          "timestamp": "2024-01-15T10:30:00Z",
+                                          "status": 403,
+                                          "error": "Forbidden",
+                                          "message": "Only ADMIN can assign staff",
+                                          "path": "/categories/770e8400-e29b-41d4-a716-446655440001/assign-staff"
+                                        }
+                                        """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    @PutMapping("categories/{id}/staff")
+    public void assignStaffToCategory(
+            @RequestHeader("X-User-Role") UserRole role,
+
+            @Parameter(
+                    description = "Уникальный идентификатор категории",
+                    example = "770e8400-e29b-41d4-a716-446655440001",
+                    required = true
+            )
+            @PathVariable UUID id,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "ID сотрудника, которого необходимо назначить на категорию",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AssignStaffRequest.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                        {
+                                          "staffId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3"
+                                        }
+                                        """
+                            )
+                    )
+            )
+            @RequestBody AssignStaffRequest request
+    ) {
+        service.assignStaffToCategory(role, id, request);
+    }
+
+
+    @Operation(
+            summary = "Удалить сотрудника из категории",
+            description = """
+                Удаляет сотрудника поддержки из категории.
+                
+                После удаления:
+                - Сотрудник теряет доступ к тикетам данной категории
+                - Не может брать новые тикеты этой категории
+                
+                Важно:
+                - Уже назначенные тикеты остаются у сотрудника
+                - Для полного отвязывания администратору необходимо переназначить тикеты вручную
+                
+                Права доступа:
+                - Администратор: может удалять сотрудников из категорий
+                - Остальные роли: не имеют доступа
+                
+                Эндпоинт доступен только администраторам.
+                """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Сотрудник успешно удален из категории"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Связь сотрудника с категорией не найдена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = """
+                                        {
+                                          "timestamp": "2024-01-15T10:30:00Z",
+                                          "status": 404,
+                                          "error": "Not Found",
+                                          "message": "Staff is not assigned to this category",
+                                          "path": "/categories/770e8400-e29b-41d4-a716-446655440001/staff/a3e8e6e-3497-4690-bfc2-c7292e7438f3"
+                                        }
+                                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Доступ запрещен",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    @DeleteMapping("categories/{categoryId}/staff/{staffId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeStaff(
+            @RequestHeader("X-User-Role") UserRole role,
+
+            @Parameter(
+                    description = "ID категории",
+                    example = "770e8400-e29b-41d4-a716-446655440001",
+                    required = true
+            )
+            @PathVariable UUID categoryId,
+
+            @Parameter(
+                    description = "ID сотрудника",
+                    example = "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
+                    required = true
+            )
+            @PathVariable UUID staffId
+    ) {
+        service.removeStaff(role, categoryId, staffId);
     }
 
 }
