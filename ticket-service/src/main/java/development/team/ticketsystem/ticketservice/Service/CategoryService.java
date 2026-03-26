@@ -6,6 +6,7 @@ import development.team.ticketsystem.ticketservice.DTO.categories.CategoryRespon
 import development.team.ticketsystem.ticketservice.DTO.categories.CreateCategoryRequest;
 import development.team.ticketsystem.ticketservice.Entity.CategoryEntity;
 import development.team.ticketsystem.ticketservice.Exceptions.AccessDeniedException;
+import development.team.ticketsystem.ticketservice.Mappers.CategoryMapper;
 import development.team.ticketsystem.ticketservice.Repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +23,17 @@ public class CategoryService {
 
     private final CategoryRepository repository;
     private final CategoryStaffService categoryStaffService;
+    private final CategoryMapper mapper;
 
     public List<CategoryResponse> getByTopic(UUID topicId) {
         return repository.findByTopicId(topicId)
                 .stream()
-                .map(this::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     public CategoryResponse getById(UUID id) {
-        return toResponse(repository.findById(id)
+        return mapper.toResponse(repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found")));
     }
 
@@ -46,7 +48,7 @@ public class CategoryService {
                 .description(request.getDescription())
                 .build();
         CategoryEntity saved = repository.save(entity);
-        return toResponse(saved);
+        return mapper.toResponse(saved);
     }
 
     public CategoryResponse update(UserRole role, UUID id, CreateCategoryRequest request) {
@@ -61,7 +63,7 @@ public class CategoryService {
                 .setDescription(request.getDescription());
         CategoryEntity entity = repository.save(existing);
 
-        return toResponse(entity);
+        return mapper.toResponse(entity);
     }
 
     public void assignStaffToCategory(UserRole role,
@@ -76,24 +78,13 @@ public class CategoryService {
 
     public void removeStaff(UserRole role,
                             UUID categoryId,
-                            UUID staffId) {
-        if (role != UserRole.ADMIN) {
+                            UUID staffId
+    ) {
+        if (!role.equals(UserRole.ADMIN)) {
             throw new AccessDeniedException("Only ADMIN can remove staff");
         }
 
         categoryStaffService.removeStaff(categoryId, staffId);
     }
-
-
-    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
-    private CategoryResponse toResponse(CategoryEntity entity) {
-        return CategoryResponse.builder()
-                .id(entity.getId())
-                .topicId(entity.getTopicId())
-                .name(entity.getName())
-                .description(entity.getDescription())
-                .build();
-    }
-
 
 }

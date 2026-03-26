@@ -7,6 +7,7 @@ import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.Exceptions.InvalidStateException;
 import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationType;
+import development.team.ticketsystem.ticketservice.Mappers.CommentMapper;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
@@ -26,11 +27,12 @@ public class CommentService {
     private final CommentRepository repository;
     private final TicketRepository ticketRepository;
     private final NotificationSender notificationSender;
+    private final CommentMapper mapper;
 
     public List<CommentResponse> getByTicket(UUID ticketId) {
         return repository.findByTicketId(ticketId)
                 .stream()
-                .map(this::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
@@ -52,27 +54,17 @@ public class CommentService {
                 .build();
 
         CommentEntity saved = repository.save(comment);
-         // отложено из-за проблем сервиса нотификаций
-        //        notificationSender.sendToNotificationMicroservice(
+        // отложено из-за проблем сервиса нотификаций
+//        notificationSender.sendToNotificationMicroservice (
 //                ticket.getCreatedBy(),
-//                new NotificationCreationDto(
-//                        ticket.getCreatedBy(),
-//                        ticket.getId(),
-//                        NotificationType.STATUS_CHANGE
-//                ));
-//
+//        new NotificationCreationDto(
+//                ticket.getCreatedBy(),
+//                ticket.getId(),
+//                NotificationType.STATUS_CHANGE
+//        ));
 
-        return toResponse(saved);
+
+        return mapper.toResponse(saved);
     }
 
-    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
-    private CommentResponse toResponse(CommentEntity entity) {
-        return CommentResponse.builder()
-                .id(entity.getId())
-                .ticketId(entity.getTicketId())
-                .content(entity.getContent())
-                .authorId(entity.getAuthorId())
-                .createdAt(entity.getCreatedAt())
-                .build();
-    }
 }

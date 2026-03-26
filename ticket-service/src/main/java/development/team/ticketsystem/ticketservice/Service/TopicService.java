@@ -4,6 +4,7 @@ import development.team.ticketsystem.ticketservice.DTO.topics.CreateTopicRequest
 import development.team.ticketsystem.ticketservice.DTO.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.Entity.TopicEntity;
 import development.team.ticketsystem.ticketservice.Exceptions.AccessDeniedException;
+import development.team.ticketsystem.ticketservice.Mappers.TopicMapper;
 import development.team.ticketsystem.ticketservice.Repository.TopicRepository;
 import development.team.ticketsystem.ticketservice.UserRole;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,11 +20,12 @@ import java.util.UUID;
 public class TopicService {
 
     private final TopicRepository repository;
+    private final TopicMapper mapper;
 
     public List<TopicResponse> getAll() {
         return repository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
@@ -38,7 +40,7 @@ public class TopicService {
                 .build();
 
         TopicEntity saved = repository.save(entity);
-        return toResponse(saved);
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -55,15 +57,7 @@ public class TopicService {
 
         TopicEntity saved = repository.save(existing);
 
-        return toResponse(saved);
+        return mapper.toResponse(saved);
     }
 
-    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
-    private TopicResponse toResponse(TopicEntity entity) {
-        return TopicResponse.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .description(entity.getDescription())
-                .build();
-    }
 }

@@ -2,9 +2,11 @@ package development.team.ticketsystem.ticketservice.Service;
 
 import development.team.ticketsystem.ticketservice.DTO.tickets.*;
 import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
+import development.team.ticketsystem.ticketservice.Exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.Exceptions.InvalidStateException;
 import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationType;
+import development.team.ticketsystem.ticketservice.Mappers.TicketMapper;
 import development.team.ticketsystem.ticketservice.Repository.Specification.TicketSpecification;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
@@ -13,8 +15,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import development.team.ticketsystem.ticketservice.Exceptions.AccessDeniedException;
-import development.team.ticketsystem.ticketservice.TicketStatus;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +29,7 @@ public class TicketService {
     private final TicketRepository repository;
     private final CategoryStaffService categoryStaffService;
     private final NotificationSender notificationSender;
+    private final TicketMapper mapper;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -49,7 +50,7 @@ public class TicketService {
                 .updatedAt(Instant.now())
                 .build();
         TicketEntity saved = repository.save(ticket);
-        return toResponse(saved);
+        return mapper.toResponse(saved);
 
     }
 
@@ -96,12 +97,12 @@ public class TicketService {
                                 createdBefore
                         )
                 ).stream()
-                .map(this::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     public TicketResponse getById(UUID id) {
-        return toResponse(repository.findById(id)
+        return mapper.toResponse(repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
     }
 
@@ -124,7 +125,7 @@ public class TicketService {
                 .setUpdatedAt(Instant.now());
 
         TicketEntity updated = repository.save(existing);
-        return toResponse(updated);
+        return mapper.toResponse(updated);
     }
 
     @Transactional
@@ -132,10 +133,10 @@ public class TicketService {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        if (ticket.getStatus() != TicketStatus.OPEN) {
+        if (ticket.getStatus().equals(TicketStatus.OPEN)) {
             throw new InvalidStateException("Only OPEN tickets can be deleted");
         }
-        if (role == UserRole.USER && !ticket.getCreatedBy().equals(userId)) {
+        if (role.equals(UserRole.USER) && !ticket.getCreatedBy().equals(userId)) {
             throw new InvalidStateException("You can not delete ticket of other user");
         }
 
@@ -160,24 +161,19 @@ public class TicketService {
                 .setUpdatedAt(Instant.now());
         TicketEntity updated = repository.save(ticket);
 
- // отложено из-за проблем сервиса нотификаций
-//        notificationSender.sendToNotificationMicroservice(
+//        sendToNotificationMicroservice(
 //                updated.getCreatedBy(),
-//                new NotificationCreationDto(
-//                        updated.getCreatedBy(),
-//                        updated.getId(),
-//                        NotificationType.STATUS_CHANGE
-//                ));
+//                updated.getId(),
+//                NotificationType.STATUS_CHANGE
+//        );
 
-
-        return toResponse(updated);
+        return mapper.toResponse(updated);
     }
 
     @Transactional
     public TicketResponse assign(UUID id, AssignTicketRequest assigneeId) {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
-        checkNotClosed(ticket);
 
         if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
             throw new InvalidStateException("Cannot assign closed ticket");
@@ -186,16 +182,28 @@ public class TicketService {
         ticket.setAssigneeId(assigneeId.getAssigneeId())
                 .setUpdatedAt(Instant.now());
         TicketEntity assigned = repository.save(ticket);
-// отложено из-за проблем сервиса нотификаций
-//        notificationSender.sendToNotificationMicroservice(
-//                assigned.getCreatedBy(),
-//                new NotificationCreationDto(
-//                        assigned.getCreatedBy(),
-//                        assigned.getId(),
-//                        NotificationType.ASSIGNMENT
-//                ));
 
-        return toResponse(assigned);
+//        sendToNotificationMicroservice(
+//                assigned.getCreatedBy(),
+//                assigned.getId(),
+//                NotificationType.ASSIGNMENT
+//        );
+
+        return mapper.toResponse(assigned);
+    }
+
+    private void sendToNotificationMicroservice(
+            UUID toUserId,
+            UUID ticketId,
+            NotificationType type
+    ){
+        notificationSender.sendToNotificationMicroservice(
+            toUserId,
+            new NotificationCreationDto(
+                    toUserId,
+                    ticketId,
+                    type
+            ));
     }
 
     private void checkNotClosed(TicketEntity ticket) {
@@ -204,18 +212,4 @@ public class TicketService {
         }
     }
 
-    // mapper - ИСПОЛЬЗОВАТЬ БИБЛИОТЕКУ mapstruct
-    private TicketResponse toResponse(TicketEntity entity) {
-        return TicketResponse.builder()
-                .id(entity.getId())
-                .subject(entity.getSubject())
-                .description(entity.getDescription())
-                .status(entity.getStatus())
-                .categoryId(entity.getCategoryId())
-                .createdBy(entity.getCreatedBy())
-                .assigneeId(entity.getAssigneeId())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .build();
-    }
 }
