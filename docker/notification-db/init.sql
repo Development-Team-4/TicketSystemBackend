@@ -6,7 +6,7 @@ CREATE TABLE notifications
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id uuid NOT NULL,
     ticket_id uuid NOT NULL,
-    type VARCHAR(50) NOT NOT NULL CHECK (type IN ('ASSIGNMENT', 'COMMENT', 'STATUS_CHANGE')),
+    type VARCHAR(50) NOT NULL CHECK (type IN ('ASSIGNMENT', 'COMMENT', 'STATUS_CHANGE')),
     title text NOT NULL,
     message text NOT NULL,
     sent boolean DEFAULT FALSE,

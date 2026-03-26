@@ -34,7 +34,7 @@ public class NotificationController {
      *
      * @return список уведомлений
      */
-    @GetMapping("/get")
+    @GetMapping
     @Operation(summary = "Получить уведомления",
             description = "Возвращает уведомления всех пользователей. Доступно только администраторам")
     @ApiResponses(value = {
@@ -62,12 +62,12 @@ public class NotificationController {
      *
      * @param dto DTO для добавления нового уведомления
      */
-    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Получить уведомления пользователя",
             description = "Получение всех уведомления конкретного пользователя")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "Успешное получение уведомлений пользователя",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -78,14 +78,14 @@ public class NotificationController {
                                             [
                                                 {
                                                     "id": "550e8400-e29b-41d4-a716-446655440000",
-                                                    "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                    "ticket_id": "550e8400-e29b-41d4-a716-446655440002",
+                                                    "userId": "550e8400-e29b-41d4-a716-446655440001",
+                                                    "ticketId": "550e8400-e29b-41d4-a716-446655440002",
                                                     "title": "Новый комментарий",
                                                     "type": "COMMENT",
                                                     "message": "К Вашему тикету добавлен новый комментарий",
                                                     "sent": true,
-                                                    "created_at": "2024-01-15T10:30:00Z",
-                                                    "updated_at": "2024-01-15T10:30:00Z"
+                                                    "createdAt": "2024-01-15T10:30:00Z",
+                                                    "updatedAt": "2024-01-15T10:30:00Z"
                                                 }
                                             ]
                                             """
@@ -95,10 +95,6 @@ public class NotificationController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Некорректный формат ID пользователя"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Пользователь не найден"
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -116,8 +112,8 @@ public class NotificationController {
                                     name = "Уведомление о комментарии",
                                     value = """
                                             {
-                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
+                                                "userId": "550e8400-e29b-41d4-a716-446655440001",
+                                                "ticketId": "e1238262-8f77-43a2-8df1-90266c2d25f2",
                                                 "type": "COMMENT"
                                             }
                                             """
@@ -126,8 +122,8 @@ public class NotificationController {
                                     name = "Уведомление об изменении статуса",
                                     value = """
                                             {
-                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
+                                                "userId": "550e8400-e29b-41d4-a716-446655440001",
+                                                "ticketId": "e1238262-8f77-43a2-8df1-90266c2d25f2",
                                                 "type": "STATUS_CHANGE"
                                             }
                                             """
@@ -136,8 +132,8 @@ public class NotificationController {
                                     name = "Уведомление о назначении",
                                     value = """
                                             {
-                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
+                                                "userId": "550e8400-e29b-41d4-a716-446655440001",
+                                                "ticketId": "e1238262-8f77-43a2-8df1-90266c2d25f2",
                                                 "type": "ASSIGNMENT"
                                             }
                                             """
@@ -145,9 +141,9 @@ public class NotificationController {
                     }
             )
             @RequestBody NotificationCreationDto dto) throws NotificationFormatException {
-        this.notificationService.addNewNotification(dto);
+        NotificationDto notification = this.notificationService.addNewNotification(dto);
 
-        return ResponseEntity.status(201).build();
+        return ResponseEntity.status(201).body(notification);
     }
 
     /**
@@ -171,8 +167,8 @@ public class NotificationController {
                                             [
                                                 {
                                                     "id": "550e8400-e29b-41d4-a716-446655440000",
-                                                    "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                    "ticket_id": "550e8400-e29b-41d4-a716-446655440002",
+                                                    "userId": "550e8400-e29b-41d4-a716-446655440001",
+                                                    "ticketId": "550e8400-e29b-41d4-a716-446655440002",
                                                     "title": "Новый комментарий"
                                                     "type": "COMMENT",
                                                     "message": "К Вашему тикету добавлен новый комментарий",
@@ -188,10 +184,6 @@ public class NotificationController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Некорректный формат ID пользователя"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Пользователь не найден"
             ),
             @ApiResponse(
                     responseCode = "500",

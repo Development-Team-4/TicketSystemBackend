@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -46,4 +47,16 @@ public class NotificationDto {
 
     @JsonProperty(value = "updatedAt")
     private Timestamp updatedAt;
+
+    public NotificationDto(UUID userId, UUID ticketId, NotificationType type) {
+        this.userId = userId;
+        this.ticketId = ticketId;
+        this.type = type;
+
+        this.createdAt = Timestamp.from(Instant.now());
+        this.updatedAt = Timestamp.from(Instant.now());
+        this.sent = true;
+        this.title = type.getTitle();
+        this.message = type.getMessage();
+    }
 }
