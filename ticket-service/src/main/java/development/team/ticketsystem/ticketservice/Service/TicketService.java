@@ -161,11 +161,11 @@ public class TicketService {
                 .setUpdatedAt(Instant.now());
         TicketEntity updated = repository.save(ticket);
 
-//        sendToNotificationMicroservice(
-//                updated.getCreatedBy(),
-//                updated.getId(),
-//                NotificationType.STATUS_CHANGE
-//        );
+        sendToNotificationMicroservice(
+                updated.getCreatedBy(),
+                updated.getId(),
+                NotificationType.STATUS_CHANGE
+        );
 
         return mapper.toResponse(updated);
     }
@@ -183,11 +183,11 @@ public class TicketService {
                 .setUpdatedAt(Instant.now());
         TicketEntity assigned = repository.save(ticket);
 
-//        sendToNotificationMicroservice(
-//                assigned.getCreatedBy(),
-//                assigned.getId(),
-//                NotificationType.ASSIGNMENT
-//        );
+        sendToNotificationMicroservice(
+                assigned.getCreatedBy(),
+                assigned.getId(),
+                NotificationType.ASSIGNMENT
+        );
 
         return mapper.toResponse(assigned);
     }

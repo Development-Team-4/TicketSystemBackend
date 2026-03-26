@@ -11,7 +11,6 @@ import development.team.ticketsystem.ticketservice.Mappers.CommentMapper;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,15 +53,15 @@ public class CommentService {
                 .build();
 
         CommentEntity saved = repository.save(comment);
-        // отложено из-за проблем сервиса нотификаций
-//        notificationSender.sendToNotificationMicroservice (
-//                ticket.getCreatedBy(),
-//        new NotificationCreationDto(
-//                ticket.getCreatedBy(),
-//                ticket.getId(),
-//                NotificationType.STATUS_CHANGE
-//        ));
 
+        notificationSender.sendToNotificationMicroservice (
+            ticket.getCreatedBy(),
+            new NotificationCreationDto(
+                    ticket.getCreatedBy(),
+                    ticket.getId(),
+                    NotificationType.STATUS_CHANGE
+            )
+        );
 
         return mapper.toResponse(saved);
     }
