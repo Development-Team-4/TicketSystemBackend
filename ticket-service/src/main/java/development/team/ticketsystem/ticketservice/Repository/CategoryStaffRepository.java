@@ -16,4 +16,6 @@ public interface CategoryStaffRepository
     List<CategoryStaffEntity> findByCategoryId(UUID categoryId);
 
     boolean existsByCategoryIdAndUserId(UUID categoryId, UUID userId);
+
+    void deleteByCategoryIdAndUserId(UUID categoryId, UUID userId);
 }

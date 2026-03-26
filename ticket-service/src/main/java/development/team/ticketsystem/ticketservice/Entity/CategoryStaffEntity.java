@@ -1,10 +1,7 @@
 package development.team.ticketsystem.ticketservice.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -12,6 +9,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "category_staff")
 @IdClass(development.team.ticketsystem.ticketservice.Entity.CategoryStaffId.class)
