@@ -11,6 +11,7 @@ import development.team.ticketsystem.ticketservice.Mappers.CommentMapper;
 import development.team.ticketsystem.ticketservice.Repository.CommentRepository;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,9 +37,10 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request) {
+    public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request)
+            throws EntityNotFoundException, InvalidStateException {
         TicketEntity ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
         if (ticket.getStatus() == TicketStatus.CLOSED) {
             throw new InvalidStateException("Cannot comment CLOSED ticket");
@@ -54,13 +56,13 @@ public class CommentService {
 
         CommentEntity saved = repository.save(comment);
 
-        notificationSender.sendToNotificationMicroservice (
-            ticket.getCreatedBy(),
-            new NotificationCreationDto(
-                    ticket.getCreatedBy(),
-                    ticket.getId(),
-                    NotificationType.STATUS_CHANGE
-            )
+        notificationSender.sendToNotificationMicroservice(
+                ticket.getCreatedBy(),
+                new NotificationCreationDto(
+                        ticket.getCreatedBy(),
+                        ticket.getId(),
+                        NotificationType.STATUS_CHANGE
+                )
         );
 
         return mapper.toResponse(saved);

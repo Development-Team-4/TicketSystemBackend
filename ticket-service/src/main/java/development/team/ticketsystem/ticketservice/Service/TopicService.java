@@ -29,8 +29,8 @@ public class TopicService {
                 .toList();
     }
 
-    public TopicResponse create(UserRole role, CreateTopicRequest request) {
-        if (role != UserRole.ADMIN) {
+    public TopicResponse create(UserRole role, CreateTopicRequest request) throws AccessDeniedException {
+        if (!role.equals(UserRole.ADMIN)) {
             throw new AccessDeniedException("Only ADMIN can create topic");
         }
 
@@ -44,8 +44,8 @@ public class TopicService {
     }
 
     @Transactional
-    public TopicResponse update(UserRole role, UUID id, CreateTopicRequest request) {
-        if (role != UserRole.ADMIN) {
+    public TopicResponse update(UserRole role, UUID id, CreateTopicRequest request) throws AccessDeniedException {
+        if (!role.equals(UserRole.ADMIN)) {
             throw new AccessDeniedException("Only ADMIN can update topic");
         }
 

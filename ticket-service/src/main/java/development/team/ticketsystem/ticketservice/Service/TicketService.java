@@ -4,6 +4,7 @@ import development.team.ticketsystem.ticketservice.DTO.tickets.*;
 import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.Exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.Exceptions.InvalidStateException;
+import development.team.ticketsystem.ticketservice.Exceptions.NotificationServiceException;
 import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationType;
 import development.team.ticketsystem.ticketservice.Mappers.TicketMapper;
@@ -63,7 +64,7 @@ public class TicketService {
             String status,
             Instant createdAfter,
             Instant createdBefore
-    ) {
+    ) throws AccessDeniedException {
 
         if (role.equals(UserRole.SUPPORT)) {
             if (categoryId == null) {
@@ -101,7 +102,7 @@ public class TicketService {
                 .toList();
     }
 
-    public TicketResponse getById(UUID id) {
+    public TicketResponse getById(UUID id) throws EntityNotFoundException {
         return mapper.toResponse(repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
     }
@@ -111,7 +112,8 @@ public class TicketService {
             UserRole role,
             UUID userId,
             UUID id,
-            UpdateTicketRequest request) {
+            UpdateTicketRequest request
+    ) throws EntityNotFoundException, AccessDeniedException {
         TicketEntity existing = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
         checkNotClosed(existing);
@@ -129,9 +131,9 @@ public class TicketService {
     }
 
     @Transactional
-    public void delete(UserRole role, UUID userId, UUID id) {
+    public void delete(UserRole role, UUID userId, UUID id) throws EntityNotFoundException, InvalidStateException {
         TicketEntity ticket = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
         if (ticket.getStatus().equals(TicketStatus.OPEN)) {
             throw new InvalidStateException("Only OPEN tickets can be deleted");
@@ -144,7 +146,8 @@ public class TicketService {
     }
 
     @Transactional
-    public TicketResponse updateStatus(UUID id, UpdateStatusRequest request) {
+    public TicketResponse updateStatus(UUID id, UpdateStatusRequest request)
+            throws EntityNotFoundException, InvalidStateException {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
         checkNotClosed(ticket);
@@ -171,7 +174,8 @@ public class TicketService {
     }
 
     @Transactional
-    public TicketResponse assign(UUID id, AssignTicketRequest assigneeId) {
+    public TicketResponse assign(UUID id, AssignTicketRequest assigneeId)
+            throws EntityNotFoundException, InvalidStateException {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
@@ -196,17 +200,17 @@ public class TicketService {
             UUID toUserId,
             UUID ticketId,
             NotificationType type
-    ){
+    ) throws NotificationServiceException {
         notificationSender.sendToNotificationMicroservice(
-            toUserId,
-            new NotificationCreationDto(
-                    toUserId,
-                    ticketId,
-                    type
-            ));
+                toUserId,
+                new NotificationCreationDto(
+                        toUserId,
+                        ticketId,
+                        type
+                ));
     }
 
-    private void checkNotClosed(TicketEntity ticket) {
+    private void checkNotClosed(TicketEntity ticket) throws InvalidStateException {
         if (ticket.getStatus() == TicketStatus.CLOSED) {
             throw new InvalidStateException("Ticket is CLOSED");
         }

@@ -5,7 +5,6 @@ import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.d
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -26,7 +25,7 @@ public class NotificationSender {
     public void sendToNotificationMicroservice(
             UUID toUserId,
             NotificationCreationDto request
-    ) {
+    ) throws NotificationServiceException {
         String url = notificationServiceUrl + "/notifications/" + toUserId;
 
         try {
