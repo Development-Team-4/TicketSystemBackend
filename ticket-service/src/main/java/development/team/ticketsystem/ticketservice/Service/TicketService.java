@@ -3,6 +3,8 @@ package development.team.ticketsystem.ticketservice.Service;
 import development.team.ticketsystem.ticketservice.DTO.tickets.*;
 import development.team.ticketsystem.ticketservice.Entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.Exceptions.InvalidStateException;
+import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationCreationDto;
+import development.team.ticketsystem.ticketservice.ForNotificationMicroservice.dto.NotificationType;
 import development.team.ticketsystem.ticketservice.Repository.Specification.TicketSpecification;
 import development.team.ticketsystem.ticketservice.Repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.TicketStatus;
@@ -26,6 +28,7 @@ public class TicketService {
 
     private final TicketRepository repository;
     private final CategoryStaffService categoryStaffService;
+    private final NotificationSender notificationSender;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -156,6 +159,17 @@ public class TicketService {
         ticket.setStatus(request.getStatus())
                 .setUpdatedAt(Instant.now());
         TicketEntity updated = repository.save(ticket);
+
+ // отложено из-за проблем сервиса нотификаций
+//        notificationSender.sendToNotificationMicroservice(
+//                updated.getCreatedBy(),
+//                new NotificationCreationDto(
+//                        updated.getCreatedBy(),
+//                        updated.getId(),
+//                        NotificationType.STATUS_CHANGE
+//                ));
+
+
         return toResponse(updated);
     }
 
@@ -172,6 +186,15 @@ public class TicketService {
         ticket.setAssigneeId(assigneeId.getAssigneeId())
                 .setUpdatedAt(Instant.now());
         TicketEntity assigned = repository.save(ticket);
+// отложено из-за проблем сервиса нотификаций
+//        notificationSender.sendToNotificationMicroservice(
+//                assigned.getCreatedBy(),
+//                new NotificationCreationDto(
+//                        assigned.getCreatedBy(),
+//                        assigned.getId(),
+//                        NotificationType.ASSIGNMENT
+//                ));
+
         return toResponse(assigned);
     }
 
