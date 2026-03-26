@@ -3,6 +3,7 @@ package development.team.ticketsystem.ticketservice.Controllers;
 import development.team.ticketsystem.ticketservice.DTO.comments.CommentResponse;
 import development.team.ticketsystem.ticketservice.DTO.comments.CreateCommentRequest;
 import development.team.ticketsystem.ticketservice.Service.CommentService;
+import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -310,6 +311,8 @@ public class CommentController {
     @PostMapping("/tickets/{ticketId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentResponse addComment(
+            @RequestHeader("X-User-Id") UUID authorId,
+
             @Parameter(
                     description = "Уникальный идентификатор тикета, к которому добавляется комментарий",
                     example = "550e8400-e29b-41d4-a716-446655440000",
@@ -356,7 +359,7 @@ public class CommentController {
         // временно authorId = 8f1e8e6e-3497-4690-bfc2-c7292e7438f1 (потом из JWT)
         return service.create(
                 ticketId,
-                UUID.fromString("8f1e8e6e-3497-4690-bfc2-c7292e7438f1"),
+                authorId,
                 request
         );
     }
