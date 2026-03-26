@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Notification {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
@@ -28,19 +28,19 @@ public class Notification {
     @Enumerated(value = EnumType.STRING)
     private NotificationType type;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "message")
+    @Column(name = "message", nullable = false)
     private String message;
 
-    @Column(name = "sent")
+    @Column(name = "sent", columnDefinition = "default false")
     private Boolean sent;
 
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false, columnDefinition = "default now()")
     private Timestamp createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false, columnDefinition = "default now()")
     private Timestamp updatedAt;
 
     public Notification(UUID userId, UUID ticketId, NotificationType type) {
