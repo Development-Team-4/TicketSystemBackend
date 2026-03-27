@@ -1,9 +1,13 @@
 package development.team.ticketsystem.iftests.configuration;
 
+import org.springframework.http.HttpMethod;
+
 public interface TestScenarioPositive {
     String getJsonMessageType();
 
-    String getMethod();
+    String getUrlFieldName();
 
-    String getAttribute();
+    boolean isRequiresId();
+
+    HttpMethod getHttpMethod();
 }

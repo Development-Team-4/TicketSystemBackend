@@ -11,44 +11,33 @@ import org.springframework.context.annotation.Configuration;
 public class RestConfiguration {
     public static final String BASIC_URL = "http://localhost:";
 
-    private TicketUrls ticketUrls;
-    private NotificationUrls notificationUrls;
+    @Value("${tests.urls.ticket.port}")
+    private String ticketPort;
 
-    @Getter
-    @Setter
-    public static class TicketUrls {
-        @Value("{tests.urls.ticket.port}")
-        private String port;
+    @Value("${tests.urls.ticket.common-url}")
+    private String ticketCommonUrl;
 
-        @Value("{tests.urls.ticket.common-url}")
-        private String commonUrl;
+    @Value("${tests.urls.ticket.create-comment}")
+    private String createCommentUrl;
 
-        @Value("{tests.urls.ticket.create-comment}")
-        private String createComment;
+    @Value("${tests.urls.ticket.change-status}")
+    private String changeStatusUrl;
 
-        @Value("{tests.urls.ticket.change-status}")
-        private String changeStatus;
+    @Value("${tests.urls.ticket.assignee-ticket}")
+    private String assigneeTicketUrl;
 
-        @Value("{tests.urls.ticket.assignee-ticket}")
-        private String assigneeTicket;
+    @Value("${tests.urls.ticket.create-ticket}")
+    private String createTicketUrl;
 
-        @Value("{tests.urls.ticket.change-ticket}")
-        private String createTicket;
+    @Value("${tests.urls.ticket.update-ticket}")
+    private String updateTicketUrl;
 
-        @Value("{tests.urls.ticket.update-ticket}")
-        private String updateTicket;
-    }
+    @Value("${tests.urls.notification.port}")
+    private String notificationPort;
 
-    @Getter
-    @Setter
-    public static class NotificationUrls {
-        @Value("{tests.urls.notification.port}")
-        private String port;
+    @Value("${tests.urls.notification.common-url}")
+    private String notificationCommonUrl;
 
-        @Value("{tests.urls.notification.common-url}")
-        private String commonUrl;
-
-        @Value("{tests.urls.notification.get-all-notifications}")
-        private String getAllNotifications;
-    }
+    @Value("${tests.urls.notification.get-all-notifications}")
+    private String getAllNotificationsUrl;
 }
