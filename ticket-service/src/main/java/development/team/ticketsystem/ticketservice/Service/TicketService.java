@@ -87,7 +87,7 @@ public class TicketService {
             }
         }
 
-
+// Можно заменить спецификацию на критерии АПИ
         return repository.findAll(
                         TicketSpecification.filter(
                                 categoryId,
@@ -118,7 +118,7 @@ public class TicketService {
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
         checkNotClosed(existing);
 
-        if (role == UserRole.USER && !existing.getCreatedBy().equals(userId)) {
+        if (!role.equals(UserRole.ADMIN) && !existing.getCreatedBy().equals(userId)) {
             throw new AccessDeniedException("Cannot edit other user's ticket");
         }
 
@@ -164,6 +164,7 @@ public class TicketService {
                 .setUpdatedAt(Instant.now());
         TicketEntity updated = repository.save(ticket);
 
+        // Вынести отдельно в метод без транзакции
         sendToNotificationMicroservice(
                 updated.getCreatedBy(),
                 updated.getId(),
@@ -187,6 +188,7 @@ public class TicketService {
                 .setUpdatedAt(Instant.now());
         TicketEntity assigned = repository.save(ticket);
 
+        // Вынести отдельно в метод без транзакции
         sendToNotificationMicroservice(
                 assigned.getCreatedBy(),
                 assigned.getId(),

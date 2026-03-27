@@ -56,12 +56,13 @@ public class CommentService {
 
         CommentEntity saved = repository.save(comment);
 
+        // Вынести отдельно в метод без транзакции
         notificationSender.sendToNotificationMicroservice(
                 ticket.getCreatedBy(),
                 new NotificationCreationDto(
                         ticket.getCreatedBy(),
                         ticket.getId(),
-                        NotificationType.STATUS_CHANGE
+                        NotificationType.COMMENT
                 )
         );
 

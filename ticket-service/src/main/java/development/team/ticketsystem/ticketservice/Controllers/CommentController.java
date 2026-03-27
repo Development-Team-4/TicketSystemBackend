@@ -356,7 +356,6 @@ public class CommentController {
             )
             @RequestBody CreateCommentRequest request
     ) {
-        // временно authorId = 8f1e8e6e-3497-4690-bfc2-c7292e7438f1 (потом из JWT)
         return service.create(
                 ticketId,
                 authorId,

@@ -42,8 +42,7 @@ CREATE TABLE tickets
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     subject VARCHAR(2000) NOT NULL,
     description VARCHAR(2000),
-    status VARCHAR(50) NOT NULL
-        CHECK (status IN ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED')),
+    status VARCHAR(50) NOT NULL,
 
     category_id uuid NOT NULL,
     created_by  uuid NOT NULL,
