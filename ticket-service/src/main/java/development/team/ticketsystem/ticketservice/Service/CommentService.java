@@ -36,8 +36,28 @@ public class CommentService {
                 .toList();
     }
 
-    @Transactional
+
     public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request)
+            throws EntityNotFoundException, InvalidStateException {
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        CommentEntity saved = createCommentWithTransaction(ticketId, authorId, request);
+
+        notificationSender.sendToNotificationMicroservice(
+                ticket.getCreatedBy(),
+                new NotificationCreationDto(
+                        ticket.getCreatedBy(),
+                        ticket.getId(),
+                        NotificationType.COMMENT
+                )
+        );
+
+        return mapper.toResponse(saved);
+    }
+
+    @Transactional
+    private CommentEntity createCommentWithTransaction(UUID ticketId, UUID authorId, CreateCommentRequest request)
             throws EntityNotFoundException, InvalidStateException {
         TicketEntity ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
@@ -54,19 +74,7 @@ public class CommentService {
                 .createdAt(Instant.now())
                 .build();
 
-        CommentEntity saved = repository.save(comment);
-
-        // Вынести отдельно в метод без транзакции
-        notificationSender.sendToNotificationMicroservice(
-                ticket.getCreatedBy(),
-                new NotificationCreationDto(
-                        ticket.getCreatedBy(),
-                        ticket.getId(),
-                        NotificationType.COMMENT
-                )
-        );
-
-        return mapper.toResponse(saved);
+        return repository.save(comment);
     }
 
 }

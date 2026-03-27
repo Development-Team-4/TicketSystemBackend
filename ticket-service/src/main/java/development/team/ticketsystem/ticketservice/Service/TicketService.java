@@ -145,9 +145,56 @@ public class TicketService {
         repository.deleteById(id);
     }
 
-    @Transactional
     public TicketResponse updateStatus(UUID id, UpdateStatusRequest request)
             throws EntityNotFoundException, InvalidStateException {
+
+        TicketEntity updated = updateStatusWithTransaction(id, request);
+
+        sendToNotificationMicroservice(
+                updated.getCreatedBy(),
+                updated.getId(),
+                NotificationType.STATUS_CHANGE
+        );
+
+        return mapper.toResponse(updated);
+    }
+
+
+    public TicketResponse assign(UUID id, AssignTicketRequest assigneeId)
+            throws EntityNotFoundException, InvalidStateException {
+
+        TicketEntity assigned = assignTicketWithTransaction(id, assigneeId);
+
+        sendToNotificationMicroservice(
+                assigned.getCreatedBy(),
+                assigned.getId(),
+                NotificationType.ASSIGNMENT
+        );
+
+        return mapper.toResponse(assigned);
+    }
+
+    @Transactional
+    private TicketEntity assignTicketWithTransaction(UUID id, AssignTicketRequest assigneeId)
+            throws EntityNotFoundException, InvalidStateException {
+
+        TicketEntity ticket = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
+            throw new InvalidStateException("Cannot assign closed ticket");
+        }
+
+        ticket.setAssigneeId(assigneeId.getAssigneeId())
+                .setUpdatedAt(Instant.now());
+
+        return repository.save(ticket);
+    }
+
+    @Transactional
+    private TicketEntity updateStatusWithTransaction(UUID id, UpdateStatusRequest request)
+            throws EntityNotFoundException, InvalidStateException {
+
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
         checkNotClosed(ticket);
@@ -162,40 +209,8 @@ public class TicketService {
 
         ticket.setStatus(request.getStatus())
                 .setUpdatedAt(Instant.now());
-        TicketEntity updated = repository.save(ticket);
 
-        // Вынести отдельно в метод без транзакции
-        sendToNotificationMicroservice(
-                updated.getCreatedBy(),
-                updated.getId(),
-                NotificationType.STATUS_CHANGE
-        );
-
-        return mapper.toResponse(updated);
-    }
-
-    @Transactional
-    public TicketResponse assign(UUID id, AssignTicketRequest assigneeId)
-            throws EntityNotFoundException, InvalidStateException {
-        TicketEntity ticket = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
-
-        if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
-            throw new InvalidStateException("Cannot assign closed ticket");
-        }
-
-        ticket.setAssigneeId(assigneeId.getAssigneeId())
-                .setUpdatedAt(Instant.now());
-        TicketEntity assigned = repository.save(ticket);
-
-        // Вынести отдельно в метод без транзакции
-        sendToNotificationMicroservice(
-                assigned.getCreatedBy(),
-                assigned.getId(),
-                NotificationType.ASSIGNMENT
-        );
-
-        return mapper.toResponse(assigned);
+        return repository.save(ticket);
     }
 
     private void sendToNotificationMicroservice(
