@@ -1,0 +1,21 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: tests-module
+
+tests:
+  urls:
+    ticket:
+      port: 8084
+      common-url: "/tickets"
+      create-comment: "/%s/comments"
+      change-status: "/%s/status"
+      assignee-ticket: "/%s/assignee"
+      create-ticket: ""
+      update-ticket: ""
+    notification:
+      port: 8083
+      common-url: "/notifications"
+      get-all-notifications: "/get"
