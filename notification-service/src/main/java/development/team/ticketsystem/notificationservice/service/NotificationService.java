@@ -77,7 +77,17 @@ public class NotificationService {
      *
      * @param dto DTO для создания уведомления
      */
-    private Notification createNotificationFromDto(NotificationCreationDto dto) {
+    private Notification createNotificationFromDto(NotificationCreationDto dto) throws NotificationFormatException {
+        if (dto.getUserId() == null) {
+            throw new NotificationFormatException("userId не может быть null");
+        }
+        if (dto.getTicketId() == null) {
+            throw new NotificationFormatException("ticketId не может быть null");
+        }
+        if (dto.getType() == null) {
+            throw new NotificationFormatException("notification не может быть null");
+        }
+
         return new Notification(
                 dto.getUserId(),
                 dto.getTicketId(),
