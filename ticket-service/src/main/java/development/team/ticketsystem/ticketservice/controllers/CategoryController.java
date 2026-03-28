@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,23 +54,7 @@ public class CategoryController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CategoryResponse.class)),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            [
-                                              {
-                                                "id": "550e8400-e29b-41d4-a716-446655440000",
-                                                "topicId": "660e8400-e29b-41d4-a716-446655440001",
-                                                "name": "Проблемы с авторизацией",
-                                                "description": "Категория для тикетов, связанных с входом в систему"
-                                              },
-                                              {
-                                                "id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "topicId": "660e8400-e29b-41d4-a716-446655440001",
-                                                "name": "Сбои в работе сервиса",
-                                                "description": "Категория для тикетов о недоступности или сбоях сервиса"
-                                              }
-                                            ]
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -77,17 +62,10 @@ public class CategoryController {
                     responseCode = "404",
                     description = "Тема с указанным ID не найдена",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Topic not found with id: 550e8400-e29b-41d4-a716-446655440000",
-                                              "path": "/topics/550e8400-e29b-41d4-a716-446655440000/categories"
-                                            }
-                                            """
+                                    name = "Объект не найден"
                             )
                     )
             ),
@@ -95,28 +73,28 @@ public class CategoryController {
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 401,
-                                              "error": "Unauthorized",
-                                              "message": "Full authentication is required to access this resource",
-                                              "path": "/topics/550e8400-e29b-41d4-a716-446655440000/categories"
-                                            }
-                                            """
+                                    name = "Пользователь не авторизован"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя недостаточно прав для просмотра категорий этой темы.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @GetMapping("/topics/{topicId}/categories")
@@ -152,15 +130,7 @@ public class CategoryController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CategoryResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440000",
-                                              "topicId": "660e8400-e29b-41d4-a716-446655440001",
-                                              "name": "Проблемы с авторизацией",
-                                              "description": "Категория для тикетов, связанных с входом в систему"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -168,33 +138,36 @@ public class CategoryController {
                     responseCode = "404",
                     description = "Категория с указанным ID не найдена",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Category not found with id: 550e8400-e29b-41d4-a716-446655440000",
-                                              "path": "/categories/550e8400-e29b-41d4-a716-446655440000"
-                                            }
-                                            """
+                                    name = "Нет категории с таким ID"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя недостаточно прав для просмотра этой категории.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @GetMapping("/categories/{id}")
@@ -234,15 +207,7 @@ public class CategoryController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CategoryResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440002",
-                                              "topicId": "660e8400-e29b-41d4-a716-446655440001",
-                                              "name": "Вопросы по API",
-                                              "description": "Категория для вопросов, связанных с использованием API"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -250,79 +215,47 @@ public class CategoryController {
                     responseCode = "400",
                     description = "Некорректные данные запроса (например, пустое название или превышение максимальной длины)",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Пустое название",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Category name cannot be empty",
-                                                      "path": "/topics/660e8400-e29b-41d4-a716-446655440001/categories"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Дубликат названия",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Category with name 'Проблемы с авторизацией' already exists in this topic",
-                                                      "path": "/topics/660e8400-e29b-41d4-a716-446655440001/categories"
-                                                    }
-                                                    """
-                                    )
-                            }
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Тема с указанным ID не найдена",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Topic not found with id: 550e8400-e29b-41d4-a716-446655440000",
-                                              "path": "/topics/550e8400-e29b-41d4-a716-446655440000/categories"
-                                            }
-                                            """
+                                    name = "Нет темы с указанными ID"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. Только администраторы могут создавать категории.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. Only ADMIN role can create categories",
-                                              "path": "/topics/660e8400-e29b-41d4-a716-446655440001/categories"
-                                            }
-                                            """
+                                    name = "Доступ запрещен"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PostMapping("/topics/{topicId}/categories")
@@ -342,16 +275,7 @@ public class CategoryController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CreateCategoryRequest.class),
-                            examples = @ExampleObject(
-                                    name = "Пример запроса",
-                                    value = """
-                                            {
-                                              "name": "Вопросы по API",
-                                              "description": "Категория для вопросов, связанных с использованием API"
-                                            }
-                                            """
-                            )
+                            schema = @Schema(implementation = CreateCategoryRequest.class)
                     )
             )
             @RequestBody CreateCategoryRequest request
@@ -382,15 +306,7 @@ public class CategoryController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CategoryResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440000",
-                                              "topicId": "660e8400-e29b-41d4-a716-446655440001",
-                                              "name": "Проблемы с авторизацией (обновлено)",
-                                              "description": "Категория для тикетов, связанных с входом в систему"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -398,79 +314,47 @@ public class CategoryController {
                     responseCode = "400",
                     description = "Некорректные данные запроса (например, пустое название)",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Пустое название",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Category name cannot be empty",
-                                                      "path": "/topics/660e8400-e29b-41d4-a716-446655440001/categories/550e8400-e29b-41d4-a716-446655440000"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Дубликат названия",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Category with name 'Вопросы по API' already exists in this topic",
-                                                      "path": "/topics/660e8400-e29b-41d4-a716-446655440001/categories/550e8400-e29b-41d4-a716-446655440000"
-                                                    }
-                                                    """
-                                    )
-                            }
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Категория с указанным ID не найдена",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Category not found with id: 550e8400-e29b-41d4-a716-446655440999",
-                                              "path": "/categories/550e8400-e29b-41d4-a716-446655440999"
-                                            }
-                                            """
+                                    name = "Нет категории с таки ID"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. Только администраторы и менеджеры могут обновлять категории.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. Only ADMIN role can update categories",
-                                              "path": "/categories/550e8400-e29b-41d4-a716-446655440000"
-                                            }
-                                            """
+                                    name = "Доступ запрещен"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PatchMapping("/categories/{id}")
@@ -489,17 +373,7 @@ public class CategoryController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CreateCategoryRequest.class),
-                            examples = {
-                                    @ExampleObject(
-                                            value = """
-                                                    {
-                                                      "name": "Проблемы с авторизацией (обновлено)",
-                                                      "description": "Обновленное описание категории"
-                                                    }
-                                                    """
-                                    )
-                            }
+                            schema = @Schema(implementation = CreateCategoryRequest.class)
                     )
             )
             @RequestBody CreateCategoryRequest request
@@ -539,19 +413,11 @@ public class CategoryController {
                     responseCode = "400",
                     description = "Некорректные данные запроса",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Категория не найдена",
-                                            value = """
-                                                {
-                                                  "timestamp": "2024-01-15T10:30:00Z",
-                                                  "status": 400,
-                                                  "error": "Bad Request",
-                                                  "message": "Category not found with id: 770e8400-e29b-41d4-a716-446655440999",
-                                                  "path": "/categories/770e8400-e29b-41d4-a716-446655440001/assign-staff"
-                                                }
-                                                """
+                                            name = "Категория не найдена"
                                     )
                             }
                     )
@@ -560,22 +426,26 @@ public class CategoryController {
                     responseCode = "403",
                     description = "Доступ запрещен. Только администратор может назначать сотрудников.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                        {
-                                          "timestamp": "2024-01-15T10:30:00Z",
-                                          "status": 403,
-                                          "error": "Forbidden",
-                                          "message": "Only ADMIN can assign staff",
-                                          "path": "/categories/770e8400-e29b-41d4-a716-446655440001/assign-staff"
-                                        }
-                                        """
+                                    name = "Доступ запрещен"
                             )
                     )
             ),
-            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+            @ApiResponse(responseCode = "401",
+                    description = "Пользователь не авторизован",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "500",
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
     })
     @PutMapping("categories/{id}/staff")
     public void assignStaffToCategory(
@@ -593,14 +463,7 @@ public class CategoryController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AssignStaffRequest.class),
-                            examples = @ExampleObject(
-                                    value = """
-                                        {
-                                          "staffId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3"
-                                        }
-                                        """
-                            )
+                            schema = @Schema(implementation = AssignStaffRequest.class)
                     )
             )
             @RequestBody AssignStaffRequest request
@@ -638,27 +501,33 @@ public class CategoryController {
                     responseCode = "404",
                     description = "Связь сотрудника с категорией не найдена",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                        {
-                                          "timestamp": "2024-01-15T10:30:00Z",
-                                          "status": 404,
-                                          "error": "Not Found",
-                                          "message": "Staff is not assigned to this category",
-                                          "path": "/categories/770e8400-e29b-41d4-a716-446655440001/staff/a3e8e6e-3497-4690-bfc2-c7292e7438f3"
-                                        }
-                                        """
+                                    name = "Сотрудник не относится к этой категории"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
-            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+            @ApiResponse(responseCode = "401",
+                    description = "Пользователь не авторизован",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )),
+            @ApiResponse(responseCode = "500",
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
     })
     @DeleteMapping("categories/{categoryId}/staff/{staffId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

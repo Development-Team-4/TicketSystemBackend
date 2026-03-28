@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
 import development.team.ticketsystem.ticketservice.service.TicketService;
 import development.team.ticketsystem.ticketservice.TicketStatus;
@@ -80,20 +81,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TicketResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440001",
-                                              "subject": "Не работает авторизация в личном кабинете",
-                                              "description": "При попытке войти в личный кабинет после ввода логина и пароля выдается ошибка 500 Internal Server Error",
-                                              "status": "OPEN",
-                                              "categoryId": "770e8400-e29b-41d4-a716-446655440001",
-                                              "createdBy": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                              "assigneeId": null,
-                                              "createdAt": "2024-01-15T10:30:00Z",
-                                              "updatedAt": "2024-01-15T10:30:00Z"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -101,43 +89,17 @@ public class TicketController {
                     responseCode = "400",
                     description = "Некорректные данные запроса",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Пустая тема",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Ticket subject cannot be empty",
-                                                      "path": "/tickets"
-                                                    }
-                                                    """
+                                            name = "Пустая тема"
                                     ),
                                     @ExampleObject(
-                                            name = "Пустое описание",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Ticket description cannot be empty",
-                                                      "path": "/tickets"
-                                                    }
-                                                    """
+                                            name = "Пустое описание"
                                     ),
                                     @ExampleObject(
-                                            name = "Категория не найдена",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Category not found with id: 770e8400-e29b-41d4-a716-446655440999",
-                                                      "path": "/tickets"
-                                                    }
-                                                    """
+                                            name = "Категория не найдена"
                                     )
                             }
                     )
@@ -145,11 +107,18 @@ public class TicketController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PostMapping
@@ -164,13 +133,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CreateTicketRequest.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "subject": "Не работает авторизация в личном кабинете",
-                                              "description": "При попытке войти в личный кабинет после ввода логина и пароля выдается ошибка 500 Internal Server Error",
-                                              "categoryId": "770e8400-e29b-41d4-a716-446655440001"
-                                            }
-                                            """
+                                    name = "Пример тела запроса"
                             )
                     )
             )
@@ -216,33 +179,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = TicketResponse.class)),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ со списком тикетов",
-                                    value = """
-                                            [
-                                              {
-                                                "id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "subject": "Не работает авторизация",
-                                                "description": "Ошибка при входе в систему",
-                                                "status": "OPEN",
-                                                "categoryId": "770e8400-e29b-41d4-a716-446655440001",
-                                                "createdBy": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                                "assigneeId": null,
-                                                "createdAt": "2024-01-15T10:30:00Z",
-                                                "updatedAt": "2024-01-15T10:30:00Z"
-                                              },
-                                              {
-                                                "id": "550e8400-e29b-41d4-a716-446655440002",
-                                                "subject": "Медленная работа приложения",
-                                                "description": "Приложение работает медленно после обновления",
-                                                "status": "IN_PROGRESS",
-                                                "categoryId": "770e8400-e29b-41d4-a716-446655440002",
-                                                "createdBy": "9f2e8e6e-3497-4690-bfc2-c7292e7438f2",
-                                                "assigneeId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
-                                                "createdAt": "2024-01-14T15:20:00Z",
-                                                "updatedAt": "2024-01-15T09:15:00Z"
-                                              }
-                                            ]
-                                            """
+                                    name = "Успешный ответ со списком тикетов"
                             )
                     )
             ),
@@ -250,31 +187,11 @@ public class TicketController {
                     responseCode = "400",
                     description = "Некорректные параметры фильтрации",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Некорректный формат даты",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Failed to convert 'createdAfter' with value: 'invalid-date'",
-                                                      "path": "/tickets"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Некорректный статус",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Invalid status value. Allowed values: OPEN, IN_PROGRESS, RESOLVED, CLOSED",
-                                                      "path": "/tickets"
-                                                    }
-                                                    """
+                                            name = "Некорректный формат даты"
                                     )
                             }
                     )
@@ -282,29 +199,29 @@ public class TicketController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. Недостаточно прав для использования выбранных фильтров.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. User does not have permission to filter by 'createdBy'",
-                                              "path": "/tickets?createdBy=8f1e8e6e-3497-4690-bfc2-c7292e7438f1"
-                                            }
-                                            """
+                                    name = "Недостаточно прав для использования указанных фильтров"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @GetMapping
@@ -393,19 +310,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TicketResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440001",
-                                              "subject": "Не работает авторизация в личном кабинете",
-                                              "description": "При попытке войти в личный кабинет после ввода логина и пароля выдается ошибка 500 Internal Server Error",
-                                              "status": "IN_PROGRESS",
-                                              "categoryId": "770e8400-e29b-41d4-a716-446655440001",
-                                              "createdBy": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                              "assigneeId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
-                                              "createdAt": "2024-01-15T10:30:00Z",
-                                              "updatedAt": "2024-01-15T14:20:00Z"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -413,46 +318,38 @@ public class TicketController {
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Ticket not found with id: 550e8400-e29b-41d4-a716-446655440999",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440999"
-                                            }
-                                            """
+                                    name = "Тикет не найден"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя нет прав на просмотр этого тикета.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. You don't have permission to view this ticket",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440001"
-                                            }
-                                            """
-                            )
+                                    name = "Недостаточно прав для просмотра"                            )
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @GetMapping("/{id}")
@@ -500,19 +397,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TicketResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440001",
-                                              "subject": "Не работает авторизация в личном кабинете (уточнено)",
-                                              "description": "При попытке войти в личный кабинет после ввода логина и пароля выдается ошибка 500 Internal Server Error. Ошибка возникает только в Chrome, в Firefox работает",
-                                              "status": "OPEN",
-                                              "categoryId": "770e8400-e29b-41d4-a716-446655440001",
-                                              "createdBy": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                              "assigneeId": null,
-                                              "createdAt": "2024-01-15T10:30:00Z",
-                                              "updatedAt": "2024-01-15T11:45:00Z"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -520,31 +405,14 @@ public class TicketController {
                     responseCode = "400",
                     description = "Некорректные данные запроса",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Пустая тема",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Ticket subject cannot be empty",
-                                                      "path": "/tickets/550e8400-e29b-41d4-a716-446655440001"
-                                                    }
-                                                    """
+                                            name = "Пустая тема"
                                     ),
                                     @ExampleObject(
-                                            name = "Пустое описание",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Ticket description cannot be empty",
-                                                      "path": "/tickets/550e8400-e29b-41d4-a716-446655440001"
-                                                    }
-                                                    """
+                                            name = "Пустое описание"
                                     )
                             }
                     )
@@ -552,21 +420,34 @@ public class TicketController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя нет прав на обновление этого тикета.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PutMapping("/{id}")
@@ -588,12 +469,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UpdateTicketRequest.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "subject": "Не работает авторизация в личном кабинете (уточнено)",
-                                              "description": "При попытке войти в личный кабинет после ввода логина и пароля выдается ошибка 500 Internal Server Error. Ошибка возникает только в Chrome, в Firefox работает"
-                                            }
-                                            """
+                                    name = "Пример тела запроса"
                             )
                     )
             )
@@ -628,39 +504,42 @@ public class TicketController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя нет прав на удаление этого тикета.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Невозможно удалить тикет (например, тикет уже обрабатывается)",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 409,
-                                              "error": "Conflict",
-                                              "message": "Cannot delete ticket with status IN_PROGRESS",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440001"
-                                            }
-                                            """
-                            )
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @DeleteMapping("/{id}")
@@ -715,19 +594,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TicketResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440001",
-                                              "subject": "Не работает авторизация",
-                                              "description": "Ошибка при входе в систему",
-                                              "status": "IN_PROGRESS",
-                                              "categoryId": "770e8400-e29b-41d4-a716-446655440001",
-                                              "createdBy": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                              "assigneeId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
-                                              "createdAt": "2024-01-15T10:30:00Z",
-                                              "updatedAt": "2024-01-15T14:20:00Z"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -735,31 +602,14 @@ public class TicketController {
                     responseCode = "400",
                     description = "Некорректный статус или недопустимый переход",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Недопустимый переход статуса",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Invalid status transition from OPEN to RESOLVED",
-                                                      "path": "/tickets/550e8400-e29b-41d4-a716-446655440001/status"
-                                                    }
-                                                    """
+                                            name = "Недопустимый переход статуса"
                                     ),
                                     @ExampleObject(
-                                            name = "Некорректный статус",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Invalid status value. Allowed values: OPEN, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED",
-                                                      "path": "/tickets/550e8400-e29b-41d4-a716-446655440001/status"
-                                                    }
-                                                    """
+                                            name = "Некорректный статус"
                                     )
                             }
                     )
@@ -767,21 +617,34 @@ public class TicketController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя нет прав на изменение статуса этого тикета.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PutMapping("/{id}/status")
@@ -800,11 +663,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UpdateStatusRequest.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "status": "IN_PROGRESS"
-                                            }
-                                            """
+                                    name = "Пример тела запроса"
                             )
                     )
             )
@@ -844,19 +703,7 @@ public class TicketController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TicketResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440001",
-                                              "subject": "Не работает авторизация",
-                                              "description": "Ошибка при входе в систему",
-                                              "status": "OPEN",
-                                              "categoryId": "770e8400-e29b-41d4-a716-446655440001",
-                                              "createdBy": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                              "assigneeId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
-                                              "createdAt": "2024-01-15T10:30:00Z",
-                                              "updatedAt": "2024-01-15T14:20:00Z"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -864,38 +711,44 @@ public class TicketController {
                     responseCode = "400",
                     description = "Некорректный ID сотрудника",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 400,
-                                              "error": "Bad Request",
-                                              "message": "User not found with id: a3e8e6e-3497-4690-bfc2-c7292e7438f9",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440001/assignee"
-                                            }
-                                            """
+                                    name = "Сотрудник не найден"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. У пользователя нет прав на назначение исполнителя.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PutMapping("/{id}/assignee")
@@ -915,12 +768,7 @@ public class TicketController {
                             schema = @Schema(implementation = AssignTicketRequest.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Назначить сотрудника",
-                                            value = """
-                                                    {
-                                                      "assigneeId": "a3e8e6e-3497-4690-bfc2-c7292e7438f3"
-                                                    }
-                                                    """
+                                            name = "Назначить сотрудника"
                                     )
                             }
                     )

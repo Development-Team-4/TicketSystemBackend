@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.dto.topics.CreateTopicRequest;
 import development.team.ticketsystem.ticketservice.dto.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.service.TopicService;
@@ -59,31 +60,7 @@ public class TopicController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = TopicResponse.class)),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ со списком тем",
-                                    value = """
-                                            [
-                                              {
-                                                "id": "660e8400-e29b-41d4-a716-446655440001",
-                                                "name": "Техническая поддержка",
-                                                "description": "Вопросы, связанные с работой программного обеспечения, ошибками, сбоями"
-                                              },
-                                              {
-                                                "id": "660e8400-e29b-41d4-a716-446655440002",
-                                                "name": "Бухгалтерия",
-                                                "description": "Вопросы по оплате, счетам, возвратам, договорам"
-                                              },
-                                              {
-                                                "id": "660e8400-e29b-41d4-a716-446655440003",
-                                                "name": "Отдел кадров",
-                                                "description": "Вопросы по трудоустройству, отпускам, больничным листам"
-                                              },
-                                              {
-                                                "id": "660e8400-e29b-41d4-a716-446655440004",
-                                                "name": "IT инфраструктура",
-                                                "description": "Вопросы по оборудованию, сетям, доступу к ресурсам"
-                                              }
-                                            ]
-                                            """
+                                    name = "Успешный ответ со списком тем"
                             )
                     )
             ),
@@ -91,23 +68,17 @@ public class TopicController {
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 401,
-                                              "error": "Unauthorized",
-                                              "message": "Full authentication is required to access this resource",
-                                              "path": "/topics"
-                                            }
-                                            """
-                            )
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @GetMapping
@@ -140,14 +111,7 @@ public class TopicController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TopicResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "660e8400-e29b-41d4-a716-446655440005",
-                                              "name": "Юридический отдел",
-                                              "description": "Вопросы по договорам, правовым аспектам, юридическим консультациям"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -155,55 +119,17 @@ public class TopicController {
                     responseCode = "400",
                     description = "Некорректные данные запроса",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Пустое название",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Topic name cannot be empty",
-                                                      "path": "/topics"
-                                                    }
-                                                    """
+                                            name = "Пустое название"
                                     ),
                                     @ExampleObject(
-                                            name = "Название слишком длинное",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Topic name cannot exceed 255 characters",
-                                                      "path": "/topics"
-                                                    }
-                                                    """
+                                            name = "Название слишком длинное"
                                     ),
                                     @ExampleObject(
-                                            name = "Дубликат названия",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Topic with name 'Техническая поддержка' already exists",
-                                                      "path": "/topics"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Превышение длины описания",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Description cannot exceed 2000 characters",
-                                                      "path": "/topics"
-                                                    }
-                                                    """
+                                            name = "Превышение длины описания"
                                     )
                             }
                     )
@@ -212,17 +138,10 @@ public class TopicController {
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 401,
-                                              "error": "Unauthorized",
-                                              "message": "Full authentication is required to access this resource",
-                                              "path": "/topics"
-                                            }
-                                            """
+                                    name = "Пользователь не авторизован"
                             )
                     )
             ),
@@ -230,23 +149,20 @@ public class TopicController {
                     responseCode = "403",
                     description = "Доступ запрещен. Только администраторы могут создавать темы.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. Only ADMIN role can create topics",
-                                              "path": "/topics"
-                                            }
-                                            """
+                                    name = "Доступ запрещен"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PostMapping
@@ -262,12 +178,7 @@ public class TopicController {
                             schema = @Schema(implementation = CreateTopicRequest.class),
                             examples = {
                                     @ExampleObject(
-                                            value = """
-                                                    {
-                                                      "name": "Юридический отдел",
-                                                      "description": "Вопросы по договорам, правовым аспектам, юридическим консультациям"
-                                                    }
-                                                    """
+                                            name = "Пример тела запроса"
                                     )
                             }
                     )
@@ -301,14 +212,7 @@ public class TopicController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TopicResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "660e8400-e29b-41d4-a716-446655440001",
-                                              "name": "Техническая поддержка (обновлено)",
-                                              "description": "Вопросы, связанные с работой программного обеспечения, ошибками, сбоями системы"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -316,31 +220,11 @@ public class TopicController {
                     responseCode = "400",
                     description = "Некорректные данные запроса",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Пустое название",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Topic name cannot be empty",
-                                                      "path": "/topics/660e8400-e29b-41d4-a716-446655440001"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Дубликат названия",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Topic with name 'Бухгалтерия' already exists",
-                                                      "path": "/topics/660e8400-e29b-41d4-a716-446655440001"
-                                                    }
-                                                    """
+                                            name = "Пустое название"
                                     )
                             }
                     )
@@ -349,17 +233,10 @@ public class TopicController {
                     responseCode = "404",
                     description = "Тема с указанным ID не найдена",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Topic not found with id: 660e8400-e29b-41d4-a716-446655440999",
-                                              "path": "/topics/660e8400-e29b-41d4-a716-446655440999"
-                                            }
-                                            """
+                                    name = "Нет указанной темы"
                             )
                     )
             ),
@@ -367,41 +244,28 @@ public class TopicController {
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 401,
-                                              "error": "Unauthorized",
-                                              "message": "Full authentication is required to access this resource",
-                                              "path": "/topics/660e8400-e29b-41d4-a716-446655440001"
-                                            }
-                                            """
-                            )
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. Только администраторы могут обновлять темы.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. Only ADMIN role can update topics",
-                                              "path": "/topics/660e8400-e29b-41d4-a716-446655440001"
-                                            }
-                                            """
+                                    name = "Недостаточно прав на обновление темы"
                             )
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @PutMapping("/{id}")
@@ -423,12 +287,7 @@ public class TopicController {
                         schema = @Schema(implementation = CreateTopicRequest.class),
                         examples = {
                                 @ExampleObject(
-                                        value = """
-                                                {
-                                                  "name": "Техническая поддержка и IT сервис",
-                                                  "description": "Комплексная поддержка по всем IT вопросам, включая оборудование, ПО и сетевые ресурсы"
-                                                }
-                                                """
+                                        name = "Пример тела запроса"
                                 )
                         }
                 )

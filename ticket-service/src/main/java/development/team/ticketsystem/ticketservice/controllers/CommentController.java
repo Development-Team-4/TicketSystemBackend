@@ -2,6 +2,7 @@ package development.team.ticketsystem.ticketservice.controllers;
 
 import development.team.ticketsystem.ticketservice.dto.comments.CommentResponse;
 import development.team.ticketsystem.ticketservice.dto.comments.CreateCommentRequest;
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -59,32 +60,7 @@ public class CommentController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CommentResponse.class)),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ с комментариями",
-                                    value = """
-                                            [
-                                              {
-                                                "id": "770e8400-e29b-41d4-a716-446655440001",
-                                                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
-                                                "authorId": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                                "content": "Не могу войти в систему, пишет 'Неверный пароль', хотя пароль точно правильный",
-                                                "createdAt": "2024-01-15T09:15:00Z"
-                                              },
-                                              {
-                                                "id": "770e8400-e29b-41d4-a716-446655440002",
-                                                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
-                                                "authorId": "9f2e8e6e-3497-4690-bfc2-c7292e7438f2",
-                                                "content": "Попробуйте сбросить пароль через форму восстановления",
-                                                "createdAt": "2024-01-15T10:30:00Z"
-                                              },
-                                              {
-                                                "id": "770e8400-e29b-41d4-a716-446655440003",
-                                                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
-                                                "authorId": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                                "content": "Спасибо, помогло! Пароль сбросил, теперь всё работает",
-                                                "createdAt": "2024-01-15T11:45:00Z"
-                                              }
-                                            ]
-                                            """
+                                    name = "Успешный ответ с комментариями"
                             )
                     )
             ),
@@ -92,17 +68,10 @@ public class CommentController {
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Ticket not found with id: 550e8400-e29b-41d4-a716-446655440999",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440999/comments"
-                                            }
-                                            """
+                                    name = "Нет указанного тикета"
                             )
                     )
             ),
@@ -110,41 +79,25 @@ public class CommentController {
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 401,
-                                              "error": "Unauthorized",
-                                              "message": "Full authentication is required to access this resource",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                            }
-                                            """
-                            )
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. Пользователь не является участником тикета (не автор, не назначенный сотрудник, не администратор).",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. You don't have permission to view comments for this ticket",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                            }
-                                            """
-                            )
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                        mediaType = "application/problem+json",
+                        schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     @GetMapping("/tickets/{ticketId}/comments")
@@ -188,16 +141,7 @@ public class CommentController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CommentResponse.class),
                             examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            {
-                                              "id": "770e8400-e29b-41d4-a716-446655440004",
-                                              "ticketId": "550e8400-e29b-41d4-a716-446655440000",
-                                              "authorId": "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                                              "content": "Проблема решена, тикет можно закрывать",
-                                              "createdAt": "2024-01-15T12:00:00Z"
-                                            }
-                                            """
+                                    name = "Успешный ответ"
                             )
                     )
             ),
@@ -205,31 +149,11 @@ public class CommentController {
                     responseCode = "400",
                     description = "Некорректные данные запроса",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Пустой комментарий",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Comment content cannot be empty",
-                                                      "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Превышение максимальной длины",
-                                            value = """
-                                                    {
-                                                      "timestamp": "2024-01-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "message": "Comment content exceeds maximum length of 2000 characters",
-                                                      "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                                    }
-                                                    """
+                                            name = "Пустой комментарий"
                                     )
                             }
                     )
@@ -238,17 +162,10 @@ public class CommentController {
                     responseCode = "404",
                     description = "Тикет с указанным ID не найден",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 404,
-                                              "error": "Not Found",
-                                              "message": "Ticket not found with id: 550e8400-e29b-41d4-a716-446655440999",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440999/comments"
-                                            }
-                                            """
+                                    name = "Нет указанного тикета"
                             )
                     )
             ),
@@ -256,54 +173,38 @@ public class CommentController {
                     responseCode = "401",
                     description = "Пользователь не авторизован.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 401,
-                                              "error": "Unauthorized",
-                                              "message": "Full authentication is required to access this resource",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                            }
-                                            """
-                            )
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Доступ запрещен. Пользователь не является участником тикета (не автор, не назначенный сотрудник, не администратор).",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 403,
-                                              "error": "Forbidden",
-                                              "message": "Access denied. Only ticket participants can add comments",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                            }
-                                            """
+                                    name = "Доступ запрещен"
                             )
                     )
             ),
             @ApiResponse(
-                    responseCode = "409",
+                    responseCode = "422",
                     description = "Конфликт при добавлении комментария (например, тикет уже закрыт)",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "timestamp": "2024-01-15T10:30:00Z",
-                                              "status": 409,
-                                              "error": "Conflict",
-                                              "message": "Cannot add comment to closed ticket",
-                                              "path": "/tickets/550e8400-e29b-41d4-a716-446655440000/comments"
-                                            }
-                                            """
+                                    name = "Конфликт с бизнес-правилами"
                             )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
     })
@@ -327,28 +228,10 @@ public class CommentController {
                             schema = @Schema(implementation = CreateCommentRequest.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Простой комментарий",
-                                            value = """
-                                                    {
-                                                      "content": "Проблема воспроизводится, начинаю разбираться"
-                                                    }
-                                                    """
+                                            name = "Простой комментарий"
                                     ),
                                     @ExampleObject(
-                                            name = "Комментарий с уточнением",
-                                            value = """
-                                                    {
-                                                      "content": "Уточните, пожалуйста, в каком браузере возникает ошибка? Пробовали очистить кэш?"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Комментарий с подтверждением решения",
-                                            value = """
-                                                    {
-                                                      "content": "Проблема решена, тикет можно закрывать. Спасибо за помощь!"
-                                                    }
-                                                    """
+                                            name = "Комментарий с уточнением"
                                     )
                             }
                     )
