@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
             InvalidStateException ex,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex, request);
+        return buildResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex, request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
             IllegalArgumentException ex,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex,request);
+        return buildResponse(HttpStatus.CONFLICT, ex,request);
     }
 
     @ExceptionHandler(RuntimeException.class)
