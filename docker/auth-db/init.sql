@@ -21,4 +21,16 @@ CREATE TABLE notification_channels (
         ON DELETE CASCADE
 );
 
+CREATE TABLE refresh_tokens (
+    id UUID PRIMARY KEY,
+    token_hash VARCHAR(128) NOT NULL UNIQUE,
+    jti VARCHAR(255) NOT NULL UNIQUE,
+    user_id UUID NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL,
+    created_by_ip VARCHAR(255),
+    user_agent TEXT
+);
+
 CREATE INDEX idx_users_email ON users(email);

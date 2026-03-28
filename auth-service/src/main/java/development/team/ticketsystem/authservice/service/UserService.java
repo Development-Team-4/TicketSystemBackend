@@ -66,10 +66,11 @@ public class UserService {
         User user = getUserOrThrow(id);
 
         UserNotificationSettings settings = settingsRepository.findById(id)
-                .orElseGet(() -> UserNotificationSettings.builder()
-                        .user(user)
-                        .userId(user.getId())
-                        .build());
+                .orElseGet(() -> {
+                    UserNotificationSettings newSettings = new UserNotificationSettings();
+                    newSettings.setUser(user);
+                    return newSettings;
+                });
 
         settings.setEmailEnabled(request.getEmailEnabled());
         settings.setTelegramEnabled(request.getTelegramEnabled());

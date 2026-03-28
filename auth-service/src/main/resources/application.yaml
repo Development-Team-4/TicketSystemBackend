@@ -9,3 +9,19 @@ spring:
     url: ${AUTH_DB_URL}
     username: ${AUTH_DB_USER}
     password: ${AUTH_DB_PASSWORD}
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+app:
+  jwt:
+    issuer: ticket-system-auth
+    audience: ticket-system
+    access-token-ttl-seconds: 900
+    refresh-token-ttl-seconds: 1209600
+    key-id: auth-rsa-key-1
+    keys:
+      public-key-path: classpath:keys/public.pem
+      private-key-path: classpath:keys/private.pem
