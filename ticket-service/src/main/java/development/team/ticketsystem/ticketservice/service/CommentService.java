@@ -39,8 +39,13 @@ public class CommentService {
 
     public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request)
             throws EntityNotFoundException, InvalidStateException {
+
         TicketEntity ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
+            throw new InvalidStateException("Cannot comment CLOSED ticket");
+        }
 
         CommentEntity saved = createCommentWithTransaction(ticketId, authorId, request);
 
@@ -59,13 +64,6 @@ public class CommentService {
     @Transactional
     private CommentEntity createCommentWithTransaction(UUID ticketId, UUID authorId, CreateCommentRequest request)
             throws EntityNotFoundException, InvalidStateException {
-        TicketEntity ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
-
-        if (ticket.getStatus() == TicketStatus.CLOSED) {
-            throw new InvalidStateException("Cannot comment CLOSED ticket");
-        }
-
 
         CommentEntity comment = CommentEntity.builder()
                 .ticketId(ticketId)
