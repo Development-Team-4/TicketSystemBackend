@@ -15,7 +15,6 @@ public class AuthResponse {
 
     @Schema(
             description = "JWT токен доступа для авторизации",
-            example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @JsonProperty("accessToken")
@@ -35,4 +34,26 @@ public class AuthResponse {
     )
     @JsonProperty("user")
     private UserResponse user;
+
+    @Schema(
+            description = "Refresh token",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("refreshToken")
+    private String refreshToken;
+
+    @Schema(
+            description = "Время жизни access token в секундах",
+            example = "900",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("expiresIn")
+    private long expiresIn;
+
+    @Schema(
+            description = "JTI access token. Может использоваться gateway для blacklist/logout orchestration",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @JsonProperty("accessTokenJti")
+    private String accessTokenJti;
 }
