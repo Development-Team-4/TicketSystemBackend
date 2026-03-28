@@ -1,6 +1,7 @@
 package development.team.ticketsystem.ticketservice.service;
 
 
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.categories.AssignStaffRequest;
 import development.team.ticketsystem.ticketservice.dto.categories.CategoryResponse;
 import development.team.ticketsystem.ticketservice.dto.categories.CreateCategoryRequest;
@@ -8,8 +9,8 @@ import development.team.ticketsystem.ticketservice.entity.CategoryEntity;
 import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.mappers.CategoryMapper;
 import development.team.ticketsystem.ticketservice.repository.CategoryRepository;
-import development.team.ticketsystem.ticketservice.UserRole;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,7 @@ public class CategoryService {
         return mapper.toResponse(saved);
     }
 
+    @Transactional
     public CategoryResponse update(UserRole role, UUID id, CreateCategoryRequest request)
             throws AccessDeniedException, EntityNotFoundException {
         if (role != UserRole.ADMIN) {
