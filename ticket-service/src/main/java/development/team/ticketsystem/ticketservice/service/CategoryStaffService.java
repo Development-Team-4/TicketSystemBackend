@@ -5,6 +5,7 @@ import development.team.ticketsystem.ticketservice.exceptions.InvalidStateExcept
 import development.team.ticketsystem.ticketservice.repository.CategoryRepository;
 import development.team.ticketsystem.ticketservice.repository.CategoryStaffRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class CategoryStaffService {
         return repository.existsByCategoryIdAndUserId(categoryId, userId);
     }
 
+    @Transactional
     public void assignStaff(UUID categoryId, UUID staffId) throws InvalidStateException, EntityNotFoundException {
 
         if (repository.existsByCategoryIdAndUserId(categoryId, staffId)) {
@@ -43,13 +45,13 @@ public class CategoryStaffService {
         repository.save(entity);
     }
 
-    public void removeStaff(UUID categoryId, UUID userId) throws RuntimeException {
+    @Transactional
+    public void removeStaff(UUID categoryId, UUID userId) throws InvalidStateException {
+        CategoryStaffEntity assignment = repository
+                .findByCategoryIdAndUserId(categoryId, userId)
+                .orElseThrow(() -> new InvalidStateException("Staff is not assigned to this category"));
 
-        if (!repository.existsByCategoryIdAndUserId(categoryId, userId)) {
-            throw new RuntimeException("Staff is not assigned to this category");
-        }
-
-        repository.deleteByCategoryIdAndUserId(categoryId, userId);
+        repository.delete(assignment);
     }
 
 }
