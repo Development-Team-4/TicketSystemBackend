@@ -1,6 +1,10 @@
 package development.team.ticketsystem.ticketservice.service;
 
+import development.team.ticketsystem.ticketservice.TicketStatus;
+import development.team.ticketsystem.ticketservice.UserRole;
+import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
+import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.exceptions.InvalidStateException;
@@ -8,10 +12,8 @@ import development.team.ticketsystem.ticketservice.exceptions.NotificationServic
 import development.team.ticketsystem.ticketservice.forNotificationMicroservice.NotificationCreationDto;
 import development.team.ticketsystem.ticketservice.forNotificationMicroservice.NotificationType;
 import development.team.ticketsystem.ticketservice.mappers.TicketMapper;
-import development.team.ticketsystem.ticketservice.repository.specification.TicketSpecification;
 import development.team.ticketsystem.ticketservice.repository.TicketRepository;
-import development.team.ticketsystem.ticketservice.TicketStatus;
-import development.team.ticketsystem.ticketservice.UserRole;
+import development.team.ticketsystem.ticketservice.repository.criteria.TicketCriteriaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.UUID;
 public class TicketService {
 
     private final TicketRepository repository;
+    private final TicketCriteriaRepository ticketCriteriaRepository;
     private final CategoryStaffService categoryStaffService;
     private final NotificationSender notificationSender;
     private final TicketMapper mapper;
@@ -66,40 +69,95 @@ public class TicketService {
             Instant createdBefore
     ) throws AccessDeniedException {
 
-        if (role.equals(UserRole.SUPPORT)) {
-            if (categoryId == null) {
-                categoryId = categoryStaffService.getByUser(userId).getFirst().getCategoryId();
-            }
-            if (assignedTo == null) {
-                assignedTo = userId;
-            } else if (!assignedTo.equals(userId)) {
-                throw new AccessDeniedException("Staff can not view tickets assigned to others");
-            }
+        validateRoleAccessToFilters(
+                role,
+                userId,
+                assignedTo,
+                createdBy
+        );
 
+        TicketFilter filter = buildFilter(
+                role,
+                userId,
+                categoryId,
+                assignedTo,
+                createdBy,
+                status,
+                createdAfter,
+                createdBefore
+        );
+
+        return ticketCriteriaRepository.findAllByFilters(filter)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    private void validateRoleAccessToFilters(UserRole role, UUID userId, UUID assignedTo, UUID createdBy) {
+        if (role.equals(UserRole.SUPPORT)) {
             if (createdBy != null) {
                 throw new AccessDeniedException("Unable to filter by createdBy");
             }
+            if (assignedTo != null && !assignedTo.equals(userId)) {
+                throw new AccessDeniedException("Staff can not view tickets assigned to others");
+            }
         } else if (role.equals(UserRole.USER)) {
-            createdBy = userId;
-
             if (assignedTo != null) {
                 throw new AccessDeniedException("Users can not filter by assignedTo");
             }
         }
+    }
 
-// Можно заменить спецификацию на критерии АПИ
-        return repository.findAll(
-                        TicketSpecification.filter(
-                                categoryId,
-                                assignedTo,
-                                createdBy,
-                                status,
-                                createdAfter,
-                                createdBefore
-                        )
-                ).stream()
-                .map(mapper::toResponse)
-                .toList();
+    private TicketFilter buildFilter(
+            UserRole role,
+            UUID userId,
+            UUID categoryId,
+            UUID assignedTo,
+            UUID createdBy,
+            String status,
+            Instant createdAfter,
+            Instant createdBefore
+    ) {
+
+        if (role == UserRole.SUPPORT) {
+
+            List<UUID> categories = categoryStaffService.getByUser(userId)
+                    .stream()
+                    .map(CategoryStaffEntity::getCategoryId)
+                    .toList();
+
+            return TicketFilter.builder()
+                    .role(role)
+                    .userId(userId)
+                    .categoryIds(categoryId == null ? categories : List.of(categoryId))
+                    .assignedTo(userId)
+                    .status(status)
+                    .createdAfter(createdAfter)
+                    .createdBefore(createdBefore)
+                    .build();
+        }
+
+        if (role == UserRole.USER) {
+            return TicketFilter.builder()
+                    .role(role)
+                    .userId(userId)
+                    .createdBy(userId)
+                    .status(status)
+                    .createdAfter(createdAfter)
+                    .createdBefore(createdBefore)
+                    .build();
+        }
+
+        return TicketFilter.builder()
+                .role(role)
+                .userId(userId)
+                .categoryId(categoryId)
+                .assignedTo(assignedTo)
+                .createdBy(createdBy)
+                .status(status)
+                .createdAfter(createdAfter)
+                .createdBefore(createdBefore)
+                .build();
     }
 
     public TicketResponse getById(UUID id) throws EntityNotFoundException {

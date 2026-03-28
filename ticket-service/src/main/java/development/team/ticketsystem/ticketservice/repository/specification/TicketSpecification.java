@@ -6,6 +6,8 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.Instant;
 import java.util.UUID;
 
+// Заменено на CriteriaRepository, но пока не удалено
+@Deprecated(forRemoval = true)
 public class TicketSpecification {
 
     public static Specification<TicketEntity> filter(
