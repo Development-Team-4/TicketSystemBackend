@@ -9,8 +9,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
-
     CommentResponse toResponse(CommentEntity entity);
 
     CommentEntity toEntity(CreateCommentRequest request);

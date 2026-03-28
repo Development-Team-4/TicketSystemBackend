@@ -10,8 +10,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface TopicMapper {
 
-    TopicMapper INSTANCE = Mappers.getMapper(TopicMapper.class);
-
     TopicResponse toResponse(TopicEntity entity);
 
     TopicEntity toEntity(CreateTopicRequest request);

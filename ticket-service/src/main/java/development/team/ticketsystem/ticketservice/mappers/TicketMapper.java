@@ -11,8 +11,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface TicketMapper {
 
-    TicketMapper INSTANCE = Mappers.getMapper(TicketMapper.class);
-
     TicketResponse toResponse(TicketEntity entity);
 
     TicketEntity toEntity(CreateTicketRequest request);
