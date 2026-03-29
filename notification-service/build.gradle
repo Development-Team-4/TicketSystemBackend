@@ -15,10 +15,6 @@ java {
 	}
 }
 
-openApi {
-	apiDocsUrl.set("http://localhost:8083/v3/api-docs")
-}
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -27,15 +23,6 @@ configurations {
 
 repositories {
 	mavenCentral()
-}
-
-tasks.named('forkedSpringBootRun') {
-	doNotTrackState("Проблема с доступом к checksums.lock")
-}
-
-// Или для всех таск плагина
-tasks.withType(org.springdoc.openapi.gradle.plugin.OpenApiGeneratorTask) {
-	doNotTrackState("Проблема с доступом к checksums.lock")
 }
 
 dependencies {
