@@ -76,7 +76,7 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/notifications")
                         .hasRole("ADMIN")
                         .pathMatchers(HttpMethod.GET, "/notifications/**")
-                        .hasRole("ADMIN")
+                        .hasAnyRole("ADMIN","USER")
                         .pathMatchers(HttpMethod.POST, "/notifications/**")
                         .hasRole("ADMIN")
 
