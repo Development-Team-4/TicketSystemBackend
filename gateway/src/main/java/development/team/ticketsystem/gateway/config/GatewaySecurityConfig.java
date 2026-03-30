@@ -68,6 +68,10 @@ public class GatewaySecurityConfig {
                         .pathMatchers("/tickets/**")
                         .hasAnyRole("ADMIN", "SUPPORT", "USER")
 
+                        // tickets delete
+                        .pathMatchers(HttpMethod.DELETE, "/tickets/**")
+                        .hasAnyRole("ADMIN", "SUPPORT", "USER")
+
                         // notifications
                         .pathMatchers(HttpMethod.GET, "/notifications")
                         .hasRole("ADMIN")
