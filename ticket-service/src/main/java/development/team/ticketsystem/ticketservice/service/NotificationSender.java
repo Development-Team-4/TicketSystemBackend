@@ -26,7 +26,7 @@ public class NotificationSender {
             UUID toUserId,
             NotificationCreationDto request
     ) throws NotificationServiceException {
-        String url = notificationServiceUrl + "/notifications/" + toUserId;
+        String url = notificationServiceUrl + "/notifications";
 
         try {
             restClient.post()
