@@ -193,7 +193,7 @@ public class TicketService {
         TicketEntity ticket = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
-        if (ticket.getStatus().equals(TicketStatus.OPEN)) {
+        if (!ticket.getStatus().equals(TicketStatus.OPEN)) {
             throw new InvalidStateException("Only OPEN tickets can be deleted");
         }
         if (role.equals(UserRole.USER) && !ticket.getCreatedBy().equals(userId)) {
