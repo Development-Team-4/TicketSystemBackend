@@ -11,14 +11,13 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class AuthHeadersPropagationFilter implements GlobalFilter, Ordered {
 
     private static final String HEADER_USER_ID = "X-User-Id";
-    private static final String HEADER_USER_ROLES = "X-User-Roles";
+    private static final String HEADER_USER_ROLE = "X-User-Role";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange,
@@ -34,20 +33,20 @@ public class AuthHeadersPropagationFilter implements GlobalFilter, Ordered {
                     }
 
                     String userId = resolveUserId(jwtAuth);
-                    String rolesHeader = resolveRoles(jwtAuth);
+                    String roleHeader = resolveRole(jwtAuth);
 
                     ServerWebExchange mutatedExchange = exchange.mutate()
                             .request(builder -> {
                                 builder.headers(headers -> {
                                     headers.remove(HEADER_USER_ID);
-                                    headers.remove(HEADER_USER_ROLES);
+                                    headers.remove(HEADER_USER_ROLE);
                                 });
 
                                 if (userId != null && !userId.isBlank()) {
                                     builder.header(HEADER_USER_ID, userId);
                                 }
-                                if (rolesHeader != null && !rolesHeader.isBlank()) {
-                                    builder.header(HEADER_USER_ROLES, rolesHeader);
+                                if (roleHeader != null && !roleHeader.isBlank()) {
+                                    builder.header(HEADER_USER_ROLE, roleHeader);
                                 }
                             })
                             .build();
@@ -65,12 +64,12 @@ public class AuthHeadersPropagationFilter implements GlobalFilter, Ordered {
         return jwtAuth.getToken().getSubject();
     }
 
-    private String resolveRoles(JwtAuthenticationToken jwtAuth) {
+    private String resolveRole(JwtAuthenticationToken jwtAuth) {
         List<String> roles = jwtAuth.getToken().getClaimAsStringList("roles");
         if (roles == null || roles.isEmpty()) {
             return "";
         }
-        return roles.stream().collect(Collectors.joining(","));
+        return roles.get(0);
     }
 
     @Override
