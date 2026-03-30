@@ -38,7 +38,7 @@ public class GatewaySecurityConfig {
 
                         // topics
                         .pathMatchers(HttpMethod.GET, "/topics")
-                        .hasAnyRole("USER", "ADMIN", "MODERATOR")
+                        .hasAnyRole("USER", "ADMIN", "SUPPORT")
                         .pathMatchers(HttpMethod.POST, "/topics")
                         .hasRole("ADMIN")
                         .pathMatchers(HttpMethod.PUT, "/topics/**")
@@ -46,13 +46,13 @@ public class GatewaySecurityConfig {
 
                         // categories read
                         .pathMatchers(HttpMethod.GET, "/topics/*/categories", "/categories/**")
-                        .hasAnyRole("USER", "ADMIN", "MODERATOR")
+                        .hasAnyRole("USER", "ADMIN", "SUPPORT")
 
                         // categories write
                         .pathMatchers(HttpMethod.POST, "/topics/*/categories")
-                        .hasAnyRole("ADMIN", "MODERATOR")
+                        .hasAnyRole("ADMIN", "SUPPORT")
                         .pathMatchers(HttpMethod.PATCH, "/categories/**")
-                        .hasAnyRole("ADMIN", "MODERATOR")
+                        .hasAnyRole("ADMIN", "SUPPORT")
 
                         // category staff management
                         .pathMatchers(HttpMethod.PUT, "/categories/*/staff")
@@ -62,11 +62,11 @@ public class GatewaySecurityConfig {
 
                         // tickets read
                         .pathMatchers(HttpMethod.GET, "/tickets/**")
-                        .hasAnyRole("USER", "ADMIN", "MODERATOR")
+                        .hasAnyRole("USER", "ADMIN", "SUPPORT")
 
                         // tickets write
                         .pathMatchers("/tickets/**")
-                        .hasAnyRole("ADMIN", "MODERATOR")
+                        .hasAnyRole("ADMIN", "SUPPORT", "USER")
 
                         // notifications
                         .pathMatchers(HttpMethod.GET, "/notifications")
