@@ -9,3 +9,10 @@ spring:
     url: ${TICKET_DB_URL}
     username: ${TICKET_DB_USER}
     password: ${TICKET_DB_PASSWORD}
+
+services:
+  notification:
+    url: http://localhost:8083
+    timeout:
+      connect: 500
+      read: 1000
