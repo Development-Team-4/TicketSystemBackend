@@ -1,6 +1,5 @@
 package development.team.ticketsystem.notificationservice.negative;
 
-import development.team.ticketsystem.notificationservice.constants.DtoFields;
 import development.team.ticketsystem.notificationservice.controller.NotificationController;
 import development.team.ticketsystem.notificationservice.exceptions.handlers.GlobalExceptionHandler;
 import development.team.ticketsystem.notificationservice.helper.JsonHelper;
@@ -64,19 +63,19 @@ public class NegativeTests {
     @Test
     @DisplayName("TC-5 : Некорректная формат DTO (отсутствует ticket_id)")
     void incorrectFieldTicketId() throws Exception {
-        fullTestOfCorruptField(DtoFields.NotificationDto.TICKET_ID_FIELD);
+        fullTestOfCorruptField("ticketId");
     }
 
     @Test
     @DisplayName("TC-6 : Некорректная формат DTO (отсутствует user_id)")
     void incorrectFieldUserId() throws Exception {
-        fullTestOfCorruptField(DtoFields.NotificationDto.USER_ID_FIELD);
+        fullTestOfCorruptField("userId");
     }
 
     @Test
     @DisplayName("TC-7 : Некорректная формат DTO (отсутствует type)")
     void incorrectFieldType() throws Exception {
-        fullTestOfCorruptField(DtoFields.NotificationDto.TYPE_FIELD);
+        fullTestOfCorruptField("type");
     }
 
     /**
