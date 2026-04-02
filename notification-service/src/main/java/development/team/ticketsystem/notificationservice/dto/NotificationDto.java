@@ -16,19 +16,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationDto {
     @JsonProperty(value = "id")
-    @NotBlank
     @NotNull
     @Schema(description = "ID уведомления", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID id;
 
     @JsonProperty(value = "userId")
-    @NotBlank
     @NotNull
     @Schema(description = "ID пользователя", example = "550e8400-e29b-41d4-a716-446655440001")
     private UUID userId;
 
     @JsonProperty(value = "ticketId")
-    @NotBlank
     @NotNull
     @Schema(description = "ID тикета", example = "550e8400-e29b-41d4-a716-446655400002")
     private UUID ticketId;
