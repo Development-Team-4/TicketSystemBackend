@@ -16,12 +16,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotificationFormatException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNotificationFormatException(NotificationFormatException e) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Формат некорректен", Timestamp.from(Instant.now()).toString());
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Format incorrect", Timestamp.from(Instant.now()).toString());
     }
 
     @ExceptionHandler(HttpServerErrorException.InternalServerError.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleInternalException(HttpServerErrorException.InternalServerError e) {
-        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Внутренняя ошибка сервера", Timestamp.from(Instant.now()).toString());
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal error of server", Timestamp.from(Instant.now()).toString());
     }
 }

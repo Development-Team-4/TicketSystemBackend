@@ -38,7 +38,7 @@ public class NotificationService {
      * @return dto с данными уведомления
      */
     public NotificationDto addNewNotification(NotificationCreationDto dto) throws NotificationFormatException {
-        Notification notification = createNotificationFromDto(dto);
+        Notification notification = this.notificationMapper.toEntity(dto);
 
         return notificationMapper.toDto(this.notificationRepository.save(notification));
     }
@@ -70,28 +70,5 @@ public class NotificationService {
      */
     private void sendTelegramMessage() {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Создание сущности уведомления из DTO
-     *
-     * @param dto DTO для создания уведомления
-     */
-    private Notification createNotificationFromDto(NotificationCreationDto dto) throws NotificationFormatException {
-        if (dto.getUserId() == null) {
-            throw new NotificationFormatException("userId не может быть null");
-        }
-        if (dto.getTicketId() == null) {
-            throw new NotificationFormatException("ticketId не может быть null");
-        }
-        if (dto.getType() == null) {
-            throw new NotificationFormatException("notification не может быть null");
-        }
-
-        return new Notification(
-                dto.getUserId(),
-                dto.getTicketId(),
-                dto.getType()
-        );
     }
 }

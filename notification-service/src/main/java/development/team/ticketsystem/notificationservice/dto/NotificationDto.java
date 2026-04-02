@@ -57,16 +57,4 @@ public class NotificationDto {
     @JsonProperty(value = "updatedAt")
     @Schema(description = "Дата обновления", example = "2024-01-15T10:30:00Z")
     private Timestamp updatedAt;
-
-    public NotificationDto(UUID userId, UUID ticketId, NotificationType type) {
-        this.userId = userId;
-        this.ticketId = ticketId;
-        this.type = type;
-
-        this.createdAt = Timestamp.from(Instant.now());
-        this.updatedAt = Timestamp.from(Instant.now());
-        this.sent = true;
-        this.title = type.getTitle();
-        this.message = type.getMessage();
-    }
 }
