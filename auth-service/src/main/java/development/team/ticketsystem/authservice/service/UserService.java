@@ -3,9 +3,11 @@ package development.team.ticketsystem.authservice.service;
 import development.team.ticketsystem.authservice.dto.notification.NotificationSettingsResponse;
 import development.team.ticketsystem.authservice.dto.notification.UpdateNotificationSettingsRequest;
 import development.team.ticketsystem.authservice.dto.user.UpdateUserRequest;
+import development.team.ticketsystem.authservice.dto.user.UpdateUserRoleRequest;
 import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import development.team.ticketsystem.authservice.entity.User;
 import development.team.ticketsystem.authservice.entity.UserNotificationSettings;
+import development.team.ticketsystem.authservice.exception.CannotChangeOwnRoleException;
 import development.team.ticketsystem.authservice.exception.NotificationSettingsNotFoundException;
 import development.team.ticketsystem.authservice.exception.UserNotFoundException;
 import development.team.ticketsystem.authservice.mapper.UserMapper;
@@ -78,6 +80,17 @@ public class UserService {
         return mapper.toResponse(settingsRepository.save(settings));
     }
 
+    @Transactional
+    public UserResponse updateRole(UUID actorUserId, UUID targetUserId, UpdateUserRoleRequest request) {
+        if (actorUserId.equals(targetUserId)) {
+            throw new CannotChangeOwnRoleException();
+        }
+
+        User user = getUserOrThrow(targetUserId);
+        user.setRole(request.getRole());
+
+        return mapper.toResponse(userRepository.save(user));
+    }
     private User getUserOrThrow(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);

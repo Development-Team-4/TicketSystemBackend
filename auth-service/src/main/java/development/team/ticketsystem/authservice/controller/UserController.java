@@ -4,6 +4,7 @@ import development.team.ticketsystem.authservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.authservice.dto.notification.NotificationSettingsResponse;
 import development.team.ticketsystem.authservice.dto.notification.UpdateNotificationSettingsRequest;
 import development.team.ticketsystem.authservice.dto.user.UpdateUserRequest;
+import development.team.ticketsystem.authservice.dto.user.UpdateUserRoleRequest;
 import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import development.team.ticketsystem.authservice.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +49,7 @@ public class UserController {
                     responseCode = "404",
                     description = "Пользователь не найден",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -56,7 +57,7 @@ public class UserController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -90,7 +91,7 @@ public class UserController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -117,7 +118,7 @@ public class UserController {
                     responseCode = "404",
                     description = "Пользователь не найден",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -125,7 +126,7 @@ public class UserController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -168,7 +169,7 @@ public class UserController {
                     responseCode = "404",
                     description = "Пользователь не найден",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -176,7 +177,7 @@ public class UserController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -219,7 +220,7 @@ public class UserController {
                     responseCode = "404",
                     description = "Настройки уведомлений не найдены",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -227,7 +228,7 @@ public class UserController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -242,6 +243,46 @@ public class UserController {
             @PathVariable UUID id
     ) {
         return userService.getSettings(id);
+    }
+
+    @Operation(
+            summary = "Изменить роль пользователя",
+            description = "Позволяет администратору назначить пользователю новую роль, например SUPPORT"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Роль пользователя успешно изменена",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Пользователь не найден",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Недостаточно прав",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+
+    })
+    @PatchMapping("/{id}/role")
+    public UserResponse updateRole(
+            @RequestHeader("X-User-Id") UUID actorUserId,
+            @PathVariable UUID id,
+            @org.springframework.web.bind.annotation.RequestBody UpdateUserRoleRequest request
+    ) {
+        return userService.updateRole(actorUserId, id, request);
     }
 }
 

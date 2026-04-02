@@ -46,7 +46,7 @@ public class AuthController {
                     responseCode = "409",
                     description = "Пользователь с таким email уже существует",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -54,7 +54,7 @@ public class AuthController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -92,7 +92,7 @@ public class AuthController {
                     responseCode = "401",
                     description = "Неверные учетные данные",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -100,7 +100,7 @@ public class AuthController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -138,7 +138,7 @@ public class AuthController {
                     responseCode = "401",
                     description = "Refresh token недействителен, истек или был отозван",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -163,7 +163,7 @@ public class AuthController {
                     responseCode = "401",
                     description = "Refresh token недействителен",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
