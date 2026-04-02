@@ -1,8 +1,8 @@
 package development.team.ticketsystem.iftests.positive;
 
+import development.team.ticketsystem.iftests.configuration.TestsConfiguration;
 import development.team.ticketsystem.iftests.dto.AuthResponse;
 import development.team.ticketsystem.iftests.dto.LoginRequest;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,12 +12,10 @@ import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = TestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("Позитивные интеграционные тесты (TicketService)")
-@RequiredArgsConstructor
 public class PositiveAuthAndTicketTests {
     private RestClient adminRestClient;
-    private RestClient userRestClient;
 
     private RestClient authClient;
 

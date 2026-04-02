@@ -3,10 +3,13 @@ package development.team.ticketsystem.iftests.positive;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.iftests.configuration.RestConfiguration;
 import development.team.ticketsystem.iftests.configuration.TestRestScenarioPositive;
+import development.team.ticketsystem.iftests.configuration.TestsConfiguration;
 import development.team.ticketsystem.iftests.dto.NotificationDto;
 import development.team.ticketsystem.iftests.mapper.TestJsonMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +21,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = TestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(locations = "classpath:application.yaml")
 @DisplayName("Позитивные интеграционные тесты")
-@RequiredArgsConstructor
-public class PositiveTests {
+public class PositiveTicketNotificationTests {
 
-    private final RestClient restClient;
-    private final RestConfiguration restConfiguration;
-    private final ObjectMapper objectMapper;
+    private final RestClient restClient = RestClient.builder().build();
+
+    @Autowired
+    private RestConfiguration restConfiguration;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private static final String TEST_TICKET_ID = "550e8400-e29b-41d4-a716-446655440000";
 

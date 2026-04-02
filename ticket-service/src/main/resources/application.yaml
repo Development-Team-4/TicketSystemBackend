@@ -6,9 +6,9 @@ spring:
     name: ticket-service
 
   datasource:
-    url: ${TICKET_DB_URL:jdbc:postgresql://ticket-postgres:5432/ticket_db}
-    username: ${TICKET_DB_USER:postgres}
-    password: ${TICKET_DB_PASSWORD:postgres}
+    url: ${TICKET_DB_URL:jdbc:postgresql://localhost:5434/ticket_db}
+    username: ${TICKET_DB_USER:ticket_user}
+    password: ${TICKET_DB_PASSWORD:ticket_password}
 
 services:
   notification:
