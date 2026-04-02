@@ -99,16 +99,8 @@ public class NotificationController {
             )
     })
     public ResponseEntity<NotificationDto> addNewNotification(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "DTO для создания уведомления",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = NotificationCreationDto.class)
-                    )
-            )
             @Valid @RequestBody NotificationCreationDto dto
     ) throws NotificationFormatException {
-
         NotificationDto notification = notificationService.addNewNotification(dto);
         return ResponseEntity.status(201).body(notification);
     }
