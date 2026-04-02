@@ -13,13 +13,13 @@ public class GatewayRoutesConfig {
         return builder.routes()
                 .route("auth-service", r -> r
                         .path("/auth/**", "/users/**", "/.well-known/jwks.json")
-                        .uri("http://localhost:8082"))
+                        .uri("http://auth-service:8082"))
                 .route("ticket-service", r -> r
                         .path("/tickets/**", "/topics/**", "/categories/**", "/debug/**")
-                        .uri("http://localhost:8084"))
+                        .uri("http://ticket-service:8084"))
                 .route("notification-service", r -> r
                         .path("/notifications/**")
-                        .uri("http://localhost:8083"))
+                        .uri("http://notification-service:8083"))
                 .build();
     }
 }

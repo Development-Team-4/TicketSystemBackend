@@ -34,6 +34,7 @@ public class GatewaySecurityConfig {
 
                         // users
                         .pathMatchers("/users").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PATCH, "/users/*/role").hasRole("ADMIN")
                         .pathMatchers("/users/**").authenticated()
 
                         // topics

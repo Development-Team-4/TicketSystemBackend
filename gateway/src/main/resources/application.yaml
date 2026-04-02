@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 spring:
   application:
@@ -7,8 +7,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST:auth-redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
 management:
   endpoints:
@@ -21,4 +21,4 @@ app:
     jwt:
       issuer: ticket-system-auth
       audience: ticket-system
-      jwk-set-uri: http://localhost:8082/.well-known/jwks.json
+      jwk-set-uri: ${APP_SECURITY_JWT_JWK_SET_URI:http://auth-service:8082/.well-known/jwks.json}
