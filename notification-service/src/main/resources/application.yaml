@@ -5,7 +5,6 @@ spring:
   application:
     name: notification-service
 
-
   datasource:
     url: ${NOTIFICATION_DB_URL}
     username: ${NOTIFICATION_DB_USER}
