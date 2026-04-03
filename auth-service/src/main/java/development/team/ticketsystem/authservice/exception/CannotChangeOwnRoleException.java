@@ -1,7 +1,9 @@
 package development.team.ticketsystem.authservice.exception;
 
-public class CannotChangeOwnRoleException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class CannotChangeOwnRoleException extends ApiException {
     public CannotChangeOwnRoleException() {
-        super("Fuck, you're the admin. You're fucking cutting your own rights. Admin cannot change own role");
+        super("CANNOT_CHANGE_OWN_ROLE", "Admin cannot change own role", HttpStatus.BAD_REQUEST);
     }
 }

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Tag(name = "Users", description = "Операции управления пользователями и их настройками уведомлений")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;
@@ -259,6 +261,14 @@ public class UserController {
                     )
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    description = "Администратор не может изменить собственную роль",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "Пользователь не найден",
                     content = @Content(
@@ -274,15 +284,35 @@ public class UserController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
-
     })
     @PatchMapping("/{id}/role")
     public UserResponse updateRole(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID actorUserId,
             @PathVariable UUID id,
             @org.springframework.web.bind.annotation.RequestBody UpdateUserRoleRequest request
     ) {
         return userService.updateRole(actorUserId, id, request);
     }
-}
 
+    @Operation(
+            summary = "Получить текущего пользователя"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Данные текущего пользователя успешно получены",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/me")
+    public UserResponse me(
+            @Parameter(hidden = true)
+            @RequestHeader("X-User-Id") UUID id
+    ) {
+        return userService.getById(id);
+    }
+}

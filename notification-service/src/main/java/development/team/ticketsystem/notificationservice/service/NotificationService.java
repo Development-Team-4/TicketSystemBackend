@@ -80,10 +80,9 @@ public class NotificationService {
     }
 
     private String getTitle(NotificationType type) {
-
+        return null; //--так сложно было это подставить? (от D-ASA-D разработчику notification-service) Пожалуйста не делайте так:))
     }
-
     private String getMessage(NotificationType type) {
-
+        return null; //--так сложно было это подставить? (от D-ASA-D разработчику notification-service) Пожалуйста не делайте так:))
     }
 }

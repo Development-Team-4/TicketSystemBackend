@@ -22,3 +22,17 @@ app:
       issuer: ticket-system-auth
       audience: ticket-system
       jwk-set-uri: ${APP_SECURITY_JWT_JWK_SET_URI:http://auth-service:8082/.well-known/jwks.json}
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls:
+      - name: auth-service
+        url: /auth/v3/api-docs
+      - name: ticket-service
+        url: /ticket/v3/api-docs
+      - name: notification-service
+        url: /notification/v3/api-docs
+    urlsPrimaryName: auth-service

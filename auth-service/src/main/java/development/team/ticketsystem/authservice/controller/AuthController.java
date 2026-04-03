@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -168,29 +169,11 @@ public class AuthController {
                     )
             )
     })
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/logout")
     public void logout(
             @org.springframework.web.bind.annotation.RequestBody LogoutRequest request
     ) {
         authService.logout(request);
-    }
-
-    @Operation(
-            summary = "Получить текущего пользователя",
-            description = "Заглушка. В текущей архитектуре аутентификация происходит на gateway"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Данные текущего пользователя успешно получены",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UserResponse.class)
-                    )
-            )
-    })
-    @GetMapping("/me")
-    public UserResponse me() {
-        return new UserResponse();
     }
 }

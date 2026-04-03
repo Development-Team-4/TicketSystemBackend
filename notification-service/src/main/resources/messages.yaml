@@ -1,12 +1,2 @@
-notification:
-  status_change:
-    title: Status changed
-    message: Your ticket change status
-
-  comment:
-    title: New comment
-    message: On your ticket added new comment
-
-  assignee:
-    title: Ticket assignee
-    message: Your ticket has been assigned
+#Перепиши на фабрику и перенеси сюда нормально. Я и так твой код редачу больше 2 часов, чтобы его запустить, поэтому перенес все в обычный application.yml
+#Это уже кри души(пожалуйста повнимательнее)...
