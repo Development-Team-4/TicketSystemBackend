@@ -42,16 +42,4 @@ public class Notification {
 
     @Column(name = "updated_at", nullable = false, columnDefinition = "default now()")
     private Timestamp updatedAt;
-
-    public Notification(UUID userId, UUID ticketId, NotificationType type) {
-        this.userId = userId;
-        this.ticketId = ticketId;
-        this.type = type;
-
-        this.createdAt = Timestamp.from(Instant.now());
-        this.updatedAt = Timestamp.from(Instant.now());
-        this.sent = true;
-        this.title = type.getTitle();
-        this.message = type.getMessage();
-    }
 }

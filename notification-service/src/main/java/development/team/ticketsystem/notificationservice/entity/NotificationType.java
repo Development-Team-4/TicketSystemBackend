@@ -7,20 +7,16 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum NotificationType {
     STATUS_CHANGE(
-            "Статус тикета изменён",
-            "У Вашего тикета был изменён статус"
+            "notification.status"
     ),
 
     COMMENT(
-            "Новый комментарий",
-            "К Вашему тикету добавлен новый комментарий"
+            "notification.comment"
     ),
 
     ASSIGNMENT(
-            "Тикет назначен",
-            "Ваш тикет успешно назначен"
+            "notification.assignee"
     );
 
-    private final String title;
-    private final String message;
+    private final String messageKey;
 }
