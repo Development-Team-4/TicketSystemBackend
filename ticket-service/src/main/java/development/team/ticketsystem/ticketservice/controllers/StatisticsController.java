@@ -1,6 +1,7 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
 import development.team.ticketsystem.ticketservice.TicketStatus;
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -62,7 +63,8 @@ public class StatisticsController {
             @ApiResponse(
                     responseCode = "500",
                     content = @Content(
-                            mediaType = "application/problem+json"
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     ),
                     description = "Внутренняя ошибка сервера"
             )
@@ -102,7 +104,8 @@ public class StatisticsController {
             @ApiResponse(
                     responseCode = "500",
                     content = @Content(
-                            mediaType = "application/problem+json"
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     ),
                     description = "Внутренняя ошибка сервера"
             )
@@ -141,7 +144,8 @@ public class StatisticsController {
             @ApiResponse(
                     responseCode = "500",
                     content = @Content(
-                            mediaType = "application/problem+json"
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     ),
                     description = "Внутренняя ошибка сервера"
             )
