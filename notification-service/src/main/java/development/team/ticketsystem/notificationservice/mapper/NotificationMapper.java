@@ -19,11 +19,5 @@ public interface NotificationMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "sent", constant = "true")
-    @Mapping(target = "createdAt", expression = "java(getCurrentTimestamp())")
-    @Mapping(target = "updatedAt", expression = "java(getCurrentTimestamp())")
     Notification toEntity(NotificationCreationDto notificationDTO);
-
-    default Timestamp getCurrentTimestamp() {
-        return Timestamp.from(Instant.now());
-    }
 }

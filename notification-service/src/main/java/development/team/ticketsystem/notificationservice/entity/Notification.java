@@ -42,4 +42,10 @@ public class Notification {
 
     @Column(name = "updated_at", nullable = false, columnDefinition = "default now()")
     private Timestamp updatedAt;
+
+    @PrePersist
+    private void prePersist() {
+        this.createdAt = Timestamp.from(Instant.now());
+        this.updatedAt = Timestamp.from(Instant.now());
+    }
 }
