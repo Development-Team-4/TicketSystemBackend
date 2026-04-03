@@ -1,0 +1,12 @@
+notification:
+  status_change:
+    title: Status changed
+    message: Your ticket change status
+
+  comment:
+    title: New comment
+    message: On your ticket added new comment
+
+  assignee:
+    title: Ticket assignee
+    message: Your ticket has been assigned
