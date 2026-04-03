@@ -9,7 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 public class RestConfiguration {
-    public static final String BASIC_URL = "http://localhost:";
+    @Value("${tests.urls.baseUrl}")
+    private String baseUrl;
+
+    @Value("${tests.urls.auth.port}")
+    private String authPort;
 
     @Value("${tests.urls.ticket.port}")
     private String ticketPort;

@@ -1,6 +1,7 @@
 package development.team.ticketsystem.iftests.positive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import development.team.ticketsystem.iftests.configuration.RestConfiguration;
 import development.team.ticketsystem.iftests.configuration.TestsConfiguration;
 import development.team.ticketsystem.iftests.dto.AuthResponse;
 import development.team.ticketsystem.iftests.dto.LoginRequest;
@@ -22,8 +23,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBootTest(classes = TestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("Позитивные интеграционные тесты (auth-service)")
 public class PositiveAuthTests {
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private RestConfiguration restConfiguration;
 
     @Autowired
     private RestClient.Builder restClientBuilder;
@@ -37,7 +38,7 @@ public class PositiveAuthTests {
 
     @BeforeEach
     void setUpBase() {
-        baseUrl = "http://localhost:" + port;
+        baseUrl = restConfiguration.getBaseUrl() + restConfiguration.getAuthPort();
         restClient = restClientBuilder.build();
     }
 

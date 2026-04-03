@@ -1,11 +1,13 @@
 package development.team.ticketsystem.iftests.positive;
 
+import development.team.ticketsystem.iftests.configuration.RestConfiguration;
 import development.team.ticketsystem.iftests.configuration.TestsConfiguration;
 import development.team.ticketsystem.iftests.dto.AuthResponse;
 import development.team.ticketsystem.iftests.dto.LoginRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
@@ -19,9 +21,12 @@ public class PositiveAuthAndTicketTests {
 
     private RestClient authClient;
 
+    @Autowired
+    private RestConfiguration restConfiguration;
+
     @BeforeEach
     void setUp() {
-        String baseUrl = "http://localhost:" + 8082;
+        String baseUrl = restConfiguration.getBaseUrl() + restConfiguration.getAuthPort();
 
         // RestClient для админа
         adminRestClient = RestClient.builder()

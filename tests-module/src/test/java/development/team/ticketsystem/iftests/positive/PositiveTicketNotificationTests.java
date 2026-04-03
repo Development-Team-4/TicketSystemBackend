@@ -126,7 +126,7 @@ public class PositiveTicketNotificationTests {
      * @throws Exception если URL не существует
      */
     private String buildUrl(TestRestScenarioPositive scenario, String ticketId) throws Exception {
-        String baseUrl = RestConfiguration.BASIC_URL;
+        String baseUrl = restConfiguration.getBaseUrl();
         String port = restConfiguration.getTicketPort();
         String commonUrl = restConfiguration.getTicketCommonUrl();
 
@@ -167,21 +167,11 @@ public class PositiveTicketNotificationTests {
      * @return сущность ответа
      */
     private ResponseEntity<String> sendRequest(String url, String body, HttpMethod method) {
-        if (method == HttpMethod.POST) {
-            return restClient.post()
+        return restClient.method(method)
                     .uri(url)
                     .body(body)
                     .retrieve()
                     .toEntity(String.class);
-        } else if (method == HttpMethod.PUT) {
-            return restClient.put()
-                    .uri(url)
-                    .body(body)
-                    .retrieve()
-                    .toEntity(String.class);
-        } else {
-            throw new UnsupportedOperationException("Unsupported HTTP method: " + method);
-        }
     }
 
     /**
@@ -189,7 +179,7 @@ public class PositiveTicketNotificationTests {
      * @return список dto нотификаций
      */
     private List<NotificationDto> getAllNotifications() {
-        String url = RestConfiguration.BASIC_URL
+        String url = restConfiguration.getBaseUrl()
                 + restConfiguration.getNotificationPort()
                 + restConfiguration.getNotificationCommonUrl()
                 + restConfiguration.getGetAllNotificationsUrl();
