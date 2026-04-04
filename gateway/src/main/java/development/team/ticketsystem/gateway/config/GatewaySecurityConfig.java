@@ -26,8 +26,10 @@ public class GatewaySecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(cors -> {})
                 .authorizeExchange(exchanges -> exchanges
 
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // swagger / openapi
                         .pathMatchers(
                                 "/swagger-ui.html",
