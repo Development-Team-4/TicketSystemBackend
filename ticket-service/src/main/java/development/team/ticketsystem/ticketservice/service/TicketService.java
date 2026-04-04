@@ -15,9 +15,9 @@ import development.team.ticketsystem.ticketservice.mappers.TicketMapper;
 import development.team.ticketsystem.ticketservice.repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.repository.criteria.TicketCriteriaRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.List;
@@ -34,6 +34,7 @@ public class TicketService {
     private final CategoryStaffService categoryStaffService;
     private final NotificationSender notificationSender;
     private final TicketMapper mapper;
+    private final TransactionTemplate transactionTemplate;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -165,48 +166,86 @@ public class TicketService {
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
     }
 
-    @Transactional
     public TicketResponse update(
             UserRole role,
             UUID userId,
             UUID id,
             UpdateTicketRequest request
     ) throws EntityNotFoundException, AccessDeniedException {
-        TicketEntity existing = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
-        checkNotClosed(existing);
 
-        if (!role.equals(UserRole.ADMIN) && !existing.getCreatedBy().equals(userId)) {
-            throw new AccessDeniedException("Cannot edit other user's ticket");
+        TicketEntity updated = transactionTemplate.execute(status -> {
+
+            TicketEntity existing = repository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+            checkNotClosed(existing);
+
+            if (!role.equals(UserRole.ADMIN) && !existing.getCreatedBy().equals(userId)) {
+                throw new AccessDeniedException("Cannot edit other user's ticket");
+            }
+
+            existing.setSubject(request.getSubject())
+                    .setDescription(request.getDescription())
+                    .setUpdatedAt(Instant.now());
+
+            return repository.save(existing);
+        });
+
+        if (updated == null) {
+            throw new RuntimeException("Updating ticket transaction failed");
         }
 
-        existing.setSubject(request.getSubject())
-                .setDescription(request.getDescription())
-                .setUpdatedAt(Instant.now());
-
-        TicketEntity updated = repository.save(existing);
         return mapper.toResponse(updated);
     }
 
-    @Transactional
     public void delete(UserRole role, UUID userId, UUID id) throws EntityNotFoundException, InvalidStateException {
-        TicketEntity ticket = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
-        if (!ticket.getStatus().equals(TicketStatus.OPEN)) {
-            throw new InvalidStateException("Only OPEN tickets can be deleted");
-        }
-        if (role.equals(UserRole.USER) && !ticket.getCreatedBy().equals(userId)) {
-            throw new InvalidStateException("You can not delete ticket of other user");
-        }
+        transactionTemplate.executeWithoutResult(status -> {
 
-        repository.deleteById(id);
+            TicketEntity ticket = repository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+            if (!ticket.getStatus().equals(TicketStatus.OPEN)) {
+                throw new InvalidStateException("Only OPEN tickets can be deleted");
+            }
+
+            if (role.equals(UserRole.USER) && !ticket.getCreatedBy().equals(userId)) {
+                throw new InvalidStateException("You can not delete ticket of other user");
+            }
+
+            repository.deleteById(id);
+        });
+
     }
 
     public TicketResponse updateStatus(UUID id, UpdateStatusRequest request)
             throws EntityNotFoundException, InvalidStateException {
 
-        TicketEntity updated = updateStatusWithTransaction(id, request);
+        TicketEntity updated = transactionTemplate.execute(status -> {
+
+            TicketEntity ticket = repository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+            checkNotClosed(ticket);
+
+            TicketStatus current = ticket.getStatus();
+
+            if (!ALLOWED_TRANSITIONS.get(current).contains(request.getStatus())) {
+                throw new InvalidStateException(
+                        "Invalid status transition: " + current + " -> " + request.getStatus()
+                );
+            }
+
+            ticket.setStatus(request.getStatus())
+                    .setUpdatedAt(Instant.now());
+
+            return repository.save(ticket);
+
+        });
+
+        if (updated == null) {
+            throw new RuntimeException("Updating ticket status transaction failed");
+        }
 
         sendToNotificationMicroservice(
                 updated.getCreatedBy(),
@@ -221,7 +260,25 @@ public class TicketService {
     public TicketResponse assign(UUID id, AssignTicketRequest assigneeId)
             throws EntityNotFoundException, InvalidStateException {
 
-        TicketEntity assigned = assignTicketWithTransaction(id, assigneeId);
+        TicketEntity assigned = transactionTemplate.execute(status -> {
+
+            TicketEntity ticket = repository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+            if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
+                throw new InvalidStateException("Cannot assign closed ticket");
+            }
+
+            ticket.setAssigneeId(assigneeId.getAssigneeId())
+                    .setUpdatedAt(Instant.now());
+
+            return repository.save(ticket);
+
+        });
+
+        if (assigned == null) {
+            throw new RuntimeException("Assigning ticket transaction failed");
+        }
 
         sendToNotificationMicroservice(
                 assigned.getCreatedBy(),
@@ -230,45 +287,6 @@ public class TicketService {
         );
 
         return mapper.toResponse(assigned);
-    }
-
-    @Transactional
-    private TicketEntity assignTicketWithTransaction(UUID id, AssignTicketRequest assigneeId)
-            throws EntityNotFoundException, InvalidStateException {
-
-        TicketEntity ticket = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
-
-        if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
-            throw new InvalidStateException("Cannot assign closed ticket");
-        }
-
-        ticket.setAssigneeId(assigneeId.getAssigneeId())
-                .setUpdatedAt(Instant.now());
-
-        return repository.save(ticket);
-    }
-
-    @Transactional
-    private TicketEntity updateStatusWithTransaction(UUID id, UpdateStatusRequest request)
-            throws EntityNotFoundException, InvalidStateException {
-
-        TicketEntity ticket = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
-        checkNotClosed(ticket);
-
-        TicketStatus current = ticket.getStatus();
-
-        if (!ALLOWED_TRANSITIONS.get(current).contains(request.getStatus())) {
-            throw new InvalidStateException(
-                    "Invalid status transition: " + current + " -> " + request.getStatus()
-            );
-        }
-
-        ticket.setStatus(request.getStatus())
-                .setUpdatedAt(Instant.now());
-
-        return repository.save(ticket);
     }
 
     private void sendToNotificationMicroservice(
