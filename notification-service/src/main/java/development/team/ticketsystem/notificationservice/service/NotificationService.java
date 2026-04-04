@@ -1,6 +1,6 @@
 package development.team.ticketsystem.notificationservice.service;
 
-import development.team.ticketsystem.notificationservice.configuration.NotificationTypeText;
+import development.team.ticketsystem.notificationservice.config.NotificationTypeText;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
@@ -80,9 +80,10 @@ public class NotificationService {
     }
 
     private String getTitle(NotificationType type) {
-        return null; //--так сложно было это подставить? (от D-ASA-D разработчику notification-service) Пожалуйста не делайте так:))
+        return this.notificationTypeText.getTemplate(type.name()).getTitle();
     }
+
     private String getMessage(NotificationType type) {
-        return null; //--так сложно было это подставить? (от D-ASA-D разработчику notification-service) Пожалуйста не делайте так:))
+        return this.notificationTypeText.getTemplate(type.name()).getMessage();
     }
 }
