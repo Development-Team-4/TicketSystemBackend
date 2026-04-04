@@ -9,17 +9,3 @@ spring:
     url: ${NOTIFICATION_DB_URL:jdbc:postgresql://notification-postgres:5432/notification_db}
     username: ${NOTIFICATION_DB_USER:postgres}
     password: ${NOTIFICATION_DB_PASSWORD:postgres}
-
-
-notifications:
-  status_change:
-    title: Status changed
-    message: Your ticket change status
-
-  comment:
-    title: New comment
-    message: On your ticket added new comment
-
-  assignee:
-    title: Ticket assignee
-    message: Your ticket has been assigned
