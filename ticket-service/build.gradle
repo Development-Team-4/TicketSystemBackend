@@ -29,6 +29,13 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// MapStruct
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+	// Совместимость Lombok с MapStruct
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
 	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -39,8 +46,7 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
 
 	// API Documentation
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
-
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 	// Test Dependencies 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

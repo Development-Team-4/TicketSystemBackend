@@ -1,16 +1,18 @@
 package development.team.ticketsystem.notificationservice.controller;
 
+import development.team.ticketsystem.notificationservice.dto.ErrorResponse;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Контроллер нотификаций", description = "Управление уведомлениями")
+@SecurityRequirement(name = "bearerAuth")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -34,21 +37,25 @@ public class NotificationController {
      *
      * @return список уведомлений
      */
-    @GetMapping("/get")
+    @GetMapping
     @Operation(summary = "Получить уведомления",
             description = "Возвращает уведомления всех пользователей. Доступно только администраторам")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Успешное получение списка уведомлений"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Доступ запрещен - требуется роль администратора"
+                    description = "Успешное получение списка уведомлений",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = NotificationDto.class))
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     public ResponseEntity<List<NotificationDto>> getAllNotifications() {
@@ -62,92 +69,42 @@ public class NotificationController {
      *
      * @param dto DTO для добавления нового уведомления
      */
-    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Получить уведомления пользователя",
-            description = "Получение всех уведомления конкретного пользователя")
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Создать уведомление",
+            description = "Создает новое уведомление для пользователя на основе переданного DTO"
+    )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "Успешное получение уведомлений пользователя",
+                    responseCode = "201",
+                    description = "Уведомление успешно создано",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = NotificationDto.class),
-                            examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            [
-                                                {
-                                                    "id": "550e8400-e29b-41d4-a716-446655440000",
-                                                    "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                    "ticket_id": "550e8400-e29b-41d4-a716-446655440002",
-                                                    "title": "Новый комментарий",
-                                                    "type": "COMMENT",
-                                                    "message": "К Вашему тикету добавлен новый комментарий",
-                                                    "sent": true,
-                                                    "created_at": "2024-01-15T10:30:00Z",
-                                                    "updated_at": "2024-01-15T10:30:00Z"
-                                                }
-                                            ]
-                                            """
-                            )
+                            schema = @Schema(implementation = NotificationDto.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Некорректный формат ID пользователя"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Пользователь не найден"
+                    description = "Ошибка валидации входных данных",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
-    public ResponseEntity<?> addNewNotification(
-            @Valid
-            @Parameter(
-                    description = "DTO для создания уведомления",
-                    required = true,
-                    schema = @Schema(implementation = NotificationCreationDto.class),
-                    examples = {
-                            @ExampleObject(
-                                    name = "Уведомление о комментарии",
-                                    value = """
-                                            {
-                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
-                                                "type": "COMMENT"
-                                            }
-                                            """
-                            ),
-                            @ExampleObject(
-                                    name = "Уведомление об изменении статуса",
-                                    value = """
-                                            {
-                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
-                                                "type": "STATUS_CHANGE"
-                                            }
-                                            """
-                            ),
-                            @ExampleObject(
-                                    name = "Уведомление о назначении",
-                                    value = """
-                                            {
-                                                "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                "ticket_id": "e1238262-8f77-43a2-8df1-90266c2d25f2",
-                                                "type": "ASSIGNMENT"
-                                            }
-                                            """
-                            )
-                    }
-            )
-            @RequestBody NotificationCreationDto dto) throws NotificationFormatException {
-        this.notificationService.addNewNotification(dto);
-
-        return ResponseEntity.status(201).build();
+    public ResponseEntity<NotificationDto> addNewNotification(
+            @Valid @RequestBody NotificationCreationDto dto
+    ) throws NotificationFormatException {
+        NotificationDto notification = notificationService.addNewNotification(dto);
+        return ResponseEntity.status(201).body(notification);
     }
 
     /**
@@ -164,38 +121,24 @@ public class NotificationController {
                     description = "Успешное получение уведомлений пользователя",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = NotificationDto.class),
-                            examples = @ExampleObject(
-                                    name = "Успешный ответ",
-                                    value = """
-                                            [
-                                                {
-                                                    "id": "550e8400-e29b-41d4-a716-446655440000",
-                                                    "user_id": "550e8400-e29b-41d4-a716-446655440001",
-                                                    "ticket_id": "550e8400-e29b-41d4-a716-446655440002",
-                                                    "title": "Новый комментарий"
-                                                    "type": "COMMENT",
-                                                    "message": "К Вашему тикету добавлен новый комментарий",
-                                                    "sent": true,
-                                                    "created_at": "2024-01-15T10:30:00Z",
-                                                    "updated_at": "2024-01-15T10:30:00Z"
-                                                }
-                                            ]
-                                            """
-                            )
+                            array = @ArraySchema(schema = @Schema(implementation = NotificationDto.class))
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Некорректный формат ID пользователя"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Пользователь не найден"
+                    description = "Некорректный формат ID пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     public ResponseEntity<List<NotificationDto>> getNotificationsOfSpecificUser(

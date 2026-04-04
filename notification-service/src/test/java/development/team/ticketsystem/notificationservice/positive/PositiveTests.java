@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.notificationservice.controller.NotificationController;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
+import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
 import development.team.ticketsystem.notificationservice.entity.NotificationType;
 import development.team.ticketsystem.notificationservice.exceptions.handlers.GlobalExceptionHandler;
+import development.team.ticketsystem.notificationservice.mapper.NotificationMapper;
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
 import development.team.ticketsystem.notificationservice.service.NotificationService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Позитивные тесты для notification-service")
 @Slf4j
+@RequiredArgsConstructor
 public class PositiveTests {
     private UUID userId;
     private UUID ticketId;
@@ -42,6 +47,9 @@ public class PositiveTests {
     private MockMvc mockMvc;
 
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private NotificationMapper notificationMapper;
 
     @Mock
     private NotificationRepository notificationRepository;
@@ -96,11 +104,10 @@ public class PositiveTests {
                 type
         );
 
-        Notification expectedNotification = new Notification(
-                this.userId,
-                this.ticketId,
-                type
-        );
+        NotificationDto expectedNotification = new NotificationDto();
+        expectedNotification.setTicketId(this.ticketId);
+        expectedNotification.setUserId(this.userId);
+        expectedNotification.setType(type);
 
         when(notificationService.addNewNotification(any(NotificationCreationDto.class)))
                 .thenReturn(expectedNotification);
@@ -113,27 +120,27 @@ public class PositiveTests {
         log.info("2. Получение сообщения в БД. Сравнение результатов");
 
         // Отправка сообщения по REST-у
-        this.mockMvc.perform(post("/notifications")
+        this.mockMvc.perform(post("/notifications/" + userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk());
+                .andExpect(status().is(201));
 
         // Отправка запроса на получение всех нотификаций
-        MvcResult notificationListMvcResult = this.mockMvc.perform(get("/notifications/get")
+        MvcResult notificationListMvcResult = this.mockMvc.perform(get("/notifications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        List<Notification> notificationList =
+        List<NotificationDto> notificationList =
                 this.objectMapper.readValue(
                         notificationListMvcResult.getResponse().getContentAsString(),
-                        new TypeReference<List<Notification>>() {}
+                        new TypeReference<List<NotificationDto>>() {}
                 );
 
         // Проверка наличия добавленой нотификации в БД
-        for(Notification n : notificationList) {
+        for(NotificationDto n : notificationList) {
             if(n.getSent() && n.getTicketId().equals(this.ticketId) && n.getUserId().equals(this.userId)) {
                 return true;
             }

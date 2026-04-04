@@ -1,6 +1,78 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 spring:
   application:
     name: gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth-openapi
+              uri: ${app.services.auth-uri}
+              predicates:
+                - Path=/auth/v3/api-docs
+              filters:
+                - RewritePath=/auth/(?<segment>.*), /${segment}
+
+            - id: auth-service
+              uri: ${app.services.auth-uri}
+              predicates:
+                - Path=/auth/**,/users/**,/.well-known/jwks.json
+
+            - id: ticket-openapi
+              uri: ${app.services.ticket-uri}
+              predicates:
+                - Path=/ticket/v3/api-docs
+              filters:
+                - RewritePath=/ticket/(?<segment>.*), /${segment}
+
+            - id: ticket-service
+              uri: ${app.services.ticket-uri}
+              predicates:
+                - Path=/tickets/**,/topics/**,/categories/**,/debug/**
+
+            - id: notification-openapi
+              uri: ${app.services.notification-uri}
+              predicates:
+                - Path=/notification/v3/api-docs
+              filters:
+                - RewritePath=/notification/(?<segment>.*), /${segment}
+
+            - id: notification-service
+              uri: ${app.services.notification-uri}
+              predicates:
+                - Path=/notifications/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+app:
+  services:
+    auth-uri: ${AUTH_SERVICE_URI:http://localhost:8082}
+    ticket-uri: ${TICKET_SERVICE_URI:http://localhost:8084}
+    notification-uri: ${NOTIFICATION_SERVICE_URI:http://localhost:8083}
+
+  security:
+    jwt:
+      issuer: ticket-system-auth
+      audience: ticket-system
+      jwk-set-uri: ${APP_SECURITY_JWT_JWK_SET_URI:${app.services.auth-uri}/.well-known/jwks.json}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls:
+      - name: auth-service
+        url: /auth/v3/api-docs
+      - name: ticket-service
+        url: /ticket/v3/api-docs
+      - name: notification-service
+        url: /notification/v3/api-docs
+    urlsPrimaryName: auth-service

@@ -2,9 +2,10 @@ package development.team.ticketsystem.authservice.controller;
 
 import development.team.ticketsystem.authservice.dto.auth.AuthResponse;
 import development.team.ticketsystem.authservice.dto.auth.LoginRequest;
+import development.team.ticketsystem.authservice.dto.auth.LogoutRequest;
+import development.team.ticketsystem.authservice.dto.auth.RefreshTokenRequest;
 import development.team.ticketsystem.authservice.dto.auth.RegisterRequest;
 import development.team.ticketsystem.authservice.dto.error.ErrorResponse;
-import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import development.team.ticketsystem.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +31,7 @@ public class AuthController {
 
     @Operation(
             summary = "Регистрация пользователя",
-            description = "Создает нового пользователя в системе и возвращает токен доступа вместе с данными созданного пользователя"
+            description = "Создает нового пользователя в системе и возвращает access token, refresh token и данные пользователя"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -43,7 +46,7 @@ public class AuthController {
                     responseCode = "409",
                     description = "Пользователь с таким email уже существует",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -51,7 +54,7 @@ public class AuthController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -66,14 +69,15 @@ public class AuthController {
                             schema = @Schema(implementation = RegisterRequest.class)
                     )
             )
-            @org.springframework.web.bind.annotation.RequestBody RegisterRequest request
+            @org.springframework.web.bind.annotation.RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return authService.register(request);
+        return authService.register(request, httpRequest);
     }
 
     @Operation(
             summary = "Авторизация пользователя",
-            description = "Проверяет email и пароль пользователя и возвращает токен доступа вместе с данными пользователя"
+            description = "Проверяет email и пароль пользователя и возвращает access token, refresh token и данные пользователя"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -88,7 +92,7 @@ public class AuthController {
                     responseCode = "401",
                     description = "Неверные учетные данные",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             ),
@@ -96,7 +100,7 @@ public class AuthController {
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
@@ -111,40 +115,64 @@ public class AuthController {
                             schema = @Schema(implementation = LoginRequest.class)
                     )
             )
-            @org.springframework.web.bind.annotation.RequestBody LoginRequest request
+            @org.springframework.web.bind.annotation.RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return authService.login(request);
+        return authService.login(request, httpRequest);
+    }
+
+    @Operation(
+            summary = "Обновить access token",
+            description = "Выдает новую пару access token и refresh token по валидному refresh token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Токены успешно обновлены",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AuthResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Refresh token недействителен, истек или был отозван",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @PostMapping("/refresh")
+    public AuthResponse refresh(
+            @org.springframework.web.bind.annotation.RequestBody RefreshTokenRequest request
+    ) {
+        return authService.refresh(request);
     }
 
     @Operation(
             summary = "Выход пользователя",
-            description = "Завершает пользовательскую сессию. Заглушка"
+            description = "Отзывает refresh token и при наличии помещает access token jti в Redis blacklist"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Выход выполнен успешно"
-            )
-    })
-    @PostMapping("/logout")
-    public void logout() {}
-
-    @Operation(
-            summary = "Получить текущего пользователя",
-            description = "Возвращает данные текущего аутентифицированного пользователя. Заглушка"
-    )
-    @ApiResponses(value = {
+            ),
             @ApiResponse(
-                    responseCode = "200",
-                    description = "Данные текущего пользователя успешно получены",
+                    responseCode = "401",
+                    description = "Refresh token недействителен",
                     content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UserResponse.class)
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
     })
-    @GetMapping("/me")
-    public UserResponse me() {
-        return new UserResponse();
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/logout")
+    public void logout(
+            @org.springframework.web.bind.annotation.RequestBody LogoutRequest request
+    ) {
+        authService.logout(request);
     }
 }
