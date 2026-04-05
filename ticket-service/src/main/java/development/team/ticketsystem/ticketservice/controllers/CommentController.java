@@ -32,7 +32,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class CommentController {
 
-    private final CommentService service;
+    private final CommentService commentService;
 
 
     @Operation(
@@ -111,7 +111,7 @@ public class CommentController {
             )
             @PathVariable UUID ticketId
     ) {
-        return service.getByTicket(ticketId);
+        return commentService.getByTicket(ticketId);
     }
 
     @Operation(
@@ -241,7 +241,7 @@ public class CommentController {
             )
             @RequestBody CreateCommentRequest request
     ) {
-        return service.create(
+        return commentService.create(
                 ticketId,
                 authorId,
                 request

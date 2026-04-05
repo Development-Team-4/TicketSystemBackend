@@ -1,10 +1,10 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.dto.topics.CreateTopicRequest;
 import development.team.ticketsystem.ticketservice.dto.topics.TopicResponse;
 import development.team.ticketsystem.ticketservice.service.TopicService;
-import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -34,7 +34,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class TopicController {
 
-    private final TopicService service;
+    private final TopicService topicService;
 
     @Operation(
             summary = "Получить все темы",
@@ -85,7 +85,7 @@ public class TopicController {
     })
     @GetMapping
     public List<TopicResponse> getTopics() {
-        return service.getAll();
+        return topicService.getAll();
     }
 
     @Operation(
@@ -188,7 +188,7 @@ public class TopicController {
             )
             @RequestBody CreateTopicRequest request
     ) {
-        return service.create(role, request);
+        return topicService.create(role, request);
     }
 
     @Operation(
@@ -298,7 +298,7 @@ public class TopicController {
         )
         @RequestBody CreateTopicRequest request
     ) {
-        return service.update(role, id, request);
+        return topicService.update(role, id, request);
     }
 
 }

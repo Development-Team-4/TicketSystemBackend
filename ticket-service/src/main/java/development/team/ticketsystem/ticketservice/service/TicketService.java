@@ -29,11 +29,11 @@ import java.util.UUID;
 @Service
 public class TicketService {
 
-    private final TicketRepository repository;
+    private final TicketRepository ticketRepository;
     private final TicketCriteriaRepository ticketCriteriaRepository;
     private final CategoryStaffService categoryStaffService;
     private final NotificationSender notificationSender;
-    private final TicketMapper mapper;
+    private final TicketMapper ticketMapper;
     private final TransactionTemplate transactionTemplate;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
@@ -54,8 +54,8 @@ public class TicketService {
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
-        TicketEntity saved = repository.save(ticket);
-        return mapper.toResponse(saved);
+        TicketEntity saved = ticketRepository.save(ticket);
+        return ticketMapper.toResponse(saved);
 
     }
 
@@ -90,7 +90,7 @@ public class TicketService {
 
         return ticketCriteriaRepository.findAllByFilters(filter)
                 .stream()
-                .map(mapper::toResponse)
+                .map(ticketMapper::toResponse)
                 .toList();
     }
 
@@ -162,7 +162,7 @@ public class TicketService {
     }
 
     public TicketResponse getById(UUID id) throws EntityNotFoundException {
-        return mapper.toResponse(repository.findById(id)
+        return ticketMapper.toResponse(ticketRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
     }
 
@@ -175,7 +175,7 @@ public class TicketService {
 
         TicketEntity updated = transactionTemplate.execute(status -> {
 
-            TicketEntity existing = repository.findById(id)
+            TicketEntity existing = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             checkNotClosed(existing);
@@ -188,21 +188,21 @@ public class TicketService {
                     .setDescription(request.getDescription())
                     .setUpdatedAt(Instant.now());
 
-            return repository.save(existing);
+            return ticketRepository.save(existing);
         });
 
         if (updated == null) {
             throw new RuntimeException("Updating ticket transaction failed");
         }
 
-        return mapper.toResponse(updated);
+        return ticketMapper.toResponse(updated);
     }
 
     public void delete(UserRole role, UUID userId, UUID id) throws EntityNotFoundException, InvalidStateException {
 
         transactionTemplate.executeWithoutResult(status -> {
 
-            TicketEntity ticket = repository.findById(id)
+            TicketEntity ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             if (!ticket.getStatus().equals(TicketStatus.OPEN)) {
@@ -213,7 +213,7 @@ public class TicketService {
                 throw new InvalidStateException("You can not delete ticket of other user");
             }
 
-            repository.deleteById(id);
+            ticketRepository.deleteById(id);
         });
 
     }
@@ -223,7 +223,7 @@ public class TicketService {
 
         TicketEntity updated = transactionTemplate.execute(status -> {
 
-            TicketEntity ticket = repository.findById(id)
+            TicketEntity ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             checkNotClosed(ticket);
@@ -239,7 +239,7 @@ public class TicketService {
             ticket.setStatus(request.getStatus())
                     .setUpdatedAt(Instant.now());
 
-            return repository.save(ticket);
+            return ticketRepository.save(ticket);
 
         });
 
@@ -253,7 +253,7 @@ public class TicketService {
                 NotificationType.STATUS_CHANGE
         );
 
-        return mapper.toResponse(updated);
+        return ticketMapper.toResponse(updated);
     }
 
 
@@ -262,7 +262,7 @@ public class TicketService {
 
         TicketEntity assigned = transactionTemplate.execute(status -> {
 
-            TicketEntity ticket = repository.findById(id)
+            TicketEntity ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
@@ -272,7 +272,7 @@ public class TicketService {
             ticket.setAssigneeId(assigneeId.getAssigneeId())
                     .setUpdatedAt(Instant.now());
 
-            return repository.save(ticket);
+            return ticketRepository.save(ticket);
 
         });
 
@@ -286,7 +286,7 @@ public class TicketService {
                 NotificationType.ASSIGNMENT
         );
 
-        return mapper.toResponse(assigned);
+        return ticketMapper.toResponse(assigned);
     }
 
     private void sendToNotificationMicroservice(

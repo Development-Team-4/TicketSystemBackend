@@ -24,17 +24,17 @@ import java.util.UUID;
 @Service
 public class CommentService {
 
-    private final CommentRepository repository;
+    private final CommentRepository commentRepository;
     private final TicketRepository ticketRepository;
     private final NotificationSender notificationSender;
-    private final CommentMapper mapper;
+    private final CommentMapper commentMapper;
 
     private final TransactionTemplate transactionTemplate;
 
     public List<CommentResponse> getByTicket(UUID ticketId) {
-        return repository.findByTicketId(ticketId)
+        return commentRepository.findByTicketId(ticketId)
                 .stream()
-                .map(mapper::toResponse)
+                .map(commentMapper::toResponse)
                 .toList();
     }
 
@@ -58,7 +58,7 @@ public class CommentService {
                     .createdAt(Instant.now())
                     .build();
 
-            CommentEntity saved = repository.save(comment);
+            CommentEntity saved = commentRepository.save(comment);
 
             return new CreateCommentTransactionResult(ticket, saved);
         });
@@ -76,7 +76,7 @@ public class CommentService {
                 )
         );
 
-        return mapper.toResponse(result.comment());
+        return commentMapper.toResponse(result.comment());
     }
 
     private record CreateCommentTransactionResult(

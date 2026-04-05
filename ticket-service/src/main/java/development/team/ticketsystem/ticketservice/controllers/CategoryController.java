@@ -1,11 +1,12 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
 
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.categories.AssignStaffRequest;
 import development.team.ticketsystem.ticketservice.dto.categories.CategoryResponse;
 import development.team.ticketsystem.ticketservice.dto.categories.CreateCategoryRequest;
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.service.CategoryService;
-import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -20,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +35,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class CategoryController {
 
-    private final CategoryService service;
+    private final CategoryService categoryService;
 
     @Operation(
             summary = "Получить все категории темы",
@@ -108,7 +108,7 @@ public class CategoryController {
             )
             @PathVariable UUID topicId
     ) {
-        return service.getByTopic(topicId);
+        return categoryService.getByTopic(topicId);
     }
 
 
@@ -181,7 +181,7 @@ public class CategoryController {
             )
             @PathVariable UUID id
     ) {
-        return service.getById(id);
+        return categoryService.getById(id);
     }
 
 
@@ -283,7 +283,7 @@ public class CategoryController {
             )
             @RequestBody CreateCategoryRequest request
     ) {
-        return service.create(role, topicId, request);
+        return categoryService.create(role, topicId, request);
     }
 
     @Operation(
@@ -382,7 +382,7 @@ public class CategoryController {
             )
             @RequestBody CreateCategoryRequest request
     ) {
-        return service.update(role, id, request);
+        return categoryService.update(role, id, request);
     }
 
     @Operation(
@@ -473,7 +473,7 @@ public class CategoryController {
             )
             @RequestBody AssignStaffRequest request
     ) {
-        service.assignStaffToCategory(role, id, request);
+        categoryService.assignStaffToCategory(role, id, request);
     }
 
 
@@ -554,7 +554,7 @@ public class CategoryController {
             )
             @PathVariable UUID staffId
     ) {
-        service.removeStaff(role, categoryId, staffId);
+        categoryService.removeStaff(role, categoryId, staffId);
     }
 
 }

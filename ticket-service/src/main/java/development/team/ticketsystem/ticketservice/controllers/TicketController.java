@@ -1,10 +1,10 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
+import development.team.ticketsystem.ticketservice.TicketStatus;
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
 import development.team.ticketsystem.ticketservice.service.TicketService;
-import development.team.ticketsystem.ticketservice.TicketStatus;
-import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -48,7 +48,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class TicketController {
 
-    private final TicketService service;
+    private final TicketService ticketService;
 
 
     @Operation(
@@ -142,7 +142,7 @@ public class TicketController {
             )
             @RequestBody CreateTicketRequest request
     ) {
-        return service.create(userId, request);
+        return ticketService.create(userId, request);
     }
 
     @Operation(
@@ -277,7 +277,7 @@ public class TicketController {
             )
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdBefore
     ) {
-         return service.getAll(
+         return ticketService.getAll(
                 role,
                 userId,
                 categoryId,
@@ -366,7 +366,7 @@ public class TicketController {
             )
             @PathVariable UUID id
     ) {
-        return service.getById(id);
+        return ticketService.getById(id);
     }
 
 
@@ -482,7 +482,7 @@ public class TicketController {
             )
             @RequestBody UpdateTicketRequest request
     ) {
-        return service.update(role, userId, id, request);
+        return ticketService.update(role, userId, id, request);
     }
 
     @Operation(
@@ -564,7 +564,7 @@ public class TicketController {
             )
             @PathVariable UUID id
     ) {
-        service.delete(role, userId, id);
+        ticketService.delete(role, userId, id);
     }
 
     @Operation(
@@ -678,7 +678,7 @@ public class TicketController {
             )
             @RequestBody UpdateStatusRequest request
     ) {
-        return service.updateStatus(id, request);
+        return ticketService.updateStatus(id, request);
     }
 
     @Operation(
@@ -784,7 +784,7 @@ public class TicketController {
             )
             @RequestBody AssignTicketRequest request
     ) {
-        return service.assign(id, request);
+        return ticketService.assign(id, request);
     }
 
 }

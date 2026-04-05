@@ -16,21 +16,21 @@ import java.util.UUID;
 @Service
 public class CategoryStaffService {
 
-    private final CategoryStaffRepository repository;
+    private final CategoryStaffRepository categoryStaffRepository;
     private final CategoryRepository categoryRepository;
 
     public List<CategoryStaffEntity> getByUser(UUID userId) {
-        return repository.findByUserId(userId);
+        return categoryStaffRepository.findByUserId(userId);
     }
 
     public boolean isUserInCategory(UUID userId, UUID categoryId) {
-        return repository.existsByCategoryIdAndUserId(categoryId, userId);
+        return categoryStaffRepository.existsByCategoryIdAndUserId(categoryId, userId);
     }
 
     @Transactional
     public void assignStaff(UUID categoryId, UUID staffId) throws InvalidStateException, EntityNotFoundException {
 
-        if (repository.existsByCategoryIdAndUserId(categoryId, staffId)) {
+        if (categoryStaffRepository.existsByCategoryIdAndUserId(categoryId, staffId)) {
             throw new InvalidStateException("Staff already assigned to this category");
         }
 
@@ -42,16 +42,16 @@ public class CategoryStaffService {
                 .userId(staffId)
                 .build();
 
-        repository.save(entity);
+        categoryStaffRepository.save(entity);
     }
 
     @Transactional
     public void removeStaff(UUID categoryId, UUID userId) throws InvalidStateException {
-        CategoryStaffEntity assignment = repository
+        CategoryStaffEntity assignment = categoryStaffRepository
                 .findByCategoryIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new InvalidStateException("Staff is not assigned to this category"));
 
-        repository.delete(assignment);
+        categoryStaffRepository.delete(assignment);
     }
 
 }
