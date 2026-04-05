@@ -451,7 +451,7 @@ public class CategoryController {
                     )
             )
     })
-    @PutMapping("categories/{id}/staff")
+    @PostMapping("categories/{id}/staff")
     public void assignStaffToCategory(
             @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
