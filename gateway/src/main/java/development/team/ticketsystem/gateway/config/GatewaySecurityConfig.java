@@ -70,7 +70,7 @@ public class GatewaySecurityConfig {
                         .hasAnyRole("ADMIN", "SUPPORT")
 
                         // category staff management
-                        .pathMatchers(HttpMethod.PUT, "/categories/*/staff")
+                        .pathMatchers(HttpMethod.POST, "/categories/*/staff")
                         .hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/categories/*/staff/**")
                         .hasRole("ADMIN")
