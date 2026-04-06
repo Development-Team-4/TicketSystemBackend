@@ -28,8 +28,20 @@ public class GatewaySecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
 
+                        // swagger / openapi
+                        .pathMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/auth/v3/api-docs",
+                                "/ticket/v3/api-docs",
+                                "/notification/v3/api-docs"
+                        ).permitAll()
                         // public
-                        .pathMatchers("/actuator/health", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .pathMatchers("/actuator/health").permitAll()
                         .pathMatchers("/auth/**", "/.well-known/jwks.json").permitAll()
 
                         // users

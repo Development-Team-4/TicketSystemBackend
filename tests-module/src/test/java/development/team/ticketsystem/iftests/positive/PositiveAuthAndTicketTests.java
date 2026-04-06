@@ -19,6 +19,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class PositiveAuthAndTicketTests {
     private RestClient adminRestClient;
 
+    /*
     private RestClient authClient;
 
     @Autowired
@@ -76,4 +77,6 @@ public class PositiveAuthAndTicketTests {
 
         return response.getAccessToken();
     }
+    
+     */
 }

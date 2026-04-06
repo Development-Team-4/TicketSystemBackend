@@ -2,46 +2,73 @@ package development.team.ticketsystem.iftests.configuration;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Getter
 @Setter
+@ConfigurationProperties(prefix = "tests")
 public class RestConfiguration {
-    @Value("${tests.urls.baseUrl}")
-    private String baseUrl;
+    private Urls urls = new Urls();
 
-    @Value("${tests.urls.auth.port}")
-    private String authPort;
+    @Getter
+    @Setter
+    public static class Urls {
+        private String baseUrl;
+        private Gateway gateway = new Gateway();
+        private Auth auth = new Auth();
+        private Ticket ticket = new Ticket();
+        private Notification notification = new Notification();
+    }
 
-    @Value("${tests.urls.ticket.port}")
-    private String ticketPort;
+    @Getter
+    @Setter
+    public static class Gateway {
+        private String port;
+    }
 
-    @Value("${tests.urls.ticket.common-url}")
-    private String ticketCommonUrl;
+    @Getter
+    @Setter
+    public static class Auth {
+        private String port;
+    }
 
-    @Value("${tests.urls.ticket.create-comment}")
-    private String createCommentUrl;
+    @Getter
+    @Setter
+    public static class Ticket {
+        private String port;
 
-    @Value("${tests.urls.ticket.change-status}")
-    private String changeStatusUrl;
+        // Маппинг kebab-case на camelCase
+        @org.springframework.boot.context.properties.bind.Name("common-url")
+        private String commonUrl;
 
-    @Value("${tests.urls.ticket.assignee-ticket}")
-    private String assigneeTicketUrl;
+        @org.springframework.boot.context.properties.bind.Name("create-comment")
+        private String createComment;
 
-    @Value("${tests.urls.ticket.create-ticket}")
-    private String createTicketUrl;
+        @org.springframework.boot.context.properties.bind.Name("change-status")
+        private String changeStatus;
 
-    @Value("${tests.urls.ticket.update-ticket}")
-    private String updateTicketUrl;
+        @org.springframework.boot.context.properties.bind.Name("assignee-ticket")
+        private String assigneeTicket;
 
-    @Value("${tests.urls.notification.port}")
-    private String notificationPort;
+        @org.springframework.boot.context.properties.bind.Name("create-ticket")
+        private String createTicket;
 
-    @Value("${tests.urls.notification.common-url}")
-    private String notificationCommonUrl;
+        @org.springframework.boot.context.properties.bind.Name("update-ticket")
+        private String updateTicket;
+    }
 
-    @Value("${tests.urls.notification.get-all-notifications}")
-    private String getAllNotificationsUrl;
+    @Getter
+    @Setter
+    public static class Notification {
+        private String port;
+
+        @org.springframework.boot.context.properties.bind.Name("common-url")
+        private String commonUrl;
+
+        @org.springframework.boot.context.properties.bind.Name("get-all-notifications")
+        private String getAllNotifications;
+    }
 }

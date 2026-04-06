@@ -3,15 +3,12 @@ package development.team.ticketsystem.iftests.positive;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.iftests.configuration.RestConfiguration;
 import development.team.ticketsystem.iftests.configuration.TestsConfiguration;
-import development.team.ticketsystem.iftests.dto.AuthResponse;
-import development.team.ticketsystem.iftests.dto.LoginRequest;
-import development.team.ticketsystem.iftests.dto.RegisterRequest;
+import development.team.ticketsystem.iftests.dto.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = TestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("Позитивные интеграционные тесты (auth-service)")
@@ -27,10 +25,10 @@ public class PositiveAuthTests {
     private RestConfiguration restConfiguration;
 
     @Autowired
-    private RestClient.Builder restClientBuilder;
+    private ObjectMapper objectMapper;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private RestClient.Builder restClientBuilder;
 
     private RestClient restClient;
     private String authToken;
@@ -38,26 +36,14 @@ public class PositiveAuthTests {
 
     @BeforeEach
     void setUpBase() {
-        baseUrl = restConfiguration.getBaseUrl() + restConfiguration.getAuthPort();
-        restClient = restClientBuilder.build();
+        this.baseUrl = this.restConfiguration.getUrls().getBaseUrl()
+                + this.restConfiguration.getUrls().getGateway().getPort();
+        this.restClient = RestClient.builder().build();
     }
 
-    protected void authenticate(String email, String password) {
-        var loginRequest = new LoginRequest(email, password);
-
-        var response = restClient.post()
-                .uri(baseUrl + "/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(loginRequest)
-                .retrieve()
-                .toEntity(AuthResponse.class);
-
-        this.authToken = response.getBody().getAccessToken();
-    }
-
-    protected RestClient authenticatedClient() {
-        return restClientBuilder
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+    private RestClient authenticatedClient() {
+        return this.restClientBuilder
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.authToken)
                 .build();
     }
 
@@ -71,21 +57,77 @@ public class PositiveAuthTests {
                 .build();
 
         ResponseEntity<Void> response = restClient.post()
-                .uri(baseUrl + "/auth/register")
+                .uri("http://localhost:8081/auth/register")
                 .body(request)
                 .retrieve()
                 .toBodilessEntity();
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+    @Test
+    @DisplayName("ТС-Auth-2 : Успешный вход и получение данных из tickets-service")
+    void succesfulAuthGettingTickets() {
+        this.commonSuccesfulAuthorizationAndGettingData("http://localhost:8081/tickets");
     }
 
     @Test
-    @DisplayName("ТС-Auth-2 : Успешный вход с уже существующим email")
-    void succesfulAuthByEmail() {
-        // Создание нового пользователя
+    @DisplayName("ТС-Auth-5 : Получение данных о себе без регистрации")
+    void takingUserDataWithoutRegistration() {
+        UserResponse response = this.restClient.get().uri("http://localhost:8082/auth/me")
+                .retrieve()
+                .body(UserResponse.class);
 
-        // Вход по email
+        assertEquals(null, response.getId());
+        assertEquals(null, response.getRole());
+        assertEquals(null, response.getCreatedAt());
+        assertEquals(null, response.getName());
+        assertEquals(null, response.getEmail());
+        assertEquals(null, response.getAvatar());
     }
 
+    private void commonSuccesfulAuthorizationAndGettingData(String url) {
+        // Данные пользователя
+        String password = "password123!";
+        String userName = "New User" + System.currentTimeMillis();
+        String email = "newuser_" + System.currentTimeMillis() + "@example.com";
 
+        // Создание нового пользователя
+        var request = RegisterRequest.builder()
+                .email(email)
+                .password(password)
+                .name(userName)
+                .build();
+
+        System.out.println(request);
+
+        ResponseEntity<AuthResponse> response = restClient.post()
+                .uri("http://localhost:8081/auth/register")
+                .body(request)
+                .retrieve()
+                .toEntity(AuthResponse.class);
+
+        this.authToken = response.getBody().getAccessToken();
+
+        // Получение данных
+        authenticatedClient().get()
+                .uri(url)
+                .exchange((request1, response1) -> {
+                    assertEquals(200, response1.getStatusCode().value(),
+                            "Ожидался статус 200 при запросе с авторизацией");
+                    return null;
+                });
+    }
+
+    private void authenticate(String email, String password) {
+        var loginRequest = new LoginRequest(email, password);
+
+        var response = restClient.post()
+                .uri(baseUrl + "/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(loginRequest)
+                .retrieve()
+                .toEntity(AuthResponse.class);
+
+        this.authToken = response.getBody().getAccessToken();
+    }
 }

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import java.util.UUID;
  Комментарии позволяют вести обсуждение тикета, добавлять уточнения, прикладывать дополнительную информацию
  и отслеживать ход решения проблемы.
  """)
+@SecurityRequirement(name = "bearerAuth")
 public class CommentController {
 
     private final CommentService service;
@@ -211,6 +213,7 @@ public class CommentController {
     @PostMapping("/tickets/{ticketId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentResponse addComment(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID authorId,
 
             @Parameter(

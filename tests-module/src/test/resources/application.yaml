@@ -1,17 +1,19 @@
 tests:
   urls:
-    baseUrl: "localhost:"
-    ticket:
-      port: 8084
-      common-url: "/tickets"
-      create-comment: "/%s/comments"
-      change-status: "/%s/status"
-      assignee-ticket: "/%s/assignee"
-      create-ticket: ""
-      update-ticket: ""
-    notification:
-      port: 8083
-      common-url: "/notifications"
-      get-all-notifications: "/get"
+    baseUrl: "http://localhost"
+    gateway:
+      port: "8081"
     auth:
-      port: 8082
+      port: "8082"
+    ticket:
+      port: "8084"
+      commonUrl: "/tickets"
+      createComment: "/%s/comments"
+      changeStatus: "/%s/status"
+      assigneeTicket: "/%s/assignee"
+      createTicket: ""
+      updateTicket: ""
+    notification:
+      port: "8083"
+      commonUrl: "/notifications"
+      getAllNotifications: "/get"

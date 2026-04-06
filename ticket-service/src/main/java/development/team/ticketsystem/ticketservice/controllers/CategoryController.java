@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import java.util.UUID;
 Управление категориями в системе поддержки.
  Категории группируют тикеты по тематикам внутри определенной темы.
  """)
+@SecurityRequirement(name = "bearerAuth")
 public class CategoryController {
 
     private final CategoryService service;
@@ -261,6 +263,7 @@ public class CategoryController {
     @PostMapping("/topics/{topicId}/categories")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse createCategory(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
 
             @Parameter(
@@ -359,6 +362,7 @@ public class CategoryController {
     })
     @PatchMapping("/categories/{id}")
     public CategoryResponse updateCategory(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
 
             @Parameter(
@@ -449,6 +453,7 @@ public class CategoryController {
     })
     @PutMapping("categories/{id}/staff")
     public void assignStaffToCategory(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
 
             @Parameter(
@@ -532,6 +537,7 @@ public class CategoryController {
     @DeleteMapping("categories/{categoryId}/staff/{staffId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeStaff(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
 
             @Parameter(

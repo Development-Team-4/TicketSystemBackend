@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -44,6 +45,7 @@ import java.util.UUID;
         - Сотрудник поддержки: доступ к назначенным тикетам и тикетам своей категории
         - Пользователь: доступ только к своим тикетам
         """)
+@SecurityRequirement(name = "bearerAuth")
 public class TicketController {
 
     private final TicketService service;
@@ -124,6 +126,7 @@ public class TicketController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TicketResponse createTicket(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -226,7 +229,9 @@ public class TicketController {
     })
     @GetMapping
     public List<TicketResponse> getTickets(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
 
             @Parameter(
@@ -452,7 +457,9 @@ public class TicketController {
     })
     @PutMapping("/{id}")
     public TicketResponse updateTicket(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
 
             @Parameter(
@@ -545,7 +552,9 @@ public class TicketController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTicket(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
 
             @Parameter(

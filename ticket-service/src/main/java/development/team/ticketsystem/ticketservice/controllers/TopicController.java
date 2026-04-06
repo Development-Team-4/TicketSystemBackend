@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import java.util.UUID;
  Темы представляют собой верхнеуровневые категории, объединяющие связанные тикеты.
  Например: 'Техническая поддержка', 'IT отдел'.
 """)
+@SecurityRequirement(name = "bearerAuth")
 public class TopicController {
 
     private final TopicService service;
@@ -168,6 +170,7 @@ public class TopicController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TopicResponse createTopic(
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -270,6 +273,7 @@ public class TopicController {
     })
     @PutMapping("/{id}")
     public TopicResponse updateTopic(
+        @Parameter(hidden = true)
         @RequestHeader("X-User-Role") UserRole role,
 
         @Parameter(
