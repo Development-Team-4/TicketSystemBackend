@@ -156,10 +156,10 @@ services:
         condition: service_started
     environment:
       SERVER_PORT: 80
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATA_REDIS_HOST: auth-redis
       SPRING_DATA_REDIS_PORT: 6379
-      APP_SECURITY_JWT_JWK_SET_URI: http://auth-service:8082/.well-known/jwks.json
-      SPRING_PROFILES_ACTIVE: docker
+      APP_SECURITY_JWT_JWK_SET_URI: http://auth-service/.well-known/jwks.json
     ports:
       - "8081:80"
     restart: unless-stopped
