@@ -15,7 +15,7 @@ public record AdminFilterBuilder() implements FilterBuilder {
                 .categoryId(request.getCategoryId())
                 .assignedTo(request.getAssignedTo())
                 .createdBy(request.getCreatedBy())
-                .status(String.valueOf(request.getStatus()))
+                .status(request.getStatus() != null ? request.getStatus().name() : null)
                 .createdAfter(request.getCreatedAfter())
                 .createdBefore(request.getCreatedBefore())
                 .build();

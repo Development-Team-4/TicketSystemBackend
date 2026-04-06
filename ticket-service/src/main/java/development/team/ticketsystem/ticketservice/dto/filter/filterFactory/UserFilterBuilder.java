@@ -13,7 +13,7 @@ public record UserFilterBuilder() implements FilterBuilder {
                 .role(UserRole.USER)
                 .userId(userId)
                 .createdBy(userId)
-                .status(String.valueOf(request.getStatus()))
+                .status(request.getStatus() != null ? request.getStatus().name() : null)
                 .createdAfter(request.getCreatedAfter())
                 .createdBefore(request.getCreatedBefore())
                 .build();

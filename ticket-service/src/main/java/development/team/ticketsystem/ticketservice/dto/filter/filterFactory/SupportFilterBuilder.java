@@ -22,7 +22,7 @@ public record SupportFilterBuilder(CategoryStaffService categoryStaffService) im
                 .userId(userId)
                 .categoryIds(request.getCategoryId() == null ? categories : List.of(request.getCategoryId()))
                 .assignedTo(userId)
-                .status(String.valueOf(request.getStatus()))
+                .status(request.getStatus() != null ? request.getStatus().name() : null)
                 .createdAfter(request.getCreatedAfter())
                 .createdBefore(request.getCreatedBefore())
                 .build();
