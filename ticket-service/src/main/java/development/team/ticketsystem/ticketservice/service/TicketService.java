@@ -3,6 +3,7 @@ package development.team.ticketsystem.ticketservice.service;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
+import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
 import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
@@ -62,62 +63,46 @@ public class TicketService {
     public List<TicketResponse> getAll(
             UserRole role,
             UUID userId,
-            UUID categoryId,
-            UUID assignedTo,
-            UUID createdBy,
-            String status,
-            Instant createdAfter,
-            Instant createdBefore
+            TicketFilterRequest filterRequest
     ) throws AccessDeniedException {
 
         validateRoleAccessToFilters(
                 role,
                 userId,
-                assignedTo,
-                createdBy
+                filterRequest
         );
 
-        TicketFilter filter = buildFilter(
+        TicketFilter criteriaFilter = buildCriteriaFilter(
                 role,
                 userId,
-                categoryId,
-                assignedTo,
-                createdBy,
-                status,
-                createdAfter,
-                createdBefore
+                filterRequest
         );
 
-        return ticketCriteriaRepository.findAllByFilters(filter)
+        return ticketCriteriaRepository.findAllByFilters(criteriaFilter)
                 .stream()
                 .map(ticketMapper::toResponse)
                 .toList();
     }
 
-    private void validateRoleAccessToFilters(UserRole role, UUID userId, UUID assignedTo, UUID createdBy) {
+    private void validateRoleAccessToFilters(UserRole role, UUID userId, TicketFilterRequest filters) {
         if (role.equals(UserRole.SUPPORT)) {
-            if (createdBy != null) {
+            if (filters.getCreatedBy() != null) {
                 throw new AccessDeniedException("Unable to filter by createdBy");
             }
-            if (assignedTo != null && !assignedTo.equals(userId)) {
+            if (filters.getAssignedTo() != null && !filters.getAssignedTo().equals(userId)) {
                 throw new AccessDeniedException("Staff can not view tickets assigned to others");
             }
         } else if (role.equals(UserRole.USER)) {
-            if (assignedTo != null) {
+            if (filters.getAssignedTo() != null) {
                 throw new AccessDeniedException("Users can not filter by assignedTo");
             }
         }
     }
 
-    private TicketFilter buildFilter(
+    private TicketFilter buildCriteriaFilter(
             UserRole role,
             UUID userId,
-            UUID categoryId,
-            UUID assignedTo,
-            UUID createdBy,
-            String status,
-            Instant createdAfter,
-            Instant createdBefore
+            TicketFilterRequest request
     ) {
 
         if (role == UserRole.SUPPORT) {
@@ -130,11 +115,11 @@ public class TicketService {
             return TicketFilter.builder()
                     .role(role)
                     .userId(userId)
-                    .categoryIds(categoryId == null ? categories : List.of(categoryId))
+                    .categoryIds(request.getCategoryId() == null ? categories : List.of(request.getCategoryId()))
                     .assignedTo(userId)
-                    .status(status)
-                    .createdAfter(createdAfter)
-                    .createdBefore(createdBefore)
+                    .status(String.valueOf(request.getStatus()))
+                    .createdAfter(request.getCreatedAfter())
+                    .createdBefore(request.getCreatedBefore())
                     .build();
         }
 
@@ -143,21 +128,21 @@ public class TicketService {
                     .role(role)
                     .userId(userId)
                     .createdBy(userId)
-                    .status(status)
-                    .createdAfter(createdAfter)
-                    .createdBefore(createdBefore)
+                    .status(String.valueOf(request.getStatus()))
+                    .createdAfter(request.getCreatedAfter())
+                    .createdBefore(request.getCreatedBefore())
                     .build();
         }
 
         return TicketFilter.builder()
                 .role(role)
                 .userId(userId)
-                .categoryId(categoryId)
-                .assignedTo(assignedTo)
-                .createdBy(createdBy)
-                .status(status)
-                .createdAfter(createdAfter)
-                .createdBefore(createdBefore)
+                .categoryId(request.getCategoryId())
+                .assignedTo(request.getAssignedTo())
+                .createdBy(request.getCreatedBy())
+                .status(String.valueOf(request.getStatus()))
+                .createdAfter(request.getCreatedAfter())
+                .createdBefore(request.getCreatedBefore())
                 .build();
     }
 

@@ -3,6 +3,7 @@ package development.team.ticketsystem.ticketservice.controllers;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
+import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
 import development.team.ticketsystem.ticketservice.service.TicketService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -234,58 +235,12 @@ public class TicketController {
             @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
 
-            @Parameter(
-                    description = "Фильтр по ID категории. Возвращает тикеты, принадлежащие указанной категории.",
-                    example = "770e8400-e29b-41d4-a716-446655440001",
-                    required = false
-            )
-            @RequestParam(required = false) UUID categoryId,
-
-            @Parameter(
-                    description = "Фильтр по ID назначенного сотрудника. Возвращает тикеты, назначенные на указанного сотрудника.",
-                    example = "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
-                    required = false
-            )
-            @RequestParam(required = false) UUID assignedTo,
-
-            @Parameter(
-                    description = "Фильтр по ID автора. Возвращает тикеты, созданные указанным пользователем.",
-                    example = "8f1e8e6e-3497-4690-bfc2-c7292e7438f1",
-                    required = false
-            )
-            @RequestParam(required = false) UUID createdBy,
-
-            @Parameter(
-                    description = "Фильтр по статусу тикета. Возвращает тикеты с указанным статусом.",
-                    example = "OPEN",
-                    schema = @Schema(allowableValues = {"OPEN", "ASSIGNED", "IN_PROGRESS", "RESOLVED", "CLOSED"}),
-                    required = false
-            )
-            @RequestParam(required = false) TicketStatus status,
-
-            @Parameter(
-                    description = "Фильтр по дате создания (после). Возвращает тикеты, созданные после указанной даты и времени.",
-                    example = "2024-01-01T00:00:00Z",
-                    required = false
-            )
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAfter,
-
-            @Parameter(
-                    description = "Фильтр по дате создания (до). Возвращает тикеты, созданные до указанной даты и времени.",
-                    example = "2024-12-31T23:59:59Z",
-                    required = false
-            )
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdBefore
+            @ModelAttribute TicketFilterRequest filterRequest
     ) {
          return ticketService.getAll(
                 role,
                 userId,
-                categoryId,
-                assignedTo,
-                createdBy,
-                status != null ? status.name() : null,
-                createdAfter,
-                createdBefore
+                filterRequest
         );
     }
 
