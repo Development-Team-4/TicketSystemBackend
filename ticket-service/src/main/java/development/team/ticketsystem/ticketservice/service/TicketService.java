@@ -161,9 +161,16 @@ public class TicketService {
                 .build();
     }
 
-    public TicketResponse getById(UUID id) throws EntityNotFoundException {
-        return ticketMapper.toResponse(ticketRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
+    public TicketResponse getById(UserRole role, UUID userId, UUID id) throws EntityNotFoundException {
+
+        TicketEntity ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        if (!canViewTicket(role, userId, ticket)) {
+            throw new AccessDeniedException("Access denied to this ticket");
+        }
+
+        return ticketMapper.toResponse(ticket);
     }
 
     public TicketResponse update(
@@ -180,8 +187,8 @@ public class TicketService {
 
             checkNotClosed(existing);
 
-            if (!role.equals(UserRole.ADMIN) && !existing.getCreatedBy().equals(userId)) {
-                throw new AccessDeniedException("Cannot edit other user's ticket");
+            if (!canEditTicket(role, userId, existing)) {
+                throw new AccessDeniedException("Cannot edit this ticket");
             }
 
             existing.setSubject(request.getSubject())
@@ -209,8 +216,8 @@ public class TicketService {
                 throw new InvalidStateException("Only OPEN tickets can be deleted");
             }
 
-            if (role.equals(UserRole.USER) && !ticket.getCreatedBy().equals(userId)) {
-                throw new InvalidStateException("You can not delete ticket of other user");
+            if (!canDeleteTicket(role, userId, ticket)) {
+                throw new AccessDeniedException("Cannot delete this ticket");
             }
 
             ticketRepository.deleteById(id);
@@ -309,4 +316,68 @@ public class TicketService {
         }
     }
 
+    private boolean canViewTicket(UserRole role, UUID userId, TicketEntity ticket) {
+
+        if (role == UserRole.ADMIN) {
+            return true;
+        }
+
+        if (role == UserRole.USER) {
+            return ticket.getCreatedBy().equals(userId);
+        }
+
+        if (role == UserRole.SUPPORT) {
+            boolean isAssignee = userId.equals(ticket.getAssigneeId());
+
+            boolean inCategory = categoryStaffService.getByUser(userId)
+                    .stream()
+                    .map(CategoryStaffEntity::getCategoryId)
+                    .anyMatch(catId -> catId.equals(ticket.getCategoryId()));
+
+            return isAssignee || inCategory;
+        }
+
+        return false; // на будущее для новых ролей
+    }
+
+    private boolean canEditTicket(UserRole role, UUID userId, TicketEntity ticket) {
+
+        if (role == UserRole.ADMIN) {
+            return true;
+        }
+
+        if (role == UserRole.USER) {
+            return ticket.getCreatedBy().equals(userId);
+        }
+
+        if (role == UserRole.SUPPORT) {
+            return userId.equals(ticket.getAssigneeId());
+        }
+
+        return false;
+    }
+
+    private boolean canDeleteTicket(UserRole role, UUID userId, TicketEntity ticket) {
+
+        if (role == UserRole.ADMIN) {
+            return true;
+        }
+
+        if (role == UserRole.USER) {
+            return ticket.getCreatedBy().equals(userId);
+        }
+
+        if (role == UserRole.SUPPORT) {
+            boolean isAssignee = userId.equals(ticket.getAssigneeId());
+
+            boolean inCategory = categoryStaffService.getByUser(userId)
+                    .stream()
+                    .map(CategoryStaffEntity::getCategoryId)
+                    .anyMatch(catId -> catId.equals(ticket.getCategoryId()));
+
+            return isAssignee || inCategory;
+        }
+
+        return false;
+    }
 }

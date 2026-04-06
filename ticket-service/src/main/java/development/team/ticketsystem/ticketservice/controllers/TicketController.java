@@ -359,6 +359,13 @@ public class TicketController {
     })
     @GetMapping("/{id}")
     public TicketResponse getTicket(
+            @Parameter(hidden = true)
+            @RequestHeader("X-User-Id") UUID userId,
+
+            @Parameter(hidden = true)
+            @RequestHeader("X-User-Role") UserRole userRole,
+
+
             @Parameter(
                     description = "Уникальный идентификатор тикета",
                     example = "550e8400-e29b-41d4-a716-446655440001",
@@ -366,7 +373,7 @@ public class TicketController {
             )
             @PathVariable UUID id
     ) {
-        return ticketService.getById(id);
+        return ticketService.getById(userRole, userId, id);
     }
 
 
