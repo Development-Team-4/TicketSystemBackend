@@ -4,6 +4,10 @@ import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
+import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.AdminFilterBuilder;
+import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.FilterBuilder;
+import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.SupportFilterBuilder;
+import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.UserFilterBuilder;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
 import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
@@ -104,46 +108,15 @@ public class TicketService {
             UUID userId,
             TicketFilterRequest request
     ) {
+        return getFilterBuilder(role).build(userId, request);
+    }
 
-        if (role == UserRole.SUPPORT) {
-
-            List<UUID> categories = categoryStaffService.getByUser(userId)
-                    .stream()
-                    .map(CategoryStaffEntity::getCategoryId)
-                    .toList();
-
-            return TicketFilter.builder()
-                    .role(role)
-                    .userId(userId)
-                    .categoryIds(request.getCategoryId() == null ? categories : List.of(request.getCategoryId()))
-                    .assignedTo(userId)
-                    .status(String.valueOf(request.getStatus()))
-                    .createdAfter(request.getCreatedAfter())
-                    .createdBefore(request.getCreatedBefore())
-                    .build();
-        }
-
-        if (role == UserRole.USER) {
-            return TicketFilter.builder()
-                    .role(role)
-                    .userId(userId)
-                    .createdBy(userId)
-                    .status(String.valueOf(request.getStatus()))
-                    .createdAfter(request.getCreatedAfter())
-                    .createdBefore(request.getCreatedBefore())
-                    .build();
-        }
-
-        return TicketFilter.builder()
-                .role(role)
-                .userId(userId)
-                .categoryId(request.getCategoryId())
-                .assignedTo(request.getAssignedTo())
-                .createdBy(request.getCreatedBy())
-                .status(String.valueOf(request.getStatus()))
-                .createdAfter(request.getCreatedAfter())
-                .createdBefore(request.getCreatedBefore())
-                .build();
+    private FilterBuilder getFilterBuilder(UserRole role) {
+        return switch (role) {
+            case UserRole.SUPPORT -> new SupportFilterBuilder(categoryStaffService);
+            case UserRole.USER -> new UserFilterBuilder();
+            case UserRole.ADMIN -> new AdminFilterBuilder();
+        };
     }
 
     public TicketResponse getById(UserRole role, UUID userId, UUID id) throws EntityNotFoundException {
