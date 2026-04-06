@@ -1,5 +1,6 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.comments.CommentResponse;
 import development.team.ticketsystem.ticketservice.dto.comments.CreateCommentRequest;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
@@ -132,7 +133,7 @@ public class CommentController {
                     - После добавления комментария, все участники тикета получают уведомление (если настроено)
                     - Комментарии нельзя редактировать после создания
                     
-                    Эндпоинт доступен всем участникам тикета (автору, назначенному сотруднику, администраторам).
+                    Эндпоинт доступен всем участникам тикета (автору, назначенному сотруднику, сотрудникам категории, администраторам).
                     """
     )
     @ApiResponses(value = {
@@ -216,6 +217,9 @@ public class CommentController {
             @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID authorId,
 
+            @Parameter(hidden = true)
+            @RequestHeader("X-User-Role") UserRole authorRole,
+
             @Parameter(
                     description = "Уникальный идентификатор тикета, к которому добавляется комментарий",
                     example = "550e8400-e29b-41d4-a716-446655440000",
@@ -244,6 +248,7 @@ public class CommentController {
         return commentService.create(
                 ticketId,
                 authorId,
+                authorRole,
                 request
         );
     }
