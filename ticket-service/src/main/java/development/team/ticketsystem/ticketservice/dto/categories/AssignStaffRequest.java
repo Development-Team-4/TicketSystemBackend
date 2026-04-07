@@ -18,6 +18,6 @@ public class AssignStaffRequest {
             example = "550e8400-e29b-41d4-a716-446655440000",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @JsonProperty("staffId")
-    private UUID staffId;
+    @JsonProperty("categoryId")
+    private UUID categoryId;
 }

@@ -76,7 +76,7 @@ public class CategoryService {
         if (!role.equals(UserRole.ADMIN)) {
             throw new AccessDeniedException("Only admin can assign staff");
         }
-        categoryStaffService.assignStaff(id, request.getStaffId());
+        categoryStaffService.assignStaff(id, request.getCategoryId());
     }
 
     public void removeStaff(UserRole role,
