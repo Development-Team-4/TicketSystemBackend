@@ -90,4 +90,14 @@ public class CategoryService {
         categoryStaffService.removeStaff(categoryId, staffId);
     }
 
+    @Transactional
+    public boolean isStaffAssignedToCategory(UUID categoryId, UUID staffId) {
+
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new AccessDeniedException("Category with this ID does not exist");
+        }
+
+        return categoryStaffService.isUserInCategory(staffId, categoryId);
+    }
+
 }
