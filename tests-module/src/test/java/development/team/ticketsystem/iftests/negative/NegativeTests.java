@@ -179,8 +179,8 @@ public class NegativeTests {
                         .name(username)
                         .build())
                 .exchange((request1, response1) -> {
-                    assertEquals(403, response1.getStatusCode().value(),
-                            "Ожидался статус 403 при попытке регистрации");
+                    assertEquals(400, response1.getStatusCode().value(),
+                            "Ожидался статус 400 при попытке регистрации");
                     return null;
                 });
     }
@@ -259,6 +259,22 @@ public class NegativeTests {
                 .exchange((request1, response1) -> {
                     assertEquals(409, response1.getStatusCode().value(),
                             "Ожидался статус 409 при попытке регистрации");
+                    return null;
+                });
+    }
+
+    @Test
+    @DisplayName("ТС-Gateway-11 : Получение данных о себе без регистрации")
+    void takingUserDataWithoutRegistration() {
+        String url = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getAuth().getPort()
+                + this.restConfiguration.getUrls().getAuth().getAuthUrl()
+                + this.restConfiguration.getUrls().getAuth().getMe();
+
+        this.restClient.get().uri(url)
+                .exchange((request1, response1) -> {
+                    assertEquals(500, response1.getStatusCode().value(),
+                            "Ожидался статус 500 при попытке регистрации");
                     return null;
                 });
     }

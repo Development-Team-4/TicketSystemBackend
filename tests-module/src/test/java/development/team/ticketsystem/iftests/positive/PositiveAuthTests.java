@@ -71,26 +71,6 @@ public class PositiveAuthTests {
         this.commonSuccesfulAuthorizationAndGettingData(urlTickets);
     }
 
-    @Test
-    @DisplayName("ТС-Auth-5 : Получение данных о себе без регистрации")
-    void takingUserDataWithoutRegistration() {
-        String url = this.restConfiguration.getUrls().getBaseUrl() + ":"
-                + this.restConfiguration.getUrls().getAuth().getPort()
-                + this.restConfiguration.getUrls().getAuth().getAuthUrl()
-                + this.restConfiguration.getUrls().getAuth().getMe();
-
-        UserResponse response = this.restClient.get().uri(url)
-                .retrieve()
-                .body(UserResponse.class);
-
-        assertEquals(null, response.getId());
-        assertEquals(null, response.getRole());
-        assertEquals(null, response.getCreatedAt());
-        assertEquals(null, response.getName());
-        assertEquals(null, response.getEmail());
-        assertEquals(null, response.getAvatar());
-    }
-
     private void commonSuccesfulAuthorizationAndGettingData(String url) {
         // Данные пользователя
         String password = "password123!";
