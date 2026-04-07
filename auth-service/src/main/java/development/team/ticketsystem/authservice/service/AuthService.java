@@ -11,6 +11,7 @@ import development.team.ticketsystem.authservice.exception.EmailAlreadyExistsExc
 import development.team.ticketsystem.authservice.exception.InvalidCredentialsException;
 import development.team.ticketsystem.authservice.exception.UserNotFoundException;
 import development.team.ticketsystem.authservice.repository.UserRepository;
+import development.team.ticketsystem.authservice.validation.UserValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +28,24 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
     private final TokenBlacklistWriterService tokenBlacklistWriterService;
+    private final UserValidator validator;
 
     @Transactional
     public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String email = validator.normalizeEmail(request.getEmail());
+        String name = validator.normalizeName(request.getName());
+
+        validator.validateEmail(email);
+        validator.validatePassword(request.getPassword());
+        validator.validateName(name);
+
+        if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException();
         }
 
         User user = User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
+                .name(name)
+                .email(email)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
                 .createdAt(Instant.now())
@@ -53,7 +62,12 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
-        User user = userRepository.findByEmail(request.getEmail())
+        String email = validator.normalizeEmail(request.getEmail());
+
+        validator.validateEmail(email);
+        validator.validateLoginPassword(request.getPassword());
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
