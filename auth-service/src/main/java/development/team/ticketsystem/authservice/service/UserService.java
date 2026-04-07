@@ -13,6 +13,7 @@ import development.team.ticketsystem.authservice.exception.UserNotFoundException
 import development.team.ticketsystem.authservice.mapper.UserMapper;
 import development.team.ticketsystem.authservice.repository.UserNotificationSettingsRepository;
 import development.team.ticketsystem.authservice.repository.UserRepository;
+import development.team.ticketsystem.authservice.validation.UserValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserNotificationSettingsRepository settingsRepository;
     private final UserMapper mapper;
+    private final UserValidator validator;
 
     public UserResponse getById(UUID id) {
         return mapper.toResponse(getUserOrThrow(id));
@@ -46,7 +48,8 @@ public class UserService {
         User user = getUserOrThrow(id);
 
         if (request.getName() != null) {
-            user.setName(request.getName());
+            validator.validateName(request.getName());
+            user.setName(validator.normalizeName(request.getName()));
         }
 
         if (request.getAvatar() != null) {
@@ -65,6 +68,9 @@ public class UserService {
 
     @Transactional
     public NotificationSettingsResponse updateSettings(UUID id, UpdateNotificationSettingsRequest request) {
+        validator.validateEmail(request.getEmailEnabled());
+        String email = validator.normalizeEmail(request.getEmailEnabled());
+
         User user = getUserOrThrow(id);
 
         UserNotificationSettings settings = settingsRepository.findById(id)
@@ -74,7 +80,7 @@ public class UserService {
                     return newSettings;
                 });
 
-        settings.setEmailEnabled(request.getEmailEnabled());
+        settings.setEmailEnabled(email);
         settings.setTelegramEnabled(request.getTelegramEnabled());
 
         return mapper.toResponse(settingsRepository.save(settings));

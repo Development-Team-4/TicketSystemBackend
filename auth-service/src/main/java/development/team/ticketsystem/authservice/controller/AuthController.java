@@ -6,7 +6,6 @@ import development.team.ticketsystem.authservice.dto.auth.LogoutRequest;
 import development.team.ticketsystem.authservice.dto.auth.RefreshTokenRequest;
 import development.team.ticketsystem.authservice.dto.auth.RegisterRequest;
 import development.team.ticketsystem.authservice.dto.error.ErrorResponse;
-import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import development.team.ticketsystem.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

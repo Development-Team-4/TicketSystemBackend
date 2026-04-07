@@ -48,7 +48,6 @@ public class RefreshTokenService {
         return new AuthResponse(
                 accessToken,
                 "Bearer",
-                userMapper.toResponse(user),
                 refreshRaw,
                 jwtProperties.getAccessTokenTtlSeconds(),
                 accessJti

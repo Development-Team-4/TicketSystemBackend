@@ -29,13 +29,6 @@ public class AuthResponse {
     private String tokenType;
 
     @Schema(
-            description = "Данные аутентифицированного пользователя",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    @JsonProperty("user")
-    private UserResponse user;
-
-    @Schema(
             description = "Refresh token",
             requiredMode = Schema.RequiredMode.REQUIRED
     )

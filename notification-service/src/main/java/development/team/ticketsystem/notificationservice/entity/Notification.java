@@ -45,7 +45,13 @@ public class Notification {
 
     @PrePersist
     private void prePersist() {
-        this.createdAt = Timestamp.from(Instant.now());
+        Timestamp now = Timestamp.from(Instant.now());
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void preUpdate() {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 }

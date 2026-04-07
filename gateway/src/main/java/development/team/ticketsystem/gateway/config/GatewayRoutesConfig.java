@@ -1,3 +1,4 @@
+/*
 package development.team.ticketsystem.gateway.config;
 
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -38,3 +39,4 @@ public class GatewayRoutesConfig {
                 .build();
     }
 }
+*/
