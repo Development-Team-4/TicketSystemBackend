@@ -78,3 +78,79 @@ CREATE INDEX idx_ticket_category ON tickets (category_id);
 CREATE INDEX idx_ticket_assignee ON tickets (assignee_id);
 CREATE INDEX idx_ticket_created_at ON tickets (created_at);
 CREATE INDEX idx_comment_ticket ON comments (ticket_id);
+
+
+
+
+
+-- АУДИТ
+
+CREATE TABLE audit_log
+(
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    table_name VARCHAR(255) NOT NULL,
+    operation VARCHAR(10) NOT NULL,
+
+    record_id uuid NOT NULL,
+
+    old_data JSONB,
+    new_data JSONB,
+
+    changed_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_audit_table_name ON audit_log(table_name);
+CREATE INDEX idx_audit_record_id ON audit_log(record_id);
+CREATE INDEX idx_audit_changed_at ON audit_log(changed_at);
+
+
+CREATE OR REPLACE FUNCTION audit_trigger_function()
+RETURNS TRIGGER AS
+$$
+    BEGIN
+        IF (TG_OP = 'INSERT') THEN
+            INSERT INTO audit_log(table_name, operation, record_id, new_data)
+            VALUES (TG_TABLE_NAME, TG_OP, NEW.id, to_jsonb(NEW));
+    RETURN NEW;
+
+    ELSIF (TG_OP = 'UPDATE' AND OLD IS DISTINCT FROM NEW) THEN
+            INSERT INTO audit_log(table_name, operation, record_id, old_data, new_data)
+            VALUES (TG_TABLE_NAME, TG_OP, NEW.id, to_jsonb(OLD), to_jsonb(NEW));
+    RETURN NEW;
+
+    ELSIF (TG_OP = 'DELETE') THEN
+            INSERT INTO audit_log(table_name, operation, record_id, old_data)
+            VALUES (TG_TABLE_NAME, TG_OP, OLD.id, to_jsonb(OLD));
+    RETURN OLD;
+    END IF;
+
+    RETURN NULL;
+    END;
+$$
+    LANGUAGE plpgsql;
+
+
+CREATE TRIGGER audit_tickets_trigger
+    AFTER INSERT OR UPDATE OR DELETE
+                    ON tickets
+                        FOR EACH ROW
+                        EXECUTE FUNCTION audit_trigger_function();
+
+CREATE TRIGGER audit_comments_trigger
+    AFTER INSERT OR UPDATE OR DELETE
+                    ON comments
+                        FOR EACH ROW
+                        EXECUTE FUNCTION audit_trigger_function();
+
+CREATE TRIGGER audit_categories_trigger
+    AFTER INSERT OR UPDATE OR DELETE
+                    ON categories
+                        FOR EACH ROW
+                        EXECUTE FUNCTION audit_trigger_function();
+
+CREATE TRIGGER audit_topics_trigger
+    AFTER INSERT OR UPDATE OR DELETE
+                    ON topics
+                        FOR EACH ROW
+                        EXECUTE FUNCTION audit_trigger_function();
