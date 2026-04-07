@@ -5,6 +5,11 @@ tests:
       port: "8081"
     auth:
       port: "8082"
+      usersUrl: "/users"
+      authUrl: "/auth"
+      login: "/login"
+      register: "/register"
+      me: "/me"
     ticket:
       port: "8084"
       commonUrl: "/tickets"

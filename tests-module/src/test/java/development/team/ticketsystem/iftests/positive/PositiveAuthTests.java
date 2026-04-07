@@ -2,7 +2,7 @@ package development.team.ticketsystem.iftests.positive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.iftests.configuration.RestConfiguration;
-import development.team.ticketsystem.iftests.configuration.TestsConfiguration;
+import development.team.ticketsystem.iftests.configuration.UnifiedTestConfiguration;
 import development.team.ticketsystem.iftests.dto.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,14 +18,11 @@ import org.springframework.web.client.RestClient;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(classes = TestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(classes = UnifiedTestConfiguration.class)
 @DisplayName("Позитивные интеграционные тесты (auth-service)")
 public class PositiveAuthTests {
     @Autowired
     private RestConfiguration restConfiguration;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private RestClient.Builder restClientBuilder;
@@ -41,15 +38,14 @@ public class PositiveAuthTests {
         this.restClient = RestClient.builder().build();
     }
 
-    private RestClient authenticatedClient() {
-        return this.restClientBuilder
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.authToken)
-                .build();
-    }
-
     @Test
     @DisplayName("ТС-Auth-1 : Успешная регистрация нового пользователя")
     void succesfulUserRegistration() {
+        String urlToRegister = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getGateway().getPort()
+                + this.restConfiguration.getUrls().getAuth().getAuthUrl()
+                + this.restConfiguration.getUrls().getAuth().getRegister();
+
         var request = RegisterRequest.builder()
                 .email("newuser_" + System.currentTimeMillis() + "@example.com")
                 .password("Password123!")
@@ -57,23 +53,33 @@ public class PositiveAuthTests {
                 .build();
 
         ResponseEntity<Void> response = restClient.post()
-                .uri("http://localhost:8081/auth/register")
+                .uri(urlToRegister)
                 .body(request)
                 .retrieve()
                 .toBodilessEntity();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+
     @Test
     @DisplayName("ТС-Auth-2 : Успешный вход и получение данных из tickets-service")
     void succesfulAuthGettingTickets() {
-        this.commonSuccesfulAuthorizationAndGettingData("http://localhost:8081/tickets");
+        String urlTickets = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getGateway().getPort()
+                + this.restConfiguration.getUrls().getTicket().getCommonUrl();
+
+        this.commonSuccesfulAuthorizationAndGettingData(urlTickets);
     }
 
     @Test
     @DisplayName("ТС-Auth-5 : Получение данных о себе без регистрации")
     void takingUserDataWithoutRegistration() {
-        UserResponse response = this.restClient.get().uri("http://localhost:8082/auth/me")
+        String url = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getAuth().getPort()
+                + this.restConfiguration.getUrls().getAuth().getAuthUrl()
+                + this.restConfiguration.getUrls().getAuth().getMe();
+
+        UserResponse response = this.restClient.get().uri(url)
                 .retrieve()
                 .body(UserResponse.class);
 
@@ -100,8 +106,13 @@ public class PositiveAuthTests {
 
         System.out.println(request);
 
+        String urlRegister = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getGateway().getPort()
+                + this.restConfiguration.getUrls().getAuth().getAuthUrl()
+                + this.restConfiguration.getUrls().getAuth().getRegister();
+
         ResponseEntity<AuthResponse> response = restClient.post()
-                .uri("http://localhost:8081/auth/register")
+                .uri(urlRegister)
                 .body(request)
                 .retrieve()
                 .toEntity(AuthResponse.class);
@@ -122,12 +133,20 @@ public class PositiveAuthTests {
         var loginRequest = new LoginRequest(email, password);
 
         var response = restClient.post()
-                .uri(baseUrl + "/auth/login")
+                .uri(baseUrl
+                        + this.restConfiguration.getUrls().getAuth().getAuthUrl()
+                        + this.restConfiguration.getUrls().getAuth().getLogin())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(loginRequest)
                 .retrieve()
                 .toEntity(AuthResponse.class);
 
         this.authToken = response.getBody().getAccessToken();
+    }
+
+    private RestClient authenticatedClient() {
+        return this.restClientBuilder
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.authToken)
+                .build();
     }
 }

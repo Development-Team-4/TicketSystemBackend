@@ -3,10 +3,9 @@ package development.team.ticketsystem.iftests.configuration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "tests")
@@ -33,6 +32,21 @@ public class RestConfiguration {
     @Setter
     public static class Auth {
         private String port;
+
+        @org.springframework.boot.context.properties.bind.Name("users-url")
+        private String usersUrl;
+
+        @org.springframework.boot.context.properties.bind.Name("auth-url")
+        private String authUrl;
+
+        @org.springframework.boot.context.properties.bind.Name("login")
+        private String login;
+
+        @org.springframework.boot.context.properties.bind.Name("register")
+        private String register;
+
+        @org.springframework.boot.context.properties.bind.Name("me")
+        private String me;
     }
 
     @Getter
@@ -40,7 +54,6 @@ public class RestConfiguration {
     public static class Ticket {
         private String port;
 
-        // Маппинг kebab-case на camelCase
         @org.springframework.boot.context.properties.bind.Name("common-url")
         private String commonUrl;
 
