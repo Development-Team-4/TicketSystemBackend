@@ -4,10 +4,8 @@ import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
-import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.AdminFilterBuilder;
-import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.FilterBuilder;
-import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.SupportFilterBuilder;
-import development.team.ticketsystem.ticketservice.dto.filter.filterFactory.UserFilterBuilder;
+import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterBuilder;
+import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterResolver;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
 import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
@@ -40,6 +38,7 @@ public class TicketService {
     private final NotificationSender notificationSender;
     private final TicketMapper ticketMapper;
     private final TransactionTemplate transactionTemplate;
+    private final FilterResolver filterResolver;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -108,15 +107,8 @@ public class TicketService {
             UUID userId,
             TicketFilterRequest request
     ) {
-        return getFilterBuilder(role).build(userId, request);
-    }
-
-    private FilterBuilder getFilterBuilder(UserRole role) {
-        return switch (role) {
-            case UserRole.SUPPORT -> new SupportFilterBuilder(categoryStaffService);
-            case UserRole.USER -> new UserFilterBuilder();
-            case UserRole.ADMIN -> new AdminFilterBuilder();
-        };
+        FilterBuilder builder = filterResolver.resolve(role);
+        return builder.build(userId, request);
     }
 
     public TicketResponse getById(UserRole role, UUID userId, UUID id) throws EntityNotFoundException {
