@@ -1,11 +1,13 @@
-package development.team.ticketsystem.ticketservice.dto.filter.filterFactory;
+package development.team.ticketsystem.ticketservice.dto.filter.filterStrategy;
 
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Component
 public record AdminFilterBuilder() implements FilterBuilder {
     @Override
     public TicketFilter build(UUID userId, TicketFilterRequest request) {
@@ -19,5 +21,10 @@ public record AdminFilterBuilder() implements FilterBuilder {
                 .createdAfter(request.getCreatedAfter())
                 .createdBefore(request.getCreatedBefore())
                 .build();
+    }
+
+    @Override
+    public boolean supports(UserRole role) {
+        return role == UserRole.ADMIN;
     }
 }
