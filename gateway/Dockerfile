@@ -1,9 +1,16 @@
+FROM gradle:8.5-jdk21 AS builder
+
+WORKDIR /app
+COPY . .
+RUN gradle clean build -x test
+
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY build/libs/*.jar app.jar
+RUN addgroup --system spring && adduser --system spring --ingroup spring
+USER spring
 
-EXPOSE 8081
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

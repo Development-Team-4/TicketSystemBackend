@@ -1,7 +1,9 @@
 package development.team.ticketsystem.authservice.config;
 
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.*;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -15,6 +17,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,8 +30,8 @@ public class JwtConfig {
 
     @Bean
     public RSAKey rsaJwk() {
-        RSAPublicKey publicKey = pemKeyLoader.loadPublicKey(jwtKeyProperties.getPublicKeyPath());
-        RSAPrivateKey privateKey = pemKeyLoader.loadPrivateKey(jwtKeyProperties.getPrivateKeyPath());
+        RSAPublicKey publicKey = pemKeyLoader.loadPublicKey(jwtKeyProperties.getPublicKey());
+        RSAPrivateKey privateKey = pemKeyLoader.loadPrivateKey(jwtKeyProperties.getPrivateKey());
 
         return new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
@@ -47,5 +50,10 @@ public class JwtConfig {
     @Bean
     public JWKSet publicJwkSet(RSAKey rsaJwk) {
         return new JWKSet(rsaJwk.toPublicJWK());
+    }
+
+    @Bean
+    public Map<String, Object> publicJwkResponse(JWKSet publicJwkSet) {
+        return publicJwkSet.toJSONObject();
     }
 }

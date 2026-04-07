@@ -21,19 +21,19 @@ import java.util.UUID;
 @Service
 public class CategoryService {
 
-    private final CategoryRepository repository;
+    private final CategoryRepository categoryRepository;
     private final CategoryStaffService categoryStaffService;
-    private final CategoryMapper mapper;
+    private final CategoryMapper categoryMapper;
 
     public List<CategoryResponse> getByTopic(UUID topicId) {
-        return repository.findByTopicId(topicId)
+        return categoryRepository.findByTopicId(topicId)
                 .stream()
-                .map(mapper::toResponse)
+                .map(categoryMapper::toResponse)
                 .toList();
     }
 
     public CategoryResponse getById(UUID id) throws EntityNotFoundException {
-        return mapper.toResponse(repository.findById(id)
+        return categoryMapper.toResponse(categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found")));
     }
 
@@ -48,8 +48,8 @@ public class CategoryService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .build();
-        CategoryEntity saved = repository.save(entity);
-        return mapper.toResponse(saved);
+        CategoryEntity saved = categoryRepository.save(entity);
+        return categoryMapper.toResponse(saved);
     }
 
     @Transactional
@@ -59,14 +59,14 @@ public class CategoryService {
             throw new AccessDeniedException("Only ADMIN update category");
         }
 
-        CategoryEntity existing = repository.findById(id)
+        CategoryEntity existing = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
         existing.setName(request.getName())
                 .setDescription(request.getDescription());
-        CategoryEntity entity = repository.save(existing);
+        CategoryEntity entity = categoryRepository.save(existing);
 
-        return mapper.toResponse(entity);
+        return categoryMapper.toResponse(entity);
     }
 
     public void assignStaffToCategory(UserRole role,

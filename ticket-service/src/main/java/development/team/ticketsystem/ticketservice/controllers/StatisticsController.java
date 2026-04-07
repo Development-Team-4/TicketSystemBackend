@@ -33,7 +33,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class StatisticsController {
 
-    private final StatisticsService service;
+    private final StatisticsService statisticsService;
 
     @Operation(
             summary = "Статистика по статусам тикетов",
@@ -73,7 +73,7 @@ public class StatisticsController {
     })
     @GetMapping("/statuses")
     public Map<TicketStatus, Long> getStatusStats() {
-        return service.getStatusStats();
+        return statisticsService.getStatusStats();
     }
 
     @Operation(
@@ -114,7 +114,7 @@ public class StatisticsController {
     })
     @GetMapping("/categories")
     public Map<UUID, Long> getCategoryStats() {
-        return service.getCategoryStats();
+        return statisticsService.getCategoryStats();
     }
 
     @Operation(
@@ -154,6 +154,6 @@ public class StatisticsController {
     })
     @GetMapping("/topics")
     public Map<UUID, Long> getTopicStats() {
-        return service.getTopicStats();
+        return statisticsService.getTopicStats();
     }
 }
