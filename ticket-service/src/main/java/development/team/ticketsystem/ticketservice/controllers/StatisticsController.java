@@ -7,6 +7,7 @@ import development.team.ticketsystem.ticketservice.dto.statistics.StatusStatisti
 import development.team.ticketsystem.ticketservice.dto.statistics.TopicStatisticResponse;
 import development.team.ticketsystem.ticketservice.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,10 +52,10 @@ public class StatisticsController {
                     - RESOLVED
                     - CLOSED
                     
-                    Результат представляет собой отображение:
-                    статус -> количество тикетов
-                    
-                    Этот эндпоинт доступен только администратору.
+                    Результат возвращается в виде массива объектов, каждый из которых содержит
+                    статус и соответствующее количество тикетов.
+    
+                    Эндпоинт доступен только администратору.
                     """
     )
     @ApiResponses(value = {
@@ -63,7 +64,7 @@ public class StatisticsController {
                     description = "Статистика успешно получена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(example = "{ \"OPEN\": 11, \"ASSIGNED\": 12,\"IN_PROGRESS\": 8,\"RESOLVED\": 2,\"CLOSED\": 10 }")
+                            array = @ArraySchema(schema = @Schema(implementation = StatusStatisticResponse.class))
                     )
             ),
             @ApiResponse(
@@ -85,10 +86,12 @@ public class StatisticsController {
             description = """
                     Возвращает количество тикетов в каждой категории.
                     
-                    Результат:
-                    categoryId -> количество тикетов
-                    
-                    Этот эндпоинт доступен только администратору.
+                    Результат возвращается в виде массива объектов, каждый из которых содержит
+                    идентификатор категории и количество тикетов в ней.
+    
+                    Категории, в которых нет тикетов, не включаются в результат.
+    
+                    Эндпоинт доступен только администратору.
                     """
     )
     @ApiResponses(value = {
@@ -97,14 +100,7 @@ public class StatisticsController {
                     description = "Статистика успешно получена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(
-                                    example = """
-                                            {
-                                                "e0281344-bb39-43e8-baef-a45753532a65": 4,
-                                                "45398e16-6eac-42fe-855a-744e0f8cdb26": 2
-                                            }
-                                            """)
-
+                            array = @ArraySchema(schema = @Schema(implementation = CategoryStatisticResponse.class))
                     )
             ),
             @ApiResponse(
@@ -124,12 +120,14 @@ public class StatisticsController {
     @Operation(
             summary = "Статистика по топикам",
             description = """
-                    Возвращает количество тикетов в каждом топике.
+                    Возвращает количество тикетов в каждой теме.
                     
-                    Результат:
-                    topic -> количество тикетов
-                    
-                    Этот эндпоинт доступен только администратору.
+                    Результат возвращается в виде массива объектов, каждый из которых содержит
+                    идентификатор темы и количество тикетов в ней.
+    
+                    Темы, в которых нет тикетов, не включаются в результат.
+    
+                    Эндпоинт доступен только администратору.
                     """
     )
     @ApiResponses(value = {
@@ -138,13 +136,7 @@ public class StatisticsController {
                     description = "Статистика успешно получена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(
-                                    example = """
-                                            {
-                                                "4fab4468-5668-4f94-994d-7dbb5ba23c88": 6,
-                                                "45398e16-6eac-42fe-855a-744e0f8cdb26": 8
-                                            }
-                                            """)
+                            array = @ArraySchema(schema = @Schema(implementation = TopicStatisticResponse.class))
                     )
             ),
             @ApiResponse(
