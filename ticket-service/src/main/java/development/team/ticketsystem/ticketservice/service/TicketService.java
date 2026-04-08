@@ -7,7 +7,6 @@ import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterReques
 import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterBuilder;
 import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterResolver;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
-import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.exceptions.InvalidStateException;
@@ -39,6 +38,7 @@ public class TicketService {
     private final TicketMapper ticketMapper;
     private final TransactionTemplate transactionTemplate;
     private final FilterResolver filterResolver;
+    private final AccessControlService accessControlService;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -119,7 +119,7 @@ public class TicketService {
         TicketEntity ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
-        if (!canViewTicket(role, userId, ticket)) {
+        if (!accessControlService.canViewTicket(role, userId, ticket)) {
             throw new AccessDeniedException("Access denied to this ticket");
         }
 
@@ -140,7 +140,7 @@ public class TicketService {
 
             checkNotClosed(existing);
 
-            if (!canEditTicket(role, userId, existing)) {
+            if (!accessControlService.canEditTicket(role, userId, existing)) {
                 throw new AccessDeniedException("Cannot edit this ticket");
             }
 
@@ -169,7 +169,7 @@ public class TicketService {
                 throw new InvalidStateException("Only OPEN tickets can be deleted");
             }
 
-            if (!canDeleteTicket(role, userId, ticket)) {
+            if (!accessControlService.canDeleteTicket(role, userId, ticket)) {
                 throw new AccessDeniedException("Cannot delete this ticket");
             }
 
@@ -267,70 +267,5 @@ public class TicketService {
         if (ticket.getStatus() == TicketStatus.CLOSED) {
             throw new InvalidStateException("Ticket is CLOSED");
         }
-    }
-
-    private boolean canViewTicket(UserRole role, UUID userId, TicketEntity ticket) {
-
-        if (role == UserRole.ADMIN) {
-            return true;
-        }
-
-        if (role == UserRole.USER) {
-            return ticket.getCreatedBy().equals(userId);
-        }
-
-        if (role == UserRole.SUPPORT) {
-            boolean isAssignee = userId.equals(ticket.getAssigneeId());
-
-            boolean inCategory = categoryStaffService.getByUser(userId)
-                    .stream()
-                    .map(CategoryStaffEntity::getCategoryId)
-                    .anyMatch(catId -> catId.equals(ticket.getCategoryId()));
-
-            return isAssignee || inCategory;
-        }
-
-        return false; // на будущее для новых ролей
-    }
-
-    private boolean canEditTicket(UserRole role, UUID userId, TicketEntity ticket) {
-
-        if (role == UserRole.ADMIN) {
-            return true;
-        }
-
-        if (role == UserRole.USER) {
-            return ticket.getCreatedBy().equals(userId);
-        }
-
-        if (role == UserRole.SUPPORT) {
-            return userId.equals(ticket.getAssigneeId());
-        }
-
-        return false;
-    }
-
-    private boolean canDeleteTicket(UserRole role, UUID userId, TicketEntity ticket) {
-
-        if (role == UserRole.ADMIN) {
-            return true;
-        }
-
-        if (role == UserRole.USER) {
-            return ticket.getCreatedBy().equals(userId);
-        }
-
-        if (role == UserRole.SUPPORT) {
-            boolean isAssignee = userId.equals(ticket.getAssigneeId());
-
-            boolean inCategory = categoryStaffService.getByUser(userId)
-                    .stream()
-                    .map(CategoryStaffEntity::getCategoryId)
-                    .anyMatch(catId -> catId.equals(ticket.getCategoryId()));
-
-            return isAssignee || inCategory;
-        }
-
-        return false;
     }
 }
