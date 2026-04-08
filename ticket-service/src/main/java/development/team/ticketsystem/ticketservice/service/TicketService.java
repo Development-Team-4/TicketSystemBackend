@@ -95,6 +95,9 @@ public class TicketService {
             if (filters.getAssignedTo() != null && !filters.getAssignedTo().equals(userId)) {
                 throw new AccessDeniedException("Staff can not view tickets assigned to others");
             }
+            if (filters.getCategoryId() != null && !categoryStaffService.isUserInCategory(userId, filters.getCategoryId())) {
+                throw new AccessDeniedException("Staff can not view tickets that are not assigned to their category");
+            }
         } else if (role.equals(UserRole.USER)) {
             if (filters.getAssignedTo() != null) {
                 throw new AccessDeniedException("Users can not filter by assignedTo");
