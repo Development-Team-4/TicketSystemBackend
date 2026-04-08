@@ -43,10 +43,6 @@ public class NotificationDto {
     @Schema(description = "Текст сообщения", example = "К Вашему тикету добавлен новый комментарий")
     private String message;
 
-    @JsonProperty(value = "sent")
-    @Schema(description = "Статус отправки", example = "true")
-    private Boolean sent;
-
     @JsonProperty(value = "createdAt")
     @Schema(description = "Дата создания", example = "2024-01-15T10:30:00Z")
     private Timestamp createdAt;
