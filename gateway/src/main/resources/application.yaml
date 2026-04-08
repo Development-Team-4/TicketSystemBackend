@@ -32,7 +32,7 @@ spring:
             - id: ticket-service
               uri: ${app.services.ticket-uri}
               predicates:
-                - Path=/tickets/**,/topics/**,/categories/**,/debug/**
+                - Path=/tickets/**,/topics/**,/categories/**,/debug/**,/statistics/**
 
             - id: notification-openapi
               uri: ${app.services.notification-uri}
