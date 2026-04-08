@@ -2,6 +2,9 @@ package development.team.ticketsystem.ticketservice.controllers;
 
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
+import development.team.ticketsystem.ticketservice.dto.statistics.CategoryStatisticResponse;
+import development.team.ticketsystem.ticketservice.dto.statistics.StatusStatisticResponse;
+import development.team.ticketsystem.ticketservice.dto.statistics.TopicStatisticResponse;
 import development.team.ticketsystem.ticketservice.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -72,7 +76,7 @@ public class StatisticsController {
             )
     })
     @GetMapping("/statuses")
-    public Map<TicketStatus, Long> getStatusStats() {
+    public  List<StatusStatisticResponse>  getStatusStats() {
         return statisticsService.getStatusStats();
     }
 
@@ -113,7 +117,7 @@ public class StatisticsController {
             )
     })
     @GetMapping("/categories")
-    public Map<UUID, Long> getCategoryStats() {
+    public  List<CategoryStatisticResponse>  getCategoryStats() {
         return statisticsService.getCategoryStats();
     }
 
@@ -153,7 +157,7 @@ public class StatisticsController {
             )
     })
     @GetMapping("/topics")
-    public Map<UUID, Long> getTopicStats() {
+    public List<TopicStatisticResponse> getTopicStats() {
         return statisticsService.getTopicStats();
     }
 }

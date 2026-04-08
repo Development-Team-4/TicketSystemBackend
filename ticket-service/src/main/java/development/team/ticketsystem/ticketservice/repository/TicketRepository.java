@@ -1,5 +1,8 @@
 package development.team.ticketsystem.ticketservice.repository;
 
+import development.team.ticketsystem.ticketservice.dto.statistics.CategoryStatisticResponse;
+import development.team.ticketsystem.ticketservice.dto.statistics.StatusStatisticResponse;
+import development.team.ticketsystem.ticketservice.dto.statistics.TopicStatisticResponse;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,19 +15,19 @@ public interface TicketRepository extends
         JpaRepository<TicketEntity, UUID>,
         JpaSpecificationExecutor<TicketEntity> {
 
-    @Query("""
-            SELECT t.status, COUNT(t)
-            FROM TicketEntity t
+    @Query(value = """
+            SELECT t.status, COUNT(t.id)
+            FROM tickets t
             GROUP BY t.status
-            """)
-    List<Object[]> countByStatus();
+            """, nativeQuery = true)
+    List<StatusStatisticResponse> countByStatus();
 
-    @Query("""
-            SELECT t.categoryId, COUNT(t)
-            FROM TicketEntity t
-            GROUP BY t.categoryId
-            """)
-    List<Object[]> countByCategory();
+    @Query(value = """
+            SELECT t.category_id, COUNT(t.id)
+            FROM tickets t
+            GROUP BY t.category_id
+            """, nativeQuery = true)
+    List<CategoryStatisticResponse> countByCategory();
 
     @Query(value = """
             SELECT c.topic_id, COUNT(t.id)
@@ -32,6 +35,6 @@ public interface TicketRepository extends
             JOIN categories c ON t.category_id = c.id
             GROUP BY c.topic_id
             """, nativeQuery = true)
-    List<Object[]> countByTopicIds();
+    List<TopicStatisticResponse> countByTopicIds();
 
 }
