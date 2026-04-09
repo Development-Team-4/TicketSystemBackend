@@ -11,35 +11,35 @@ public enum TestRestScenarioPositive implements TestScenarioPositive {
 
     TEST_CREATE_COMMENT(
             JsonFiles.TicketFiles.CREATE_COMMENT_DTO,
-            "createCommentUrl",
+            "http://localhost:8081/tickets/%s/comments",
             true,
             HttpMethod.POST
     ),
 
     TEST_CHANGE_STATUS(
             JsonFiles.TicketFiles.CHANGE_STATUS_DTO,
-            "changeStatusUrl",
+            "http://localhost:8081/tickets/%s/status",
             true,
             HttpMethod.PUT
     ),
 
     TEST_ASSIGNEE(
             JsonFiles.TicketFiles.ASSIGNEE_DTO,
-            "assigneeTicketUrl",
+            "http://localhost:8081/tickets/%s/assignee",
             true,
             HttpMethod.PUT
     ),
 
     TEST_CREATE_TICKET(
             JsonFiles.TicketFiles.CREATE_TICKET_DTO,
-            "createTicketUrl",
+            "http://localhost:8081/tickets",
             false,
             HttpMethod.POST
     ),
 
     TEST_UPDATE_TICKET(
             JsonFiles.TicketFiles.UPDATE_TICKET_DTO,
-            "updateTicketUrl",
+            "http://localhost:8081/tickets/%s",
             true,
             HttpMethod.PUT
     );

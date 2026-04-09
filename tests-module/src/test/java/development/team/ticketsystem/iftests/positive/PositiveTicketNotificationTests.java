@@ -3,32 +3,72 @@ package development.team.ticketsystem.iftests.positive;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.iftests.configuration.RestConfiguration;
 import development.team.ticketsystem.iftests.configuration.TestRestScenarioPositive;
+import development.team.ticketsystem.iftests.configuration.UnifiedTestConfiguration;
+import development.team.ticketsystem.iftests.dto.AuthResponse;
+import development.team.ticketsystem.iftests.dto.CreateTicketRequest;
 import development.team.ticketsystem.iftests.dto.NotificationDto;
+import development.team.ticketsystem.iftests.dto.RegisterRequest;
 import development.team.ticketsystem.iftests.mapper.TestJsonMapper;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestClient;
 
-import java.lang.reflect.Field;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application.yaml")
+@SpringBootTest(classes = UnifiedTestConfiguration.class)
 @DisplayName("Позитивные интеграционные тесты")
-@RequiredArgsConstructor
-public class PositiveTests {
+public class PositiveTicketNotificationTests {
+    @Autowired
+    private RestConfiguration restConfiguration;
 
-    private final RestClient restClient;
-    private final RestConfiguration restConfiguration;
-    private final ObjectMapper objectMapper;
+    private final RestClient restClient = RestClient.builder().build();
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private static final String TEST_TICKET_ID = "550e8400-e29b-41d4-a716-446655440000";
+    private static final UUID TEST_CATEGORY_ID = UUID.randomUUID();
+
+    private String accessToken;
+
+    @PostConstruct
+    private void postConstruct() {
+        String url = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getTicket().getPort()
+                + this.restConfiguration.getUrls().getTicket().getCommonUrl();
+
+        // Создание тикета в системе
+        this.restClient.post()
+                .uri(url)
+                .body(new CreateTicketRequest(
+                "", "", TEST_CATEGORY_ID
+                ));
+
+        // Регистрация пользователя
+        String urlRegister = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getGateway().getPort()
+                + this.restConfiguration.getUrls().getAuth().getAuthUrl()
+                + this.restConfiguration.getUrls().getAuth().getRegister();
+
+        AuthResponse response = this.restClient.post()
+                .uri(urlRegister)
+                .body(new RegisterRequest(
+                        "ааа",
+                        "fff@examle.ru",
+                        "fff"
+                ))
+                .retrieve()
+                .body(AuthResponse.class);
+
+        this.accessToken = response.getAccessToken();
+    }
 
     @Test
     @DisplayName("ИФТ Тест 1 : Проверка связности notificationservice и ticketservice (комментарии)")
@@ -42,7 +82,7 @@ public class PositiveTests {
     @Test
     @DisplayName("ИФТ Тест 2 : Проверка связности notificationservice и ticketservice (изменение статуса)")
     void notificationTicketTestChangeStatus() throws Exception {
-       commonTestNotificationTicket(
+        commonTestNotificationTicket(
                 TestRestScenarioPositive.TEST_CHANGE_STATUS,
                 TEST_TICKET_ID
         );
@@ -75,6 +115,12 @@ public class PositiveTests {
         );
     }
 
+    @Test
+    @DisplayName("ИФТ Тест 6 : Получение всех тикетов через админа")
+    void gettingAllTicketsViaAdminRole() {
+
+    }
+
     /**
      * Общий тест для notification-ticket
      * @param scenario сценарий
@@ -84,8 +130,10 @@ public class PositiveTests {
     private void commonTestNotificationTicket(
             TestRestScenarioPositive scenario,
             String ticketId) throws Exception {
+
         // 1. Формирование сообщения из JSON файла
         String message = TestJsonMapper.readDataFromJson(scenario.getJsonMessageType());
+        System.out.println(message);
 
         // 2. Формирование URL для отправки запроса
         String urlSending = buildUrl(scenario, ticketId);
@@ -101,7 +149,7 @@ public class PositiveTests {
                         ticketResponse.getStatusCode(), urlSending)
         );
 
-        // Потом исправлю
+        // Ожидание для обработки асинхронных уведомлений
         Thread.sleep(1500);
 
         List<NotificationDto> notifications = getAllNotifications();
@@ -113,44 +161,19 @@ public class PositiveTests {
     }
 
     /**
-     * Билда url
+     * Билда url из шаблона в enum
      * @param scenario сценарий
      * @param ticketId id тикета
      * @return сформированный URL
-     * @throws Exception если URL не существует
      */
-    private String buildUrl(TestRestScenarioPositive scenario, String ticketId) throws Exception {
-        String baseUrl = RestConfiguration.BASIC_URL;
-        String port = restConfiguration.getTicketPort();
-        String commonUrl = restConfiguration.getTicketCommonUrl();
-
-        String methodUrl = getUrlFromConfiguration(scenario.getUrlFieldName());
-
-        String fullUrl = baseUrl + port + commonUrl + methodUrl;
+    private String buildUrl(TestRestScenarioPositive scenario, String ticketId) {
+        String urlTemplate = scenario.getUrlFieldName();
 
         if (scenario.isRequiresId() && ticketId != null) {
-            fullUrl = String.format(fullUrl, ticketId);
+            return String.format(urlTemplate, ticketId);
         }
 
-        return fullUrl;
-    }
-
-    /**
-     * Получение URL из конфигурации
-     * @param fieldName имя поля
-     * @return сформированный url
-     * @throws Exception если url не существует
-     */
-    private String getUrlFromConfiguration(String fieldName) throws Exception {
-        Field field = RestConfiguration.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        String url = (String) field.get(restConfiguration);
-
-        if (url == null) {
-            throw new IllegalStateException("URL не найден для поля: " + fieldName);
-        }
-
-        return url;
+        return urlTemplate;
     }
 
     /**
@@ -161,21 +184,12 @@ public class PositiveTests {
      * @return сущность ответа
      */
     private ResponseEntity<String> sendRequest(String url, String body, HttpMethod method) {
-        if (method == HttpMethod.POST) {
-            return restClient.post()
-                    .uri(url)
-                    .body(body)
-                    .retrieve()
-                    .toEntity(String.class);
-        } else if (method == HttpMethod.PUT) {
-            return restClient.put()
-                    .uri(url)
-                    .body(body)
-                    .retrieve()
-                    .toEntity(String.class);
-        } else {
-            throw new UnsupportedOperationException("Unsupported HTTP method: " + method);
-        }
+        return restClient.method(method)
+                .uri(url)
+                .body(body)
+                .header("Authorization", "Bearer " + this.accessToken)
+                .retrieve()
+                .toEntity(String.class);
     }
 
     /**
@@ -183,14 +197,14 @@ public class PositiveTests {
      * @return список dto нотификаций
      */
     private List<NotificationDto> getAllNotifications() {
-        String url = RestConfiguration.BASIC_URL
-                + restConfiguration.getNotificationPort()
-                + restConfiguration.getNotificationCommonUrl()
-                + restConfiguration.getGetAllNotificationsUrl();
+        String url = this.restConfiguration.getUrls().getBaseUrl() + ":"
+                + this.restConfiguration.getUrls().getNotification().getPort()
+                + this.restConfiguration.getUrls().getNotification().getCommonUrl();
 
         try {
             ResponseEntity<List<NotificationDto>> response = restClient.get()
                     .uri(url)
+                    .header("Authorization", "Bearer " + this.accessToken)
                     .retrieve()
                     .toEntity(new org.springframework.core.ParameterizedTypeReference<List<NotificationDto>>() {});
 
@@ -229,4 +243,5 @@ public class PositiveTests {
             return isRecent;
         });
     }
+
 }

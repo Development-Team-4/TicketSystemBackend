@@ -14,17 +14,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationDto {
     @JsonProperty(value = "id")
-    @NotBlank
     @NotNull
     private UUID id;
 
     @JsonProperty(value = "userId")
-    @NotBlank
     @NotNull
     private UUID userId;
 
     @JsonProperty(value = "ticketId")
-    @NotBlank
     @NotNull
     private UUID ticketId;
 
