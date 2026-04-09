@@ -13,3 +13,5 @@ app:
     auth-uri: http://localhost:8082
     ticket-uri: http://localhost:8084
     notification-uri: http://localhost:8083
+  cors:
+    allowed-origins: http://localhost:3000
