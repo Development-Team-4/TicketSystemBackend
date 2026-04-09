@@ -3,14 +3,17 @@ package development.team.ticketsystem.authservice.service;
 import development.team.ticketsystem.authservice.dto.notification.NotificationSettingsResponse;
 import development.team.ticketsystem.authservice.dto.notification.UpdateNotificationSettingsRequest;
 import development.team.ticketsystem.authservice.dto.user.UpdateUserRequest;
+import development.team.ticketsystem.authservice.dto.user.UpdateUserRoleRequest;
 import development.team.ticketsystem.authservice.dto.user.UserResponse;
 import development.team.ticketsystem.authservice.entity.User;
 import development.team.ticketsystem.authservice.entity.UserNotificationSettings;
+import development.team.ticketsystem.authservice.exception.CannotChangeOwnRoleException;
 import development.team.ticketsystem.authservice.exception.NotificationSettingsNotFoundException;
 import development.team.ticketsystem.authservice.exception.UserNotFoundException;
 import development.team.ticketsystem.authservice.mapper.UserMapper;
 import development.team.ticketsystem.authservice.repository.UserNotificationSettingsRepository;
 import development.team.ticketsystem.authservice.repository.UserRepository;
+import development.team.ticketsystem.authservice.validation.UserValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserNotificationSettingsRepository settingsRepository;
     private final UserMapper mapper;
+    private final UserValidator validator;
 
     public UserResponse getById(UUID id) {
         return mapper.toResponse(getUserOrThrow(id));
@@ -44,7 +48,8 @@ public class UserService {
         User user = getUserOrThrow(id);
 
         if (request.getName() != null) {
-            user.setName(request.getName());
+            validator.validateName(request.getName());
+            user.setName(validator.normalizeName(request.getName()));
         }
 
         if (request.getAvatar() != null) {
@@ -63,20 +68,35 @@ public class UserService {
 
     @Transactional
     public NotificationSettingsResponse updateSettings(UUID id, UpdateNotificationSettingsRequest request) {
+        validator.validateEmail(request.getEmailEnabled());
+        String email = validator.normalizeEmail(request.getEmailEnabled());
+
         User user = getUserOrThrow(id);
 
         UserNotificationSettings settings = settingsRepository.findById(id)
-                .orElseGet(() -> UserNotificationSettings.builder()
-                        .user(user)
-                        .userId(user.getId())
-                        .build());
+                .orElseGet(() -> {
+                    UserNotificationSettings newSettings = new UserNotificationSettings();
+                    newSettings.setUser(user);
+                    return newSettings;
+                });
 
-        settings.setEmailEnabled(request.getEmailEnabled());
+        settings.setEmailEnabled(email);
         settings.setTelegramEnabled(request.getTelegramEnabled());
 
         return mapper.toResponse(settingsRepository.save(settings));
     }
 
+    @Transactional
+    public UserResponse updateRole(UUID actorUserId, UUID targetUserId, UpdateUserRoleRequest request) {
+        if (actorUserId.equals(targetUserId)) {
+            throw new CannotChangeOwnRoleException();
+        }
+
+        User user = getUserOrThrow(targetUserId);
+        user.setRole(request.getRole());
+
+        return mapper.toResponse(userRepository.save(user));
+    }
     private User getUserOrThrow(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);

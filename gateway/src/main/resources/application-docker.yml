@@ -1,0 +1,18 @@
+spring:
+  config:
+    activate:
+      on-profiles: docker
+
+  data:
+    redis:
+      host: auth-redis
+      port: 6379
+
+app:
+  services:
+    auth-uri: http://auth-service
+    ticket-uri: http://ticket-service
+    notification-uri: http://notification-service
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://ticketsystem.braverto.com}

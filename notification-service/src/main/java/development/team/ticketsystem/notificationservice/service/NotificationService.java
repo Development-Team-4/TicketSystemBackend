@@ -1,8 +1,10 @@
 package development.team.ticketsystem.notificationservice.service;
 
+import development.team.ticketsystem.notificationservice.config.NotificationTypeText;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
+import development.team.ticketsystem.notificationservice.entity.NotificationType;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.mapper.NotificationMapper;
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
@@ -18,6 +20,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     private final NotificationMapper notificationMapper;
+
+    private final NotificationTypeText notificationTypeText;
 
     /**
      * Метод выдачи всех нотификаций
@@ -38,7 +42,10 @@ public class NotificationService {
      * @return dto с данными уведомления
      */
     public NotificationDto addNewNotification(NotificationCreationDto dto) throws NotificationFormatException {
-        Notification notification = createNotificationFromDto(dto);
+        Notification notification = this.notificationMapper.toEntity(dto);
+
+        notification.setTitle(this.getTitle(dto.getType()));
+        notification.setMessage(this.getMessage(dto.getType()));
 
         return notificationMapper.toDto(this.notificationRepository.save(notification));
     }
@@ -72,16 +79,11 @@ public class NotificationService {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Создание сущности уведомления из DTO
-     *
-     * @param dto DTO для создания уведомления
-     */
-    private Notification createNotificationFromDto(NotificationCreationDto dto) {
-        return new Notification(
-                dto.getUserId(),
-                dto.getTicketId(),
-                dto.getType()
-        );
+    private String getTitle(NotificationType type) {
+        return this.notificationTypeText.getTemplate(type.name()).getTitle();
+    }
+
+    private String getMessage(NotificationType type) {
+        return this.notificationTypeText.getTemplate(type.name()).getMessage();
     }
 }
