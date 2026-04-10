@@ -4,7 +4,6 @@ import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.comments.CommentResponse;
 import development.team.ticketsystem.ticketservice.dto.comments.CreateCommentRequest;
-import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.CommentEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
@@ -31,7 +30,7 @@ public class CommentService {
     private final TicketRepository ticketRepository;
     private final NotificationSender notificationSender;
     private final CommentMapper commentMapper;
-    private final CategoryStaffService categoryStaffService;
+    private final AccessControlService accessControlService;
     private final TransactionTemplate transactionTemplate;
 
     public List<CommentResponse> getByTicket(UUID ticketId) {
@@ -54,7 +53,7 @@ public class CommentService {
                 throw new InvalidStateException("Cannot comment CLOSED ticket");
             }
 
-            if (!canCommentOnTicket(role, authorId, ticket)){
+            if (!accessControlService.canCommentOnTicket(role, authorId, ticket)) {
                 throw new AccessDeniedException("This user cannot comment this ticket");
             }
 
@@ -90,30 +89,6 @@ public class CommentService {
             TicketEntity ticket,
             CommentEntity comment
     ) {
-    }
-
-    private boolean canCommentOnTicket(UserRole role, UUID userId, TicketEntity ticket) {
-
-        if (role == UserRole.ADMIN) {
-            return true;
-        }
-
-        if (role == UserRole.USER) {
-            return ticket.getCreatedBy().equals(userId);
-        }
-
-        if (role == UserRole.SUPPORT) {
-            boolean isAssignee = userId.equals(ticket.getAssigneeId());
-
-            boolean inCategory = categoryStaffService.getByUser(userId)
-                    .stream()
-                    .map(CategoryStaffEntity::getCategoryId)
-                    .anyMatch(catId -> catId.equals(ticket.getCategoryId()));
-
-            return isAssignee || inCategory;
-        }
-
-        return false;
     }
 
 }

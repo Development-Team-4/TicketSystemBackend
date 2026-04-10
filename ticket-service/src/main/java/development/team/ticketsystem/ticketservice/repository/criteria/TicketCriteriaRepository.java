@@ -73,7 +73,9 @@ public class TicketCriteriaRepository {
             }
 
             case UserRole.SUPPORT -> {
-                predicates.add(cb.equal(root.get("assigneeId"), filter.getUserId()));
+                if (filter.getAssignedTo() != null) {
+                    predicates.add(cb.equal(root.get("assigneeId"), filter.getUserId()));
+                }
 
                 if (filter.getCategoryIds() != null) {
                     predicates.add(root.get("categoryId").in(filter.getCategoryIds()));

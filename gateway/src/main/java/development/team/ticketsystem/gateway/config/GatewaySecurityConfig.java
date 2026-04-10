@@ -74,6 +74,8 @@ public class GatewaySecurityConfig {
                         .hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/categories/*/staff/**")
                         .hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/categories/*/staff/*/check")
+                        .hasAnyRole("ADMIN", "SUPPORT")
 
                         // tickets read
                         .pathMatchers(HttpMethod.GET, "/tickets/**")
@@ -95,6 +97,9 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/notifications/**")
                         .hasRole("ADMIN")
 
+                        // statistic
+                        .pathMatchers(HttpMethod.GET, "/statistics/**")
+                        .hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(ex -> ex

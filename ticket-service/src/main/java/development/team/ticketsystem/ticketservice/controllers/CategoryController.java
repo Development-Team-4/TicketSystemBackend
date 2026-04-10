@@ -5,6 +5,7 @@ import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.categories.AssignStaffRequest;
 import development.team.ticketsystem.ticketservice.dto.categories.CategoryResponse;
 import development.team.ticketsystem.ticketservice.dto.categories.CreateCategoryRequest;
+import development.team.ticketsystem.ticketservice.dto.categories.StaffAssignmentCheckResponse;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -557,4 +558,55 @@ public class CategoryController {
         categoryService.removeStaff(role, categoryId, staffId);
     }
 
+
+    @Operation(
+            summary = "Проверить, назначен ли сотрудник на категорию",
+            description = """
+                    Проверяет, назначен ли указанный сотрудник на данную категорию.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Проверка выполнена успешно",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StaffAssignmentCheckResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Сотрудник назначен"
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "500",
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("categories/{categoryId}/staff/{staffId}/check")
+    public StaffAssignmentCheckResponse checkStaffAssignment(
+            @Parameter(
+                    description = "ID категории",
+                    example = "770e8400-e29b-41d4-a716-446655440001",
+                    required = true
+            )
+            @PathVariable UUID categoryId,
+
+            @Parameter(
+                    description = "ID сотрудника",
+                    example = "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
+                    required = true
+            )
+            @PathVariable UUID staffId
+    ) {
+        boolean isAssigned = categoryService.isStaffAssignedToCategory(categoryId, staffId);
+
+        return StaffAssignmentCheckResponse.builder()
+                .assigned(isAssigned)
+                .categoryId(categoryId)
+                .staffId(staffId)
+                .build();
+    }
 }
