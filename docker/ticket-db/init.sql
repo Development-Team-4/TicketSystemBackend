@@ -83,74 +83,91 @@ CREATE INDEX idx_comment_ticket ON comments (ticket_id);
 
 
 
--- АУДИТ
+-- АУДИТ ТАБЛИЦЫ ТИКЕТОВ
 
-CREATE TABLE audit_log
+CREATE TABLE ticket_audit
 (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 
-    table_name VARCHAR(255) NOT NULL,
+    ticket_id uuid NOT NULL,
+
     operation VARCHAR(10) NOT NULL,
 
-    record_id uuid NOT NULL,
+    old_subject VARCHAR(2000),
+    new_subject VARCHAR(2000),
 
-    old_data JSONB,
-    new_data JSONB,
+    old_description VARCHAR(2000),
+    new_description VARCHAR(2000),
+
+    old_status VARCHAR(50),
+    new_status VARCHAR(50),
+
+    old_assignee_id uuid,
+    new_assignee_id uuid,
 
     changed_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_audit_table_name ON audit_log(table_name);
-CREATE INDEX idx_audit_record_id ON audit_log(record_id);
-CREATE INDEX idx_audit_changed_at ON audit_log(changed_at);
+CREATE INDEX idx_audit_ticket_id ON audit_log(ticket_id);
 
 
-CREATE OR REPLACE FUNCTION audit_trigger_function()
+CREATE
+OR REPLACE FUNCTION ticket_audit_trigger()
 RETURNS TRIGGER AS
 $$
     BEGIN
         IF (TG_OP = 'INSERT') THEN
-            INSERT INTO audit_log(table_name, operation, record_id, new_data)
-            VALUES (TG_TABLE_NAME, TG_OP, NEW.id, to_jsonb(NEW));
-    RETURN NEW;
+            INSERT INTO ticket_audit(
+                ticket_id, operation,
+                new_subject, new_description, new_status,
+                new_assignee_id
+            )
+            VALUES (
+                NEW.id, TG_OP,
+                NEW.subject, NEW.description, NEW.status,
+                NEW.assignee_id
+            );
+    RETURN new;
 
-    ELSIF (TG_OP = 'UPDATE' AND OLD IS DISTINCT FROM NEW) THEN
-            INSERT INTO audit_log(table_name, operation, record_id, old_data, new_data)
-            VALUES (TG_TABLE_NAME, TG_OP, NEW.id, to_jsonb(OLD), to_jsonb(NEW));
-    RETURN NEW;
+    ELSIF (TG_OP = 'UPDATE') THEN
+            INSERT INTO ticket_audit(
+                ticket_id, operation,
+                old_subject, new_subject,
+                old_description, new_description,
+                old_status, new_status,
+                old_assignee_id, new_assignee_id
+            )
+            VALUES (
+                NEW.id, TG_OP,
+                OLD.subject, NEW.subject,
+                OLD.description, NEW.description,
+                OLD.status, NEW.status,
+                OLD.assignee_id, NEW.assignee_id
+            );
+    RETURN new;
 
     ELSIF (TG_OP = 'DELETE') THEN
-            INSERT INTO audit_log(table_name, operation, record_id, old_data)
-            VALUES (TG_TABLE_NAME, TG_OP, OLD.id, to_jsonb(OLD));
-    RETURN OLD;
+            INSERT INTO ticket_audit(
+                ticket_id, operation,
+                old_subject, old_description, old_status,
+                old_assignee_id
+            )
+            VALUES (
+                OLD.id, TG_OP,
+                OLD.subject, OLD.description, OLD.status,
+                OLD.assignee_id
+            );
+    RETURN old;
     END IF;
 
     RETURN NULL;
     END;
 $$
-    LANGUAGE plpgsql;
+LANGUAGE plpgsql;
 
 
-CREATE TRIGGER audit_tickets_trigger
+CREATE TRIGGER ticket_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE
                     ON tickets
                         FOR EACH ROW
-                        EXECUTE FUNCTION audit_trigger_function();
-
-CREATE TRIGGER audit_comments_trigger
-    AFTER INSERT OR UPDATE OR DELETE
-                    ON comments
-                        FOR EACH ROW
-                        EXECUTE FUNCTION audit_trigger_function();
-
-CREATE TRIGGER audit_categories_trigger
-    AFTER INSERT OR UPDATE OR DELETE
-                    ON categories
-                        FOR EACH ROW
-                        EXECUTE FUNCTION audit_trigger_function();
-
-CREATE TRIGGER audit_topics_trigger
-    AFTER INSERT OR UPDATE OR DELETE
-                    ON topics
-                        FOR EACH ROW
-                        EXECUTE FUNCTION audit_trigger_function();
+                        EXECUTE FUNCTION ticket_audit_trigger();
