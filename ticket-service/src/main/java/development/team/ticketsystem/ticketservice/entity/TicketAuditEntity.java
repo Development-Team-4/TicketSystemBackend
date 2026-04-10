@@ -12,8 +12,7 @@ import java.util.UUID;
 
 @Builder
 @Accessors(chain = true)
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
