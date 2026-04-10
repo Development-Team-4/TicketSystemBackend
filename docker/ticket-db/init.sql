@@ -108,7 +108,7 @@ CREATE TABLE ticket_audit
     changed_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_audit_ticket_id ON audit_log(ticket_id);
+CREATE INDEX idx_audit_ticket_id ON ticket_audit(ticket_id);
 
 
 CREATE
