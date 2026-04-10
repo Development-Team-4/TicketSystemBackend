@@ -2,6 +2,7 @@ package development.team.ticketsystem.ticketservice.service;
 
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
+import development.team.ticketsystem.ticketservice.dto.audit.TicketAuditResponse;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
 import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterBuilder;
@@ -13,11 +14,14 @@ import development.team.ticketsystem.ticketservice.exceptions.InvalidStateExcept
 import development.team.ticketsystem.ticketservice.exceptions.NotificationServiceException;
 import development.team.ticketsystem.ticketservice.forNotificationMicroservice.NotificationCreationDto;
 import development.team.ticketsystem.ticketservice.forNotificationMicroservice.NotificationType;
+import development.team.ticketsystem.ticketservice.mappers.TicketAuditMapper;
 import development.team.ticketsystem.ticketservice.mappers.TicketMapper;
+import development.team.ticketsystem.ticketservice.repository.TicketAuditRepository;
 import development.team.ticketsystem.ticketservice.repository.TicketRepository;
 import development.team.ticketsystem.ticketservice.repository.criteria.TicketCriteriaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -27,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TicketService {
@@ -39,6 +44,9 @@ public class TicketService {
     private final TransactionTemplate transactionTemplate;
     private final FilterResolver filterResolver;
     private final AccessControlService accessControlService;
+
+    private final TicketAuditMapper ticketAuditMapper;
+    private final TicketAuditRepository ticketAuditRepository;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -247,6 +255,21 @@ public class TicketService {
         );
 
         return ticketMapper.toResponse(assigned);
+    }
+
+    public List<TicketAuditResponse> getTicketHistory(UUID ticketId, UUID userId, UserRole role) {
+
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        if (!accessControlService.canViewTicketHistory(role, userId, ticket)) {
+            throw new AccessDeniedException("Cannot view history of this ticket");
+        }
+
+        return ticketAuditRepository.findByTicketIdOrderByChangedAtDesc(ticketId)
+                .stream()
+                .map(ticketAuditMapper::toResponse)
+                .toList();
     }
 
     private void sendToNotificationMicroservice(
