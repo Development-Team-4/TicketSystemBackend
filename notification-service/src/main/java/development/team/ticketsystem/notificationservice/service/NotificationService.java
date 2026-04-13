@@ -106,7 +106,7 @@ public class NotificationService {
         }
 
         Notification notification = notificationOptional.get();
-        notification.setSent(true);
+        notification.setRead(true);
 
         this.notificationRepository.save(notification);
     }
