@@ -26,8 +26,10 @@ public class GatewaySecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(cors -> {})
                 .authorizeExchange(exchanges -> exchanges
 
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // swagger / openapi
                         .pathMatchers(
                                 "/swagger-ui.html",
@@ -68,10 +70,12 @@ public class GatewaySecurityConfig {
                         .hasAnyRole("ADMIN", "SUPPORT")
 
                         // category staff management
-                        .pathMatchers(HttpMethod.PUT, "/categories/*/staff")
+                        .pathMatchers(HttpMethod.POST, "/categories/*/staff")
                         .hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/categories/*/staff/**")
                         .hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/categories/*/staff/*/check")
+                        .hasAnyRole("ADMIN", "SUPPORT")
 
                         // tickets read
                         .pathMatchers(HttpMethod.GET, "/tickets/**")
@@ -93,6 +97,9 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/notifications/**")
                         .hasRole("ADMIN")
 
+                        // statistic
+                        .pathMatchers(HttpMethod.GET, "/statistics/**")
+                        .hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(ex -> ex

@@ -23,5 +23,5 @@ app:
     refresh-token-ttl-seconds: 1209600
     key-id: auth-rsa-key-1
     keys:
-      public-key-path: classpath:keys/public.pem
-      private-key-path: classpath:keys/private.pem
+      public-key: classpath:keys/public.pem
+      private-key: classpath:keys/private.pem

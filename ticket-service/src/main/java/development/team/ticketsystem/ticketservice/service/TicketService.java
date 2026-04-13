@@ -3,8 +3,10 @@ package development.team.ticketsystem.ticketservice.service;
 import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilter;
+import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
+import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterBuilder;
+import development.team.ticketsystem.ticketservice.dto.filter.filterStrategy.FilterResolver;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
-import development.team.ticketsystem.ticketservice.entity.CategoryStaffEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
 import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.exceptions.InvalidStateException;
@@ -29,12 +31,14 @@ import java.util.UUID;
 @Service
 public class TicketService {
 
-    private final TicketRepository repository;
+    private final TicketRepository ticketRepository;
     private final TicketCriteriaRepository ticketCriteriaRepository;
     private final CategoryStaffService categoryStaffService;
     private final NotificationSender notificationSender;
-    private final TicketMapper mapper;
+    private final TicketMapper ticketMapper;
     private final TransactionTemplate transactionTemplate;
+    private final FilterResolver filterResolver;
+    private final AccessControlService accessControlService;
 
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
             TicketStatus.OPEN, Set.of(TicketStatus.ASSIGNED, TicketStatus.CLOSED),
@@ -54,116 +58,72 @@ public class TicketService {
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
-        TicketEntity saved = repository.save(ticket);
-        return mapper.toResponse(saved);
+        TicketEntity saved = ticketRepository.save(ticket);
+        return ticketMapper.toResponse(saved);
 
     }
 
     public List<TicketResponse> getAll(
             UserRole role,
             UUID userId,
-            UUID categoryId,
-            UUID assignedTo,
-            UUID createdBy,
-            String status,
-            Instant createdAfter,
-            Instant createdBefore
+            TicketFilterRequest filterRequest
     ) throws AccessDeniedException {
 
         validateRoleAccessToFilters(
                 role,
                 userId,
-                assignedTo,
-                createdBy
+                filterRequest
         );
 
-        TicketFilter filter = buildFilter(
+        TicketFilter criteriaFilter = buildCriteriaFilter(
                 role,
                 userId,
-                categoryId,
-                assignedTo,
-                createdBy,
-                status,
-                createdAfter,
-                createdBefore
+                filterRequest
         );
 
-        return ticketCriteriaRepository.findAllByFilters(filter)
+        return ticketCriteriaRepository.findAllByFilters(criteriaFilter)
                 .stream()
-                .map(mapper::toResponse)
+                .map(ticketMapper::toResponse)
                 .toList();
     }
 
-    private void validateRoleAccessToFilters(UserRole role, UUID userId, UUID assignedTo, UUID createdBy) {
+    private void validateRoleAccessToFilters(UserRole role, UUID userId, TicketFilterRequest filters) {
         if (role.equals(UserRole.SUPPORT)) {
-            if (createdBy != null) {
+            if (filters.getCreatedBy() != null) {
                 throw new AccessDeniedException("Unable to filter by createdBy");
             }
-            if (assignedTo != null && !assignedTo.equals(userId)) {
+            if (filters.getAssignedTo() != null && !filters.getAssignedTo().equals(userId)) {
                 throw new AccessDeniedException("Staff can not view tickets assigned to others");
             }
+            if (filters.getCategoryId() != null && !categoryStaffService.isUserInCategory(userId, filters.getCategoryId())) {
+                throw new AccessDeniedException("Staff can not view tickets that are not assigned to their category");
+            }
         } else if (role.equals(UserRole.USER)) {
-            if (assignedTo != null) {
+            if (filters.getAssignedTo() != null) {
                 throw new AccessDeniedException("Users can not filter by assignedTo");
             }
         }
     }
 
-    private TicketFilter buildFilter(
+    private TicketFilter buildCriteriaFilter(
             UserRole role,
             UUID userId,
-            UUID categoryId,
-            UUID assignedTo,
-            UUID createdBy,
-            String status,
-            Instant createdAfter,
-            Instant createdBefore
+            TicketFilterRequest request
     ) {
-
-        if (role == UserRole.SUPPORT) {
-
-            List<UUID> categories = categoryStaffService.getByUser(userId)
-                    .stream()
-                    .map(CategoryStaffEntity::getCategoryId)
-                    .toList();
-
-            return TicketFilter.builder()
-                    .role(role)
-                    .userId(userId)
-                    .categoryIds(categoryId == null ? categories : List.of(categoryId))
-                    .assignedTo(userId)
-                    .status(status)
-                    .createdAfter(createdAfter)
-                    .createdBefore(createdBefore)
-                    .build();
-        }
-
-        if (role == UserRole.USER) {
-            return TicketFilter.builder()
-                    .role(role)
-                    .userId(userId)
-                    .createdBy(userId)
-                    .status(status)
-                    .createdAfter(createdAfter)
-                    .createdBefore(createdBefore)
-                    .build();
-        }
-
-        return TicketFilter.builder()
-                .role(role)
-                .userId(userId)
-                .categoryId(categoryId)
-                .assignedTo(assignedTo)
-                .createdBy(createdBy)
-                .status(status)
-                .createdAfter(createdAfter)
-                .createdBefore(createdBefore)
-                .build();
+        FilterBuilder builder = filterResolver.resolve(role);
+        return builder.build(userId, request);
     }
 
-    public TicketResponse getById(UUID id) throws EntityNotFoundException {
-        return mapper.toResponse(repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found")));
+    public TicketResponse getById(UserRole role, UUID userId, UUID id) throws EntityNotFoundException {
+
+        TicketEntity ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
+
+        if (!accessControlService.canViewTicket(role, userId, ticket)) {
+            throw new AccessDeniedException("Access denied to this ticket");
+        }
+
+        return ticketMapper.toResponse(ticket);
     }
 
     public TicketResponse update(
@@ -175,45 +135,45 @@ public class TicketService {
 
         TicketEntity updated = transactionTemplate.execute(status -> {
 
-            TicketEntity existing = repository.findById(id)
+            TicketEntity existing = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             checkNotClosed(existing);
 
-            if (!role.equals(UserRole.ADMIN) && !existing.getCreatedBy().equals(userId)) {
-                throw new AccessDeniedException("Cannot edit other user's ticket");
+            if (!accessControlService.canEditTicket(role, userId, existing)) {
+                throw new AccessDeniedException("Cannot edit this ticket");
             }
 
             existing.setSubject(request.getSubject())
                     .setDescription(request.getDescription())
                     .setUpdatedAt(Instant.now());
 
-            return repository.save(existing);
+            return ticketRepository.save(existing);
         });
 
         if (updated == null) {
             throw new RuntimeException("Updating ticket transaction failed");
         }
 
-        return mapper.toResponse(updated);
+        return ticketMapper.toResponse(updated);
     }
 
     public void delete(UserRole role, UUID userId, UUID id) throws EntityNotFoundException, InvalidStateException {
 
         transactionTemplate.executeWithoutResult(status -> {
 
-            TicketEntity ticket = repository.findById(id)
+            TicketEntity ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             if (!ticket.getStatus().equals(TicketStatus.OPEN)) {
                 throw new InvalidStateException("Only OPEN tickets can be deleted");
             }
 
-            if (role.equals(UserRole.USER) && !ticket.getCreatedBy().equals(userId)) {
-                throw new InvalidStateException("You can not delete ticket of other user");
+            if (!accessControlService.canDeleteTicket(role, userId, ticket)) {
+                throw new AccessDeniedException("Cannot delete this ticket");
             }
 
-            repository.deleteById(id);
+            ticketRepository.deleteById(id);
         });
 
     }
@@ -223,7 +183,7 @@ public class TicketService {
 
         TicketEntity updated = transactionTemplate.execute(status -> {
 
-            TicketEntity ticket = repository.findById(id)
+            TicketEntity ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             checkNotClosed(ticket);
@@ -239,7 +199,7 @@ public class TicketService {
             ticket.setStatus(request.getStatus())
                     .setUpdatedAt(Instant.now());
 
-            return repository.save(ticket);
+            return ticketRepository.save(ticket);
 
         });
 
@@ -253,7 +213,7 @@ public class TicketService {
                 NotificationType.STATUS_CHANGE
         );
 
-        return mapper.toResponse(updated);
+        return ticketMapper.toResponse(updated);
     }
 
 
@@ -262,7 +222,7 @@ public class TicketService {
 
         TicketEntity assigned = transactionTemplate.execute(status -> {
 
-            TicketEntity ticket = repository.findById(id)
+            TicketEntity ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Ticket not found"));
 
             if (ticket.getStatus().equals(TicketStatus.CLOSED)) {
@@ -272,7 +232,7 @@ public class TicketService {
             ticket.setAssigneeId(assigneeId.getAssigneeId())
                     .setUpdatedAt(Instant.now());
 
-            return repository.save(ticket);
+            return ticketRepository.save(ticket);
 
         });
 
@@ -286,7 +246,7 @@ public class TicketService {
                 NotificationType.ASSIGNMENT
         );
 
-        return mapper.toResponse(assigned);
+        return ticketMapper.toResponse(assigned);
     }
 
     private void sendToNotificationMicroservice(
@@ -308,5 +268,4 @@ public class TicketService {
             throw new InvalidStateException("Ticket is CLOSED");
         }
     }
-
 }

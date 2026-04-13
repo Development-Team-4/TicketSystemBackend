@@ -1,11 +1,13 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
 
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.categories.AssignStaffRequest;
 import development.team.ticketsystem.ticketservice.dto.categories.CategoryResponse;
 import development.team.ticketsystem.ticketservice.dto.categories.CreateCategoryRequest;
+import development.team.ticketsystem.ticketservice.dto.categories.StaffAssignmentCheckResponse;
+import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.service.CategoryService;
-import development.team.ticketsystem.ticketservice.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -20,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +36,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class CategoryController {
 
-    private final CategoryService service;
+    private final CategoryService categoryService;
 
     @Operation(
             summary = "Получить все категории темы",
@@ -108,7 +109,7 @@ public class CategoryController {
             )
             @PathVariable UUID topicId
     ) {
-        return service.getByTopic(topicId);
+        return categoryService.getByTopic(topicId);
     }
 
 
@@ -181,7 +182,7 @@ public class CategoryController {
             )
             @PathVariable UUID id
     ) {
-        return service.getById(id);
+        return categoryService.getById(id);
     }
 
 
@@ -283,7 +284,7 @@ public class CategoryController {
             )
             @RequestBody CreateCategoryRequest request
     ) {
-        return service.create(role, topicId, request);
+        return categoryService.create(role, topicId, request);
     }
 
     @Operation(
@@ -382,7 +383,7 @@ public class CategoryController {
             )
             @RequestBody CreateCategoryRequest request
     ) {
-        return service.update(role, id, request);
+        return categoryService.update(role, id, request);
     }
 
     @Operation(
@@ -451,7 +452,7 @@ public class CategoryController {
                     )
             )
     })
-    @PutMapping("categories/{id}/staff")
+    @PostMapping("categories/{id}/staff")
     public void assignStaffToCategory(
             @Parameter(hidden = true)
             @RequestHeader("X-User-Role") UserRole role,
@@ -473,7 +474,7 @@ public class CategoryController {
             )
             @RequestBody AssignStaffRequest request
     ) {
-        service.assignStaffToCategory(role, id, request);
+        categoryService.assignStaffToCategory(role, id, request);
     }
 
 
@@ -554,7 +555,58 @@ public class CategoryController {
             )
             @PathVariable UUID staffId
     ) {
-        service.removeStaff(role, categoryId, staffId);
+        categoryService.removeStaff(role, categoryId, staffId);
     }
 
+
+    @Operation(
+            summary = "Проверить, назначен ли сотрудник на категорию",
+            description = """
+                    Проверяет, назначен ли указанный сотрудник на данную категорию.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Проверка выполнена успешно",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StaffAssignmentCheckResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Сотрудник назначен"
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "500",
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("categories/{categoryId}/staff/{staffId}/check")
+    public StaffAssignmentCheckResponse checkStaffAssignment(
+            @Parameter(
+                    description = "ID категории",
+                    example = "770e8400-e29b-41d4-a716-446655440001",
+                    required = true
+            )
+            @PathVariable UUID categoryId,
+
+            @Parameter(
+                    description = "ID сотрудника",
+                    example = "a3e8e6e-3497-4690-bfc2-c7292e7438f3",
+                    required = true
+            )
+            @PathVariable UUID staffId
+    ) {
+        boolean isAssigned = categoryService.isStaffAssignedToCategory(categoryId, staffId);
+
+        return StaffAssignmentCheckResponse.builder()
+                .assigned(isAssigned)
+                .categoryId(categoryId)
+                .staffId(staffId)
+                .build();
+    }
 }

@@ -1,10 +1,12 @@
 package development.team.ticketsystem.ticketservice.service;
 
 import development.team.ticketsystem.ticketservice.TicketStatus;
+import development.team.ticketsystem.ticketservice.UserRole;
 import development.team.ticketsystem.ticketservice.dto.comments.CommentResponse;
 import development.team.ticketsystem.ticketservice.dto.comments.CreateCommentRequest;
 import development.team.ticketsystem.ticketservice.entity.CommentEntity;
 import development.team.ticketsystem.ticketservice.entity.TicketEntity;
+import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.exceptions.InvalidStateException;
 import development.team.ticketsystem.ticketservice.forNotificationMicroservice.NotificationCreationDto;
 import development.team.ticketsystem.ticketservice.forNotificationMicroservice.NotificationType;
@@ -24,22 +26,22 @@ import java.util.UUID;
 @Service
 public class CommentService {
 
-    private final CommentRepository repository;
+    private final CommentRepository commentRepository;
     private final TicketRepository ticketRepository;
     private final NotificationSender notificationSender;
-    private final CommentMapper mapper;
-
+    private final CommentMapper commentMapper;
+    private final AccessControlService accessControlService;
     private final TransactionTemplate transactionTemplate;
 
     public List<CommentResponse> getByTicket(UUID ticketId) {
-        return repository.findByTicketId(ticketId)
+        return commentRepository.findByTicketId(ticketId)
                 .stream()
-                .map(mapper::toResponse)
+                .map(commentMapper::toResponse)
                 .toList();
     }
 
 
-    public CommentResponse create(UUID ticketId, UUID authorId, CreateCommentRequest request)
+    public CommentResponse create(UUID ticketId, UUID authorId, UserRole role, CreateCommentRequest request)
             throws EntityNotFoundException, InvalidStateException {
 
         CreateCommentTransactionResult result = transactionTemplate.execute(status -> {
@@ -51,6 +53,10 @@ public class CommentService {
                 throw new InvalidStateException("Cannot comment CLOSED ticket");
             }
 
+            if (!accessControlService.canCommentOnTicket(role, authorId, ticket)) {
+                throw new AccessDeniedException("This user cannot comment this ticket");
+            }
+
             CommentEntity comment = CommentEntity.builder()
                     .ticketId(ticketId)
                     .authorId(authorId)
@@ -58,7 +64,7 @@ public class CommentService {
                     .createdAt(Instant.now())
                     .build();
 
-            CommentEntity saved = repository.save(comment);
+            CommentEntity saved = commentRepository.save(comment);
 
             return new CreateCommentTransactionResult(ticket, saved);
         });
@@ -76,7 +82,7 @@ public class CommentService {
                 )
         );
 
-        return mapper.toResponse(result.comment());
+        return commentMapper.toResponse(result.comment());
     }
 
     private record CreateCommentTransactionResult(

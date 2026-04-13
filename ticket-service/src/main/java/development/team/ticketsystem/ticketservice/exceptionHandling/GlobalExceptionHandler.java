@@ -3,6 +3,7 @@ package development.team.ticketsystem.ticketservice.exceptionHandling;
 import development.team.ticketsystem.ticketservice.exceptions.AccessDeniedException;
 import development.team.ticketsystem.ticketservice.exceptions.InvalidStateException;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return buildResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex, request);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(
+            InvalidStateException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -1,6 +1,5 @@
 package development.team.ticketsystem.authservice.controller;
 
-import com.nimbusds.jose.jwk.JWKSet;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +12,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JwkController {
 
-    private final JWKSet publicJwkSet;
+    private final Map<String, Object> publicJwkResponse;
 
     @GetMapping("/.well-known/jwks.json")
     public Map<String, Object> jwks() {
-        return publicJwkSet.toJSONObject();
+        return publicJwkResponse;
     }
 }

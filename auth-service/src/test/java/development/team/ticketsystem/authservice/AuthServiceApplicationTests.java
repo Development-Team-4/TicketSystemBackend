@@ -1,4 +1,4 @@
-package development.team.ticketsystem.auth_service;
+package development.team.ticketsystem.authservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
