@@ -1,7 +1,7 @@
 package development.team.ticketsystem.ticketservice.controllers;
 
-import development.team.ticketsystem.ticketservice.TicketStatus;
 import development.team.ticketsystem.ticketservice.UserRole;
+import development.team.ticketsystem.ticketservice.dto.audit.TicketAuditResponse;
 import development.team.ticketsystem.ticketservice.dto.error.ErrorResponse;
 import development.team.ticketsystem.ticketservice.dto.filter.TicketFilterRequest;
 import development.team.ticketsystem.ticketservice.dto.tickets.*;
@@ -17,14 +17,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -168,7 +167,7 @@ public class TicketController {
                     - Пользователь:
                       * автоматически получает фильтр по createdBy (только свои тикеты)
                       * может использовать фильтры по статусу, категории и датам
-    
+                    
                     При множественной фильтрации применяется логическое И (AND).
                     Сортировка: по дате создания (от новых к старым).
                     
@@ -237,7 +236,7 @@ public class TicketController {
 
             @ModelAttribute TicketFilterRequest filterRequest
     ) {
-         return ticketService.getAll(
+        return ticketService.getAll(
                 role,
                 userId,
                 filterRequest
@@ -300,7 +299,7 @@ public class TicketController {
                             mediaType = "application/problem+json",
                             schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
-                                    name = "Недостаточно прав для просмотра"                            )
+                                    name = "Недостаточно прав для просмотра")
                     )
             ),
             @ApiResponse(
@@ -330,7 +329,6 @@ public class TicketController {
     ) {
         return ticketService.getById(userRole, userId, id);
     }
-
 
 
     @Operation(
@@ -749,4 +747,72 @@ public class TicketController {
         return ticketService.assign(id, request);
     }
 
+    @Operation(
+            summary = "Получить историю изменений тикета",
+            description = """
+                Возвращает полную историю изменений указанного тикета.
+                
+                Каждая запись содержит:
+                - Тип операции
+                - Предыдущие и новые значения изменённых полей
+                - Временную метку изменения
+                
+                История отсортирована по дате изменения (от старых к новым).
+                
+                Права доступа:
+                - Администратор: может просматривать историю любого тикета
+                - Сотрудник поддержки: может просматривать историю тикетов в своих категориях
+                - Пользователь: может просматривать историю только своих тикетов
+                
+                Эндпоинт доступен всем авторизованным пользователям с соответствующими правами.
+                """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "История изменений успешно получена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = TicketAuditResponse.class)),
+                            examples = @ExampleObject(
+                                    name = "Успешный ответ с историей изменений"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Тикет с указанным ID не найден",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Тикет не найден"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Внутренняя ошибка сервера",
+                    content = @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/{id}/history")
+    public List<TicketAuditResponse> getHistory(
+            @Parameter(hidden = true)
+            @RequestHeader("X-User-Role") UserRole role,
+            @Parameter(hidden = true)
+            @RequestHeader("X-User-Id") UUID userId,
+
+            @Parameter(
+                    description = "Уникальный идентификатор тикета, историю которого необходимо получить",
+                    example = "550e8400-e29b-41d4-a716-446655440001",
+                    required = true
+            )
+            @PathVariable UUID id
+    ) {
+        return ticketService.getTicketHistory(id, userId, role);
+    }
 }

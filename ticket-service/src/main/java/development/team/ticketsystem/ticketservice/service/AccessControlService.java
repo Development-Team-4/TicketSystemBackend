@@ -102,4 +102,28 @@ public class AccessControlService {
 
         return false;
     }
+
+    public boolean canViewTicketHistory(UserRole role, UUID userId, TicketEntity ticket) {
+
+        if (role == UserRole.ADMIN) {
+            return true;
+        }
+
+        if (role == UserRole.USER) {
+            return ticket.getCreatedBy().equals(userId);
+        }
+
+        if (role == UserRole.SUPPORT) {
+            boolean isAssignee = userId.equals(ticket.getAssigneeId());
+
+            boolean inCategory = categoryStaffService.getByUser(userId)
+                    .stream()
+                    .map(CategoryStaffEntity::getCategoryId)
+                    .anyMatch(catId -> catId.equals(ticket.getCategoryId()));
+
+            return isAssignee || inCategory;
+        }
+
+        return false;
+    }
 }
