@@ -156,4 +156,42 @@ public class NotificationController {
 
         return ResponseEntity.ok().body(result);
     }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteAllUserNotifications(@PathVariable UUID userId) {
+        this.notificationService.deleteAllUserNotifications(userId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Удалить уведомление пользователя по ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Успешное удаление уведомлений пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = NotificationDto.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Некорректный формат ID пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @DeleteMapping("{userId}/{notificationId}")
+    public ResponseEntity<?> deleteNotificationById(@PathVariable UUID userId, @PathVariable UUID notificationId) {
+        this.notificationService.deleteUserNotificationById(userId, notificationId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{notificationId}")
+    public ResponseEntity<?> setReadStatusForNotification(@PathVariable UUID notificationId) {
+
+    }
 }

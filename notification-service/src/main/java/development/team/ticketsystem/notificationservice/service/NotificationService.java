@@ -64,6 +64,23 @@ public class NotificationService {
     }
 
     /**
+     * Метод удаления всех уведомлений пользователя
+     * @param userId ID пользователя
+     */
+    public void deleteAllUserNotifications(UUID userId) {
+        this.notificationRepository.deleteAllByUserId(userId);
+    }
+
+    /**
+     * Метод удаления уведомления
+     * @param userId ID пользователя
+     * @param notificationId ID уведомления
+     */
+    public void deleteUserNotificationById(UUID userId, UUID notificationId) {
+        this.notificationRepository.deleteByUserIdAndId(userId, notificationId);
+    }
+
+    /**
      * Метод для отправки сообщения по email
      * (ПОКА НЕ РЕАЛИЗОВАН)
      */
