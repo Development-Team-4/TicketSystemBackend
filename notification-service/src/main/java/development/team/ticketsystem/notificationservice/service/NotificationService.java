@@ -5,6 +5,7 @@ import development.team.ticketsystem.notificationservice.dto.NotificationCreatio
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
 import development.team.ticketsystem.notificationservice.entity.NotificationType;
+import development.team.ticketsystem.notificationservice.exceptions.NoSuchNotificationException;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.mapper.NotificationMapper;
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -78,6 +80,19 @@ public class NotificationService {
      */
     public void deleteUserNotificationById(UUID userId, UUID notificationId) {
         this.notificationRepository.deleteByUserIdAndId(userId, notificationId);
+    }
+
+    public void setReadStatusToNotification(UUID notificationId) throws NoSuchNotificationException {
+        Optional<Notification> notificationOptional = this.notificationRepository.findById(notificationId);
+
+        if(notificationOptional.isEmpty()) {
+            throw new NoSuchNotificationException(notificationId);
+        }
+
+        Notification notification = notificationOptional.get();
+        notification.setSent(true);
+
+        this.notificationRepository.save(notification);
     }
 
     /**

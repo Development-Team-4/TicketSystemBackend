@@ -34,6 +34,9 @@ public class Notification {
     @Column(name = "message", nullable = false)
     private String message;
 
+    @Column(name = "sent", nullable = false, columnDefinition = "default FALSE")
+    private Boolean sent;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false, columnDefinition = "default now()")
     private Timestamp createdAt;
 

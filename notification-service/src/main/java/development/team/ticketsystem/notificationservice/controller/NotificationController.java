@@ -3,6 +3,7 @@ package development.team.ticketsystem.notificationservice.controller;
 import development.team.ticketsystem.notificationservice.dto.ErrorResponse;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
+import development.team.ticketsystem.notificationservice.exceptions.NoSuchNotificationException;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -191,7 +192,9 @@ public class NotificationController {
     }
 
     @PutMapping("/{notificationId}")
-    public ResponseEntity<?> setReadStatusForNotification(@PathVariable UUID notificationId) {
+    public ResponseEntity<?> setReadStatusForNotification(@PathVariable UUID notificationId) throws NoSuchNotificationException {
+        this.notificationService.setReadStatusToNotification(notificationId);
 
+        return ResponseEntity.ok().build();
     }
 }
