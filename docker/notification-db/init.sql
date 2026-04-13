@@ -8,7 +8,7 @@ CREATE TABLE notifications
     ticket_id uuid NOT NULL,
     type VARCHAR(50) NOT NULL CHECK (type IN ('ASSIGNMENT', 'COMMENT', 'STATUS_CHANGE')),
     title text NOT NULL,
-    sent boolean DEFAULT FALSE,
+    sent BOOLEAN DEFAULT FALSE,
     message text NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now()

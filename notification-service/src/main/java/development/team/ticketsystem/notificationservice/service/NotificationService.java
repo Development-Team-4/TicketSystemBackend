@@ -10,6 +10,7 @@ import development.team.ticketsystem.notificationservice.exceptions.UserNotFound
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.mapper.NotificationMapper;
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +71,7 @@ public class NotificationService {
      * Метод удаления всех уведомлений пользователя
      * @param userId ID пользователя
      */
+    @Transactional
     public void deleteAllUserNotifications(UUID userId) throws UserNotFoundException {
         List<Notification> notifications = this.notificationRepository.findByUserId(userId);
 
@@ -85,6 +87,7 @@ public class NotificationService {
      * @param userId ID пользователя
      * @param notificationId ID уведомления
      */
+    @Transactional
     public void deleteUserNotificationById(UUID userId, UUID notificationId) {
         this.notificationRepository.deleteByUserIdAndId(userId, notificationId);
     }
@@ -94,6 +97,7 @@ public class NotificationService {
      * @param notificationId ID уведомления
      * @throws NotificationNotFoundException если уведомление не найдено
      */
+    @Transactional
     public void setReadStatusToNotification(UUID notificationId) throws NotificationNotFoundException {
         Optional<Notification> notificationOptional = this.notificationRepository.findById(notificationId);
 
