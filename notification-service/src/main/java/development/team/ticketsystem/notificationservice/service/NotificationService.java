@@ -5,7 +5,8 @@ import development.team.ticketsystem.notificationservice.dto.NotificationCreatio
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
 import development.team.ticketsystem.notificationservice.entity.NotificationType;
-import development.team.ticketsystem.notificationservice.exceptions.NoSuchNotificationException;
+import development.team.ticketsystem.notificationservice.exceptions.NotificationNotFoundException;
+import development.team.ticketsystem.notificationservice.exceptions.UserNotFoundException;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.mapper.NotificationMapper;
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
@@ -56,7 +57,7 @@ public class NotificationService {
      * Перегруженный метод выдачи всех нотификаций
      * (для конкретного пользователя)
      *
-     * @param userId user_id пользователя
+     * @param userId userId пользователя
      * @return список уведомлений
      */
     public List<NotificationDto> getAllNotifications(UUID userId) {
@@ -69,7 +70,13 @@ public class NotificationService {
      * Метод удаления всех уведомлений пользователя
      * @param userId ID пользователя
      */
-    public void deleteAllUserNotifications(UUID userId) {
+    public void deleteAllUserNotifications(UUID userId) throws UserNotFoundException {
+        List<Notification> notifications = this.notificationRepository.findByUserId(userId);
+
+        if(notifications.isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
+
         this.notificationRepository.deleteAllByUserId(userId);
     }
 
@@ -82,11 +89,16 @@ public class NotificationService {
         this.notificationRepository.deleteByUserIdAndId(userId, notificationId);
     }
 
-    public void setReadStatusToNotification(UUID notificationId) throws NoSuchNotificationException {
+    /**
+     * Метод установка флага "sent" в Notification в true
+     * @param notificationId ID уведомления
+     * @throws NotificationNotFoundException если уведомление не найдено
+     */
+    public void setReadStatusToNotification(UUID notificationId) throws NotificationNotFoundException {
         Optional<Notification> notificationOptional = this.notificationRepository.findById(notificationId);
 
         if(notificationOptional.isEmpty()) {
-            throw new NoSuchNotificationException(notificationId);
+            throw new NotificationNotFoundException(notificationId);
         }
 
         Notification notification = notificationOptional.get();

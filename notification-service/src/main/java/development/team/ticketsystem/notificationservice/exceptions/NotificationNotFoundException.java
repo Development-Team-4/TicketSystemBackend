@@ -7,6 +7,6 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Getter
-public class NoSuchNotificationException extends Exception {
+public class NotificationNotFoundException extends Exception {
     private final UUID id;
 }
