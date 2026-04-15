@@ -1,17 +1,21 @@
 package development.team.ticketsystem.notificationservice.service;
 
-import development.team.ticketsystem.notificationservice.config.NotificationTypeText;
+import development.team.ticketsystem.notificationservice.config.NotificationContentProvider;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
 import development.team.ticketsystem.notificationservice.entity.Notification;
 import development.team.ticketsystem.notificationservice.entity.NotificationType;
+import development.team.ticketsystem.notificationservice.exceptions.NotificationNotFoundException;
+import development.team.ticketsystem.notificationservice.exceptions.UserNotFoundException;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.mapper.NotificationMapper;
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,7 +25,7 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
 
-    private final NotificationTypeText notificationTypeText;
+    private final NotificationContentProvider notificationContentProvider;
 
     /**
      * Метод выдачи всех нотификаций
@@ -54,13 +58,57 @@ public class NotificationService {
      * Перегруженный метод выдачи всех нотификаций
      * (для конкретного пользователя)
      *
-     * @param userId user_id пользователя
+     * @param userId userId пользователя
      * @return список уведомлений
      */
     public List<NotificationDto> getAllNotifications(UUID userId) {
         List<Notification> result = this.notificationRepository.findByUserId(userId);
 
         return notificationMapper.toDtoList(result);
+    }
+
+    /**
+     * Метод удаления всех уведомлений пользователя
+     * @param userId ID пользователя
+     */
+    @Transactional
+    public void deleteAllUserNotifications(UUID userId) throws UserNotFoundException {
+        List<Notification> notifications = this.notificationRepository.findByUserId(userId);
+
+        if(notifications.isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
+
+        this.notificationRepository.deleteAllByUserId(userId);
+    }
+
+    /**
+     * Метод удаления уведомления
+     * @param userId ID пользователя
+     * @param notificationId ID уведомления
+     */
+    @Transactional
+    public void deleteUserNotificationById(UUID userId, UUID notificationId) {
+        this.notificationRepository.deleteByUserIdAndId(userId, notificationId);
+    }
+
+    /**
+     * Метод установка флага "sent" в Notification в true
+     * @param notificationId ID уведомления
+     * @throws NotificationNotFoundException если уведомление не найдено
+     */
+    @Transactional
+    public void setReadStatusToNotification(UUID notificationId) throws NotificationNotFoundException {
+        Optional<Notification> notificationOptional = this.notificationRepository.findById(notificationId);
+
+        if(notificationOptional.isEmpty()) {
+            throw new NotificationNotFoundException(notificationId);
+        }
+
+        Notification notification = notificationOptional.get();
+        notification.setRead(true);
+
+        this.notificationRepository.save(notification);
     }
 
     /**
@@ -80,10 +128,10 @@ public class NotificationService {
     }
 
     private String getTitle(NotificationType type) {
-        return this.notificationTypeText.getTemplate(type.name()).getTitle();
+        return this.notificationContentProvider.getTemplate(type.name()).getTitle();
     }
 
     private String getMessage(NotificationType type) {
-        return this.notificationTypeText.getTemplate(type.name()).getMessage();
+        return this.notificationContentProvider.getTemplate(type.name()).getMessage();
     }
 }

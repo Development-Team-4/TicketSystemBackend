@@ -3,6 +3,8 @@ package development.team.ticketsystem.notificationservice.controller;
 import development.team.ticketsystem.notificationservice.dto.ErrorResponse;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
+import development.team.ticketsystem.notificationservice.exceptions.NotificationNotFoundException;
+import development.team.ticketsystem.notificationservice.exceptions.UserNotFoundException;
 import development.team.ticketsystem.notificationservice.exceptions.NotificationFormatException;
 import development.team.ticketsystem.notificationservice.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -155,5 +157,122 @@ public class NotificationController {
         List<NotificationDto> result = this.notificationService.getAllNotifications(userId);
 
         return ResponseEntity.ok().body(result);
+    }
+
+    @Operation(summary = "Удалить все уведомления пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Успешное удаление уведомлений пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = NotificationDto.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Уведомления с таким ID нет",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteAllUserNotifications(
+            @Parameter(
+                    description = "Уникальный идентификатор пользователя в формате UUID",
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440001",
+                    schema = @Schema(
+                            type = "string",
+                            format = "uuid",
+                            description = "UUID пользователя"
+                    )
+            ) @PathVariable UUID userId) throws UserNotFoundException {
+        this.notificationService.deleteAllUserNotifications(userId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Удалить уведомление пользователя по ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Успешное удаление уведомления пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = NotificationDto.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Уведомления с таким ID нет",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @DeleteMapping("{userId}/{notificationId}")
+    public ResponseEntity<?> deleteNotificationById(
+            @Parameter(
+                    description = "Уникальный идентификатор пользователя в формате UUID",
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440001",
+                    schema = @Schema(
+                            type = "string",
+                            format = "uuid",
+                            description = "UUID пользователя"
+                    )
+            ) @PathVariable UUID userId,
+            @Parameter(
+                    description = "Уникальный идентификатор уведомления в формате UUID",
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440001",
+                    schema = @Schema(
+                            type = "string",
+                            format = "uuid",
+                            description = "UUID уведомления"
+                    )
+            ) @PathVariable UUID notificationId) {
+        this.notificationService.deleteUserNotificationById(userId, notificationId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Установка флага read в true для уведомления")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Успешная установка флага для уведомления",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Уведомления с таким ID нет",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @PutMapping("/{notificationId}/read")
+    public ResponseEntity<?> setReadStatusForNotification(
+            @Parameter(
+                    description = "Уникальный идентификатор уведомления в формате UUID",
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440001",
+                    schema = @Schema(
+                            type = "string",
+                            format = "uuid",
+                            description = "UUID уведомления"
+                    )
+            ) @PathVariable UUID notificationId) throws NotificationNotFoundException {
+        this.notificationService.setReadStatusToNotification(notificationId);
+
+        return ResponseEntity.ok().build();
     }
 }
