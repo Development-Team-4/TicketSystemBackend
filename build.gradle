@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+allprojects {
+
+    group = 'com.example.ticket'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+
+    }
+}
+

@@ -1,0 +1,27 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: ${AUTH_DB_URL:jdbc:postgresql://auth-postgres:5432/auth_db}
+    username: ${AUTH_DB_USER:postgres}
+    password: ${AUTH_DB_PASSWORD:postgres}
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:auth-redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+app:
+  jwt:
+    issuer: ticket-system-auth
+    audience: ticket-system
+    access-token-ttl-seconds: 900
+    refresh-token-ttl-seconds: 1209600
+    key-id: auth-rsa-key-1
+    keys:
+      public-key: classpath:keys/public.pem
+      private-key: classpath:keys/private.pem

@@ -1,0 +1,8 @@
+rootProject.name = 'TicketSystemBackend'
+
+include 'gateway'
+include 'auth-service'
+include 'ticket-service'
+include 'notification-service'
+include 'tests-module'
+

@@ -1,0 +1,11 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: notification-service
+
+  datasource:
+    url: ${NOTIFICATION_DB_URL:jdbc:postgresql://localhost:5435/notification_db}
+    username: ${NOTIFICATION_DB_USER:notification_user}
+    password: ${NOTIFICATION_DB_PASSWORD:notification_password}

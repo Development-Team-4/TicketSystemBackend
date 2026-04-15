@@ -1,0 +1,18 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  application:
+    name: ticket-service
+
+  datasource:
+    url: ${TICKET_DB_URL:jdbc:postgresql://ticket-postgres:5432/ticket_db}
+    username: ${TICKET_DB_USER:postgres}
+    password: ${TICKET_DB_PASSWORD:postgres}
+
+services:
+  notification:
+    url: ${NOTIFICATION_SERVICE_URL:http://notification-service:8083}
+    timeout:
+      connect: 500
+      read: 1000

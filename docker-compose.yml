@@ -1,0 +1,166 @@
+services:
+
+  auth-postgres:
+    image: postgres:16-alpine
+    container_name: auth-postgres
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: UTC+3
+    ports:
+      - "${AUTH_DB_PORT}:5432"
+    volumes:
+      - ./docker/auth-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    tmpfs:
+      - /var/lib/postgresql/data:rw,noexec,nosuid,size=256m
+    shm_size: "256m"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+    restart: unless-stopped
+
+
+  ticket-postgres:
+    image: postgres:16-alpine
+    container_name: ticket-postgres
+    environment:
+      POSTGRES_DB: ${TICKET_DB_NAME}
+      POSTGRES_USER: ${TICKET_DB_USER}
+      POSTGRES_PASSWORD: ${TICKET_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: UTC+3
+    ports:
+      - "${TICKET_DB_PORT}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data:rw,noexec,nosuid,size=256m
+    volumes:
+      - ./docker/ticket-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    shm_size: "256m"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+    restart: unless-stopped
+
+
+  notification-postgres:
+    image: postgres:16-alpine
+    container_name: notification-postgres
+    environment:
+      POSTGRES_DB: ${NOTIFICATION_DB_NAME}
+      POSTGRES_USER: ${NOTIFICATION_DB_USER}
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: UTC+3
+    ports:
+      - "${NOTIFICATION_DB_PORT}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data:rw,noexec,nosuid,size=256m
+    volumes:
+      - ./docker/notification-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    shm_size: "256m"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+    restart: unless-stopped
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: auth-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      SERVER_PORT: 80
+      AUTH_DB_URL: jdbc:postgresql://auth-postgres:5432/${AUTH_DB_NAME}
+      AUTH_DB_USER: ${AUTH_DB_USER}
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: auth-redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+
+
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: notification-service
+    depends_on:
+      notification-postgres:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 80
+      NOTIFICATION_DB_URL: jdbc:postgresql://notification-postgres:5432/${NOTIFICATION_DB_NAME}
+      NOTIFICATION_DB_USER: ${NOTIFICATION_DB_USER}
+      NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+    ports:
+      - "8083:80"
+    restart: unless-stopped
+
+
+  ticket-service:
+    build:
+      context: ./ticket-service
+    container_name: ticket-service
+    depends_on:
+      ticket-postgres:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+    environment:
+      SERVER_PORT: 80
+      TICKET_DB_URL: jdbc:postgresql://ticket-postgres:5432/${TICKET_DB_NAME}
+      TICKET_DB_USER: ${TICKET_DB_USER}
+      TICKET_DB_PASSWORD: ${TICKET_DB_PASSWORD}
+      NOTIFICATION_SERVICE_URL: http://notification-service:80
+    ports:
+      - "8084:80"
+    restart: unless-stopped
+
+
+  gateway:
+    build:
+      context: ./gateway
+    container_name: gateway
+    depends_on:
+      auth-service:
+        condition: service_started
+      ticket-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      redis:
+        condition: service_started
+    environment:
+      SERVER_PORT: 80
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_REDIS_HOST: auth-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_SECURITY_JWT_JWK_SET_URI: http://auth-service/.well-known/jwks.json
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,https://ticketsystem.braverto.com
+    ports:
+      - "8081:80"
+    restart: unless-stopped
