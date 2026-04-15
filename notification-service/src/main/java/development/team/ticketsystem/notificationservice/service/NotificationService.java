@@ -54,14 +54,34 @@ public class NotificationService {
      * @return dto с данными уведомления
      */
     public NotificationDto addNewNotification(NotificationCreationDto dto) throws NotificationFormatException {
+        log.info("Creating notification: userId={}, ticketId={}, type={}",
+                dto.getUserId(), dto.getTicketId(), dto.getType());
+
         Notification notification = this.notificationMapper.toEntity(dto);
 
         notification.setTitle(this.getTitle(dto.getType()));
         notification.setMessage(this.getMessage(dto.getType()));
 
+        log.debug("Notification content prepared: title='{}', message='{}'",
+                notification.getTitle(), notification.getMessage());
+
         Notification saved = this.notificationRepository.save(notification);
 
-        sendTelegramMessage(saved);
+        log.info("Notification saved: id={}, userId={}",
+                saved.getId(), saved.getUserId());
+
+        try {
+            log.info("Attempting to send Telegram notification: notificationId={}, userId={}",
+                    saved.getId(), saved.getUserId());
+
+            sendTelegramMessage(saved);
+
+            log.info("Telegram notification flow finished: notificationId={}", saved.getId());
+
+        } catch (Exception e) {
+            log.error("Telegram notification failed: notificationId={}, userId={}",
+                    saved.getId(), saved.getUserId(), e);
+        }
 
         return notificationMapper.toDto(saved);
     }
@@ -143,22 +163,29 @@ public class NotificationService {
         try {
             var settings = authServiceClient.getNotificationSettings(notification.getUserId());
 
-            log.debug("tg:{}", settings.telegramNotification());
-            if (settings == null
-                    || settings.telegramNotification() == null
-                    || settings.telegramNotification().isBlank()) {
+            if (settings == null) {
+                log.warn("No settings for userId={}", notification.getUserId());
                 return;
             }
 
-            Long chatId = Long.parseLong(settings.telegramNotification());
-            log.debug("tg:{}", chatId);
+            String chatIdStr = settings.telegramNotification();
+
+            if (chatIdStr == null || chatIdStr.isBlank()) {
+                log.warn("Telegram not enabled for userId={}", notification.getUserId());
+                return;
+            }
+
+            Long chatId = Long.parseLong(chatIdStr);
+
             String text = "<b>" + notification.getTitle() + "</b>\n" +
                     notification.getMessage();
 
             botServiceClient.sendTelegramMessage(chatId, text);
 
+            log.info("Telegram sent to chatId={}", chatId);
+
         } catch (Exception exception) {
-            throw new RuntimeException("ERROR");
+            log.error("Failed to send telegram for userId={}", notification.getUserId(), exception);
         }
     }
 }
