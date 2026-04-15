@@ -1,0 +1,13 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: bot
+
+app:
+  telegram:
+    url: https://api.telegram.org/bot
+    token: ${TELEGRAM_TOKEN}
+    update-listener-sleep: 1s
+    debug: false
