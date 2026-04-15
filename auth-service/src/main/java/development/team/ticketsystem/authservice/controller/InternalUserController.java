@@ -25,8 +25,8 @@ public class InternalUserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return new NotificationSettingsResponse(
-                user.getTelegramEnabled(),
-                user.getEmailEnabled()
+                user.getEmailEnabled(),
+                user.getTelegramEnabled()
         );
     }
 }
