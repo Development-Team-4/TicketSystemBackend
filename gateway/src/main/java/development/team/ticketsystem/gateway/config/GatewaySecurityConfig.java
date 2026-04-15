@@ -97,9 +97,18 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/notifications/**")
                         .hasRole("ADMIN")
 
+                        .pathMatchers(HttpMethod.DELETE, "/notifications/**")
+                        .hasAnyRole("ADMIN", "USER", "SUPPORT")
+
+                        .pathMatchers(HttpMethod.PUT, "/notifications/**")
+                        .hasAnyRole("ADMIN", "USER", "SUPPORT")
+
                         // statistic
                         .pathMatchers(HttpMethod.GET, "/statistics/**")
                         .hasRole("ADMIN")
+
+                        // internal
+                        .pathMatchers("/internal/**").denyAll()
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(ex -> ex
