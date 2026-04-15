@@ -14,12 +14,14 @@ import development.team.ticketsystem.notificationservice.mapper.NotificationMapp
 import development.team.ticketsystem.notificationservice.repository.NotificationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -129,14 +131,6 @@ public class NotificationService {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Метод для отправки сообщения в telegram
-     * (ПОКА НЕ РЕАЛИЗОВАН)
-     */
-    private void sendTelegramMessage() {
-        throw new UnsupportedOperationException();
-    }
-
     private String getTitle(NotificationType type) {
         return this.notificationContentProvider.getTemplate(type.name()).getTitle();
     }
@@ -149,6 +143,7 @@ public class NotificationService {
         try {
             var settings = authServiceClient.getNotificationSettings(notification.getUserId());
 
+            log.debug("tg:{}", settings.telegramNotification());
             if (settings == null
                     || settings.telegramNotification() == null
                     || settings.telegramNotification().isBlank()) {
@@ -156,13 +151,14 @@ public class NotificationService {
             }
 
             Long chatId = Long.parseLong(settings.telegramNotification());
-
+            log.debug("tg:{}", chatId);
             String text = "<b>" + notification.getTitle() + "</b>\n" +
                     notification.getMessage();
 
             botServiceClient.sendTelegramMessage(chatId, text);
 
         } catch (Exception exception) {
+            throw new RuntimeException("ERROR");
         }
     }
 }
