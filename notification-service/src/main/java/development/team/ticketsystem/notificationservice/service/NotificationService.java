@@ -1,5 +1,7 @@
 package development.team.ticketsystem.notificationservice.service;
 
+import development.team.ticketsystem.notificationservice.client.AuthServiceClient;
+import development.team.ticketsystem.notificationservice.client.BotServiceClient;
 import development.team.ticketsystem.notificationservice.config.NotificationContentProvider;
 import development.team.ticketsystem.notificationservice.dto.NotificationCreationDto;
 import development.team.ticketsystem.notificationservice.dto.NotificationDto;
@@ -21,6 +23,10 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
+
+    private final AuthServiceClient authServiceClient;
+    private final BotServiceClient botServiceClient;
+
     private final NotificationRepository notificationRepository;
 
     private final NotificationMapper notificationMapper;
@@ -51,7 +57,11 @@ public class NotificationService {
         notification.setTitle(this.getTitle(dto.getType()));
         notification.setMessage(this.getMessage(dto.getType()));
 
-        return notificationMapper.toDto(this.notificationRepository.save(notification));
+        Notification saved = this.notificationRepository.save(notification);
+
+        sendTelegramMessage(saved);
+
+        return notificationMapper.toDto(saved);
     }
 
     /**
@@ -133,5 +143,26 @@ public class NotificationService {
 
     private String getMessage(NotificationType type) {
         return this.notificationContentProvider.getTemplate(type.name()).getMessage();
+    }
+
+    private void sendTelegramMessage(Notification notification) {
+        try {
+            var settings = authServiceClient.getNotificationSettings(notification.getUserId());
+
+            if (settings == null
+                    || settings.telegramNotification() == null
+                    || settings.telegramNotification().isBlank()) {
+                return;
+            }
+
+            Long chatId = Long.parseLong(settings.telegramNotification());
+
+            String text = "<b>" + notification.getTitle() + "</b>\n" +
+                    notification.getMessage();
+
+            botServiceClient.sendTelegramMessage(chatId, text);
+
+        } catch (Exception exception) {
+        }
     }
 }
