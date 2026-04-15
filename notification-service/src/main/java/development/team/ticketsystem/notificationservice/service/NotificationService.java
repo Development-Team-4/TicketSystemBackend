@@ -168,7 +168,7 @@ public class NotificationService {
                 return;
             }
 
-            String chatIdStr = settings.telegramNotification();
+            String chatIdStr = settings.userTelegramNotification();
 
             if (chatIdStr == null || chatIdStr.isBlank()) {
                 log.warn("Telegram not enabled for userId={}", notification.getUserId());
