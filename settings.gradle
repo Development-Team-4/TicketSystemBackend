@@ -5,5 +5,6 @@ include 'auth-service'
 include 'ticket-service'
 include 'notification-service'
 include 'tests-module'
+include 'gpt-service'
 include 'bot'
 
