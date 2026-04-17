@@ -1,19 +1,12 @@
-package development.team.ticketsystem.gptservice.prompts;
+package development.team.ticketsystem.gptservice.configuration;
 
-public class UpgradeDescriptionPrompts {
-    /**
-     * Возвращает промпт для улучшения описания тикета
-     */
-    public static String getUpgradeDescriptionPrompt(String pointName, String pointDescription) {
-        String context = "";
-        if (pointName != null && !pointName.isEmpty()) {
-            context += String.format("Название задачи: %s\n", pointName);
-        }
-        if (pointDescription != null && !pointDescription.isEmpty()) {
-            context += String.format("Текущее описание: %s\n", pointDescription);
-        }
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
-        return String.format("""
+@Configuration
+public class PromptsConfiguration {
+    //@Value("${yagpt.prompts.upgrade-description-prompts}")
+    private String upgradeDescriptionPrompt = """
             Ты - ассистент в системе управления задачами (тикет-системе). \
             Твоя задача - улучшать описания задач (тикетов), делая их более чёткими, \
             структурированными и информативными.
@@ -31,14 +24,10 @@ public class UpgradeDescriptionPrompts {
             
             Пожалуйста, улучши следующее описание задачи, следуя указанным правилам.
             Верни только улучшенное описание без дополнительных комментариев.
-            """, context);
-    }
+            """;
 
-    /**
-     * Возвращает промпт для ассистента в чате
-     */
-    public static String getChatAssistantPrompt(String pointName, String pointDescription) {
-        return String.format("""
+    //@Value("${yagpt.prompts.chat-assistant-prompt}")
+    private String chatAssistantPrompt = """
             Ты - полезный ассистент в системе управления задачами (тикет-системе). \
             Ты помогаешь пользователям решать проблемы, связанные с задачей.
             
@@ -56,7 +45,22 @@ public class UpgradeDescriptionPrompts {
             Если вопрос не относится к задаче, вежливо предложи вернуться к обсуждению задачи.
             
             Пожалуйста, ответь на сообщение пользователя, учитывая контекст задачи.
-            """,
+            """;
+
+    public String getUpgradeDescriptionPrompt(String pointName, String pointDescription) {
+        String context = "";
+        if (pointName != null && !pointName.isEmpty()) {
+            context += String.format("Название задачи: %s\n", pointName);
+        }
+        if (pointDescription != null && !pointDescription.isEmpty()) {
+            context += String.format("Текущее описание: %s\n", pointDescription);
+        }
+
+        return String.format(this.upgradeDescriptionPrompt, context);
+    }
+
+    public String getChatAssistantPrompt(String pointName, String pointDescription) {
+        return String.format(this.chatAssistantPrompt,
                 pointName != null ? pointName : "Не указано",
                 pointDescription != null ? pointDescription : "Не указано");
     }

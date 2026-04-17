@@ -177,3 +177,14 @@ services:
     ports:
       - "8085:80"
     restart: unless-stopped
+
+  gpt-service:
+    build:
+      context: ./bot
+    container_name: bot-service
+    environment:
+      SERVER_PORT: 80
+      APP_TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+    ports:
+      - "8086:80"
+    restart: unless-stopped

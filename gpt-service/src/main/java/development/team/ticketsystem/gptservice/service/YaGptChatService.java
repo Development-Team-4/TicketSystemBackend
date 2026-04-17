@@ -1,7 +1,7 @@
 package development.team.ticketsystem.gptservice.service;
 
 import development.team.ticketsystem.gptservice.client.interfaces.LlmClient;
-import development.team.ticketsystem.gptservice.prompts.UpgradeDescriptionPrompts;
+import development.team.ticketsystem.gptservice.configuration.PromptsConfiguration;
 import development.team.ticketsystem.gptservice.service.interfaces.LlmServiceInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +21,8 @@ public class YaGptChatService implements LlmServiceInterface {
 
     @Value("${yagpt.temperature:0.7}")
     private double temperature;
+
+    private final PromptsConfiguration promptsConfiguration;
 
     /**
      * Метод для обновления оригинального описания тикета через Gpt
@@ -42,13 +44,13 @@ public class YaGptChatService implements LlmServiceInterface {
     private String upgradeDescription(String description, String pointName, String pointDescription) {
         try {
             // Формируем системный промпт
-            String systemPrompt = UpgradeDescriptionPrompts.getUpgradeDescriptionPrompt(pointName, pointDescription);
+            String systemPrompt = this.promptsConfiguration.getUpgradeDescriptionPrompt(pointName, pointDescription);
 
             // Формируем сообщения для чата
             List<Map<String, String>> messages = new ArrayList<>();
             messages.add(Map.of("role", "user", "content", description));
 
-            return configureResponse(systemPrompt, messages);
+            return configureRequestAndSend(systemPrompt, messages);
 
         } catch (Exception e) {
             return "Извините, сервис временно недоступен. Пожалуйста, попробуйте позже.";
@@ -73,18 +75,16 @@ public class YaGptChatService implements LlmServiceInterface {
             messages.add(Map.of("role", "user", "content", userMessage));
 
             // Формируем системный промпт для чата
-            String systemPrompt = UpgradeDescriptionPrompts.getChatAssistantPrompt(pointName, pointDescription);
+            String systemPrompt = this.promptsConfiguration.getChatAssistantPrompt(pointName, pointDescription);
 
-            // Выполняем запрос
-
-            return configureResponse(systemPrompt, messages);
+            return configureRequestAndSend(systemPrompt, messages);
 
         } catch (Exception e) {
             return "Извините, я временно недоступен. Пожалуйста, попробуйте позже.";
         }
     }
 
-    private String configureResponse(String systemPrompt, List<Map<String, String>> messages) {
+    private String configureRequestAndSend(String systemPrompt, List<Map<String, String>> messages) {
         return this.yaGptClient.chatCompletion(
                 systemPrompt,
                 messages,
