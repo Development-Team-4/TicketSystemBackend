@@ -12,15 +12,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpgradeRequestDto {
-    @JsonProperty(value = "description")
-    @Schema(description = "")
-    private String description;
 
+    @Schema(
+            description = "Название тикета",
+            example = "Проблема с входом на сайт",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @JsonProperty(value = "ticketName")
-    @Schema(description = "Название тикета")
     private String ticketName;
 
+
+    @Schema(
+            description = "Текущее описание тикета",
+            example = "Не могу залогиниться.",
+            requiredMode = Schema.RequiredMode.REQUIRED
+            )
     @JsonProperty(value = "currentDescription")
-    @Schema(description = "Текущее описание тикета")
     private String currentDescription;
 }
