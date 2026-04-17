@@ -1,3 +1,6 @@
+server:
+  port: 8085
+
 spring:
   application:
     name: gpt-service
@@ -11,3 +14,6 @@ yagpt:
   model: yandexgpt
   max-tokens: 1000
   temperature: 0.7
+
+  prompts:
+    config-location: classpath:prompts.yaml
