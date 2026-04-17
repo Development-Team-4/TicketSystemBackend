@@ -1,40 +1,46 @@
 package development.team.ticketsystem.gptservice.configuration;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.Yaml;
 
-@Configuration
+import java.io.InputStream;
+import java.util.Map;
+
+@Component
 public class PromptsConfiguration {
-    //@Value("${yagpt.prompts.upgrade-description-prompts}")
-    private String upgradeDescriptionPrompt = """
-            Ты - ассистент в системе управления задачами (тикет-системе). \
-            Твоя задача - улучшать описания задач (тикетов), делая их более чёткими, \
-            структурированными и информативными.
-            
-            %s
-            
-            Правила улучшения описания:
-            1. Сделай описание более подробным и понятным
-            2. Добавь структуру (используй маркированные списки при необходимости)
-            3. Выдели ключевые моменты и требования
-            4. Опиши ожидаемый результат
-            5. Сохрани основную суть исходного описания
-            6. Используй профессиональный, но понятный язык
-            7. Удали лишние или дублирующиеся фразы
-            
-            Пожалуйста, улучши следующее описание задачи, следуя указанным правилам.
-            Верни только улучшенное описание без дополнительных комментариев.
-            """;
 
-    public String getUpgradeDescriptionPrompt(String pointName, String pointDescription) {
+    @Value("${yagpt.prompts.config-location:classpath:prompts.yaml}")
+    private Resource promptsResource;
+
+    private String upgradeDescriptionPromptTemplate;
+
+    @PostConstruct
+    public void loadPrompts() {
+        try {
+            Yaml yaml = new Yaml();
+            try (InputStream inputStream = promptsResource.getInputStream()) {
+                Map<String, Map<String, Object>> prompts = yaml.load(inputStream);
+
+                Map<String, Object> upgradePrompt = prompts.get("upgrade-description");
+                if (upgradePrompt != null) {
+                    this.upgradeDescriptionPromptTemplate = (String) upgradePrompt.get("template");
+                } else {
+                    throw new IllegalStateException("upgrade-description prompt not found in YAML");
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load prompts configuration", e);
+        }
+    }
+
+    public String getUpgradeDescriptionPrompt(String pointName) {
         String context = "";
         if (pointName != null && !pointName.isEmpty()) {
             context += String.format("Название задачи: %s\n", pointName);
         }
-        if (pointDescription != null && !pointDescription.isEmpty()) {
-            context += String.format("Текущее описание: %s\n", pointDescription);
-        }
-
-        return String.format(this.upgradeDescriptionPrompt, context);
+        return String.format(this.upgradeDescriptionPromptTemplate, context);
     }
 }
