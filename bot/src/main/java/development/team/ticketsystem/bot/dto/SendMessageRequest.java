@@ -7,9 +7,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateMessageRequest {
+public class SendMessageRequest {
 
     private Long chatId;
 
     private String text;
+
+    private String url;
 }

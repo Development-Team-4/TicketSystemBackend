@@ -46,7 +46,6 @@ public class NotificationService {
         return this.notificationMapper.toDtoList(result);
     }
 
-    // В дальнейшем поменяю DTO, в котором ещё будет передаваться settings
     /**
      * Метод добавления нового уведомления через DTO
      *
@@ -177,10 +176,11 @@ public class NotificationService {
 
             Long chatId = Long.parseLong(chatIdStr);
 
-            String text = "<b>" + notification.getTitle() + "</b>\n" +
-                    notification.getMessage();
+            String ticketUrl = "https://ticketsystem.braverto.com/tickets/" + notification.getTicketId();
 
-            botServiceClient.sendTelegramMessage(chatId, text);
+            String text = "<b><i>" + notification.getMessage() + "</i></b>\n";
+
+            botServiceClient.sendTelegramMessage(chatId, text, ticketUrl);
 
             log.info("Telegram sent to chatId={}", chatId);
 

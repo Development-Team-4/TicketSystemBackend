@@ -12,4 +12,6 @@ public class TelegramSendMessageRequest {
     private  Long chatId;
 
     private String text;
+
+    private String url;
 }

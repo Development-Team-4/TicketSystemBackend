@@ -11,10 +11,10 @@ public class BotServiceClient {
 
     private final RestClient botRestClient;
 
-    public void sendTelegramMessage(Long chatId, String text) {
+    public void sendTelegramMessage(Long chatId, String text, String url) {
         botRestClient.post()
                 .uri("/internal/telegram/send")
-                .body(new TelegramSendMessageRequest(chatId, text))
+                .body(new TelegramSendMessageRequest(chatId, text, url))
                 .retrieve()
                 .toBodilessEntity();
     }
