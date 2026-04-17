@@ -26,22 +26,17 @@ public class YaGptChatService {
     /**
      * Улучшает описание тикета с контекстом названия и текущего описания
      *
-     * @param currentDescription Исходное описание для улучшения
      * @param ticketName         Название тикета для контекста
+     * @param currentDescription Исходное описание для улучшения
      * @return Улучшенное описание
      */
     public String upgradeDescription(String ticketName, String currentDescription) {
-        try {
 
-            String systemPrompt = this.promptsConfiguration.getUpgradeDescriptionPrompt(ticketName);
-            List<Map<String, String>> messages = new ArrayList<>();
-            messages.add(Map.of("role", "user", "content", currentDescription));
+        String systemPrompt = this.promptsConfiguration.getUpgradeDescriptionPrompt(ticketName);
+        List<Map<String, String>> messages = new ArrayList<>();
+        messages.add(Map.of("role", "user", "content", currentDescription));
 
-            return configureRequestAndSend(systemPrompt, messages);
-
-        } catch (Exception e) {
-            return "Извините, сервис временно недоступен. Пожалуйста, попробуйте позже.";
-        }
+        return configureRequestAndSend(systemPrompt, messages);
     }
 
     private String configureRequestAndSend(String systemPrompt, List<Map<String, String>> messages) {
