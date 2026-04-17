@@ -2,7 +2,6 @@ package development.team.ticketsystem.gptservice.service;
 
 import development.team.ticketsystem.gptservice.client.interfaces.LlmClient;
 import development.team.ticketsystem.gptservice.configuration.PromptsConfiguration;
-import development.team.ticketsystem.gptservice.service.interfaces.LlmServiceInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class YaGptChatService implements LlmServiceInterface {
+public class YaGptChatService {
     private final LlmClient yaGptClient;
 
     @Value("${yagpt.max-tokens:5000}")
@@ -22,36 +21,22 @@ public class YaGptChatService implements LlmServiceInterface {
     @Value("${yagpt.temperature:0.7}")
     private double temperature;
 
-    private final PromptsConfiguration promptsConfiguration;
+    @Value("${yagpt.model:general}")
+    private String model;
 
-    /**
-     * Метод для обновления оригинального описания тикета через Gpt
-     * @param originalDescription оригинальное описание тикета
-     * @return обновлённое описание после отправки промпта
-     */
-    @Override
-    public String upgradeDescription(String originalDescription) {
-        return upgradeDescription(originalDescription, null, null);
-    }
+    private final PromptsConfiguration promptsConfiguration;
 
     /**
      * Улучшает описание тикета с контекстом названия и текущего описания
      * @param description Исходное описание для улучшения
-     * @param pointName Название тикета
-     * @param pointDescription Текущее описание тикета
      * @return Улучшенное описание
      */
-    private String upgradeDescription(String description, String pointName, String pointDescription) {
+    public String upgradeDescription(String description, String ticketName, String currentDescription) {
         try {
-            // Формируем системный промпт
-            String systemPrompt = this.promptsConfiguration.getUpgradeDescriptionPrompt(pointName, pointDescription);
-
-            // Формируем сообщения для чата
+            String systemPrompt = this.promptsConfiguration.getUpgradeDescriptionPrompt(ticketName, currentDescription);
             List<Map<String, String>> messages = new ArrayList<>();
             messages.add(Map.of("role", "user", "content", description));
-
             return configureRequestAndSend(systemPrompt, messages);
-
         } catch (Exception e) {
             return "Извините, сервис временно недоступен. Пожалуйста, попробуйте позже.";
         }
@@ -70,16 +55,15 @@ public class YaGptChatService implements LlmServiceInterface {
                                        String pointName,
                                        String pointDescription) {
         try {
-            // Добавляем сообщение пользователя к истории
             List<Map<String, String>> messages = new ArrayList<>(chatHistory);
             messages.add(Map.of("role", "user", "content", userMessage));
 
-            // Формируем системный промпт для чата
             String systemPrompt = this.promptsConfiguration.getChatAssistantPrompt(pointName, pointDescription);
 
             return configureRequestAndSend(systemPrompt, messages);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return "Извините, я временно недоступен. Пожалуйста, попробуйте позже.";
         }
     }
