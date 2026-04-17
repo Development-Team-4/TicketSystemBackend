@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import development.team.ticketsystem.gptservice.client.interfaces.LlmClient;
 import development.team.ticketsystem.gptservice.exception.YaGptApiException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -146,6 +147,12 @@ public class YaGPTClient implements LlmClient {
                 .header("x-folder-id", folderId)
                 .body(requestBody)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                    throw new YaGptApiException("Client error: " + res.getStatusCode(), res.getStatusCode().value());
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
+                    throw new YaGptApiException("Server error: " + res.getStatusCode(), res.getStatusCode().value());
+                })
                 .body(String.class);
     }
 
