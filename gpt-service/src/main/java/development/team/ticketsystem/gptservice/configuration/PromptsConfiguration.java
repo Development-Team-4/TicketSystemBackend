@@ -26,27 +26,6 @@ public class PromptsConfiguration {
             Верни только улучшенное описание без дополнительных комментариев.
             """;
 
-    //@Value("${yagpt.prompts.chat-assistant-prompt}")
-    private String chatAssistantPrompt = """
-            Ты - полезный ассистент в системе управления задачами (тикет-системе). \
-            Ты помогаешь пользователям решать проблемы, связанные с задачей.
-            
-            Контекст задачи:
-            Название: %s
-            Описание: %s
-            
-            Твоя роль:
-            - Отвечай на вопросы, связанные с данной задачей
-            - Помогай находить решения проблем
-            - Объясняй сложные технические моменты простым языком
-            - Предлагай лучшие практики и подходы
-            - Будь вежливым и профессиональным
-            
-            Если вопрос не относится к задаче, вежливо предложи вернуться к обсуждению задачи.
-            
-            Пожалуйста, ответь на сообщение пользователя, учитывая контекст задачи.
-            """;
-
     public String getUpgradeDescriptionPrompt(String pointName, String pointDescription) {
         String context = "";
         if (pointName != null && !pointName.isEmpty()) {
@@ -57,11 +36,5 @@ public class PromptsConfiguration {
         }
 
         return String.format(this.upgradeDescriptionPrompt, context);
-    }
-
-    public String getChatAssistantPrompt(String pointName, String pointDescription) {
-        return String.format(this.chatAssistantPrompt,
-                pointName != null ? pointName : "Не указано",
-                pointDescription != null ? pointDescription : "Не указано");
     }
 }
