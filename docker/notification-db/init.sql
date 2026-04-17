@@ -8,13 +8,12 @@ CREATE TABLE notifications
     ticket_id uuid NOT NULL,
     type VARCHAR(50) NOT NULL CHECK (type IN ('ASSIGNMENT', 'COMMENT', 'STATUS_CHANGE')),
     title text NOT NULL,
+    read_status BOOLEAN DEFAULT FALSE,
     message text NOT NULL,
-    sent boolean DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_notification_user ON notifications (user_id);
 -- CREATE INDEX idx_notification_ticket ON notifications (ticket_id);
-CREATE INDEX idx_notification_read ON notifications (sent);
 CREATE INDEX idx_notification_created_at ON notifications (created_at);
