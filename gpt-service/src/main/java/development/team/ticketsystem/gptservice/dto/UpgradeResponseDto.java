@@ -12,11 +12,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpgradeResponseDto {
+
+    @Schema(
+            description = "Исходное описание тикета",
+            example = "Проблема с входом на сайт",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @JsonProperty(value = "originalDescription")
-    @Schema(description = "Оригинальное описание тикета")
     private String originalDescription;
 
+    @Schema(
+            description = "Изменённое описание тикета",
+            example = """
+                    Проблема при попытке входа на сайт.
+                    Описание:
+                    * Пользователь не может авторизоваться на сайте.
+                    * При попытке входа система не пропускает дальше страницы авторизации.""",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @JsonProperty(value = "upgradedDescription")
-    @Schema(description = "Изменённое описание тикета")
     private String upgradedDescription;
 }
