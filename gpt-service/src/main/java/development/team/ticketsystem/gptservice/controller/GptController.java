@@ -5,7 +5,10 @@ import development.team.ticketsystem.gptservice.dto.UpgradeResponseDto;
 import development.team.ticketsystem.gptservice.service.YaGptChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/gpt")
@@ -16,14 +19,15 @@ public class GptController {
     @PostMapping("/upgrade")
     public ResponseEntity<UpgradeResponseDto> upgradeDescription(@RequestBody UpgradeRequestDto request) {
         String upgradedDescription = yaGptChatService.upgradeDescription(
-                request.getDescription(),
                 request.getTicketName(),
                 request.getCurrentDescription()
         );
 
-        return ResponseEntity.ok(UpgradeResponseDto.builder()
-                .originalDescription(request.getDescription())
-                .upgradedDescription(upgradedDescription)
-                .build());
+        return ResponseEntity.ok(
+                UpgradeResponseDto.builder()
+                        .originalDescription(request.getCurrentDescription())
+                        .upgradedDescription(upgradedDescription)
+                        .build()
+        );
     }
 }
