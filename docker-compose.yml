@@ -180,11 +180,12 @@ services:
 
   gpt-service:
     build:
-      context: ./bot
+      context: ./gpt-service
     container_name: gpt-service
     environment:
       SERVER_PORT: 80
-      APP_TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      YAGPT_FOLDER_ID: ${YAGPT_FOLDER_ID}
+      YAGPT_API_KEY: ${YAGPT_API_KEY}
     ports:
       - "8086:80"
     restart: unless-stopped

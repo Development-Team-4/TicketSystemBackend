@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
         Нейросеть анализирует исходное описание и возвращает его улучшенную версию,
         сохраняя исходный смысл, но делая его более профессиональным и структурированным.
         """)
+@SecurityRequirement(name = "bearerAuth")
 public class GptController {
     private final YaGptChatService yaGptChatService;
 
