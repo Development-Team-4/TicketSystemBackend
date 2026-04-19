@@ -40,7 +40,8 @@ public class GatewaySecurityConfig {
                                 "/v3/api-docs/**",
                                 "/auth/v3/api-docs",
                                 "/ticket/v3/api-docs",
-                                "/notification/v3/api-docs"
+                                "/notification/v3/api-docs",
+                                "/gpt/v3/api-docs"
                         ).permitAll()
                         // public
                         .pathMatchers("/actuator/health").permitAll()
@@ -106,6 +107,10 @@ public class GatewaySecurityConfig {
                         // statistic
                         .pathMatchers(HttpMethod.GET, "/statistics/**")
                         .hasRole("ADMIN")
+
+                        // gpt
+                        .pathMatchers(HttpMethod.POST,"/gpt/**")
+                        .hasAnyRole("ADMIN", "USER", "SUPPORT")
 
                         // internal
                         .pathMatchers("/internal/**").denyAll()
