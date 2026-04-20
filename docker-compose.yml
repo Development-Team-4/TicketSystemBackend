@@ -118,6 +118,7 @@ services:
       NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
       AUTH_SERVICE_URL: http://auth-service
       BOT_SERVICE_URL: http://bot-service
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
     ports:
       - "8083:80"
     restart: unless-stopped

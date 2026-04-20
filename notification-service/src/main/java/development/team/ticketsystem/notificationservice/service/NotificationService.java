@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +28,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
+
+    private final JavaMailSender mailSender;
 
     private final AuthServiceClient authServiceClient;
     private final BotServiceClient botServiceClient;
@@ -77,6 +82,7 @@ public class NotificationService {
 
             log.info("Telegram notification flow finished: notificationId={}", saved.getId());
 
+            sendEmailMessage(saved);
         } catch (Exception e) {
             log.error("Telegram notification failed: notificationId={}, userId={}",
                     saved.getId(), saved.getUserId(), e);
@@ -142,14 +148,6 @@ public class NotificationService {
         this.notificationRepository.save(notification);
     }
 
-    /**
-     * Метод для отправки сообщения по email
-     * (ПОКА НЕ РЕАЛИЗОВАН)
-     */
-    private void sendEmailMessage() {
-        throw new UnsupportedOperationException();
-    }
-
     private String getTitle(NotificationType type) {
         return this.notificationContentProvider.getTemplate(type.name()).getTitle();
     }
@@ -186,6 +184,44 @@ public class NotificationService {
 
         } catch (Exception exception) {
             log.error("Failed to send telegram for userId={}", notification.getUserId(), exception);
+        }
+    }
+
+    private void sendEmailMessage(Notification notification) {
+        try {
+            var settings = authServiceClient.getNotificationSettings(notification.getUserId());
+
+            if (settings == null) {
+                log.warn("No settings for userId={}", notification.getUserId());
+                return;
+            }
+
+            String email = settings.userEmailNotification();
+
+            if (email == null || email.isBlank()) {
+                log.warn("Email not enabled for userId={}", notification.getUserId());
+                return;
+            }
+
+            String ticketUrl = "https://ticketsystem.braverto.com/tickets/" + notification.getTicketId();
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+
+            message.setFrom("bravertogroup@gmail.com");
+
+            message.setSubject(notification.getTitle());
+            message.setText(
+                    notification.getMessage()
+                            + "\n\nOpen ticket: " + ticketUrl
+            );
+
+            mailSender.send(message);
+
+            log.info("Email sent to {}", email);
+
+        } catch (Exception exception) {
+            log.error("Failed to send email for userId={}", notification.getUserId(), exception);
         }
     }
 }
